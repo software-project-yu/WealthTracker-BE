@@ -2,7 +2,6 @@ package com.WealthTracker.demo.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
@@ -12,23 +11,23 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Expend {
+public class Income {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(unique = true)
-    private Long expendId;
+    private Long incomeId;
 
-    //비용
+    //수입비
     private Long cost;
 
-    //지출일자
+    //수입내용
+    private String incomeName;
+
+    //수입일자
     @CreatedDate
-    private LocalDateTime expendDate;
+    private LocalDateTime incomeDate;
 
-    //지출내용
-    private String expendName;
-
-    //유저 ID
-    @ManyToOne (fetch = FetchType.LAZY)
+    //다대일
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId")
     private User user;
+
 }

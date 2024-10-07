@@ -3,24 +3,41 @@ package com.WealthTracker.demo.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@Getter
 @Entity
+@Table(name = "users")
+@Getter
 @Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class User {
+
     @Id
-    @Column(unique = true)
-    private Long useId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long userId;
 
-    //카테고리Id
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
-    private List<Expend> expends=new ArrayList<>();
+    @Column(unique = true, nullable = false)
+    private String email;
+
+    @Column(nullable = false)
+    private String password;
+
+    private String name;
+
+    private String nickName;
+
+    private String profile; // 프로필 사진 URL 또는 경로
+
+    private boolean enabled = false; // 이메일 인증 여부
 
 
 
+    // 계정 활성화 메서드
+    public void enable() {
+        this.enabled = true;
+    }
+
+    // 비밀번호 변경 메서드
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

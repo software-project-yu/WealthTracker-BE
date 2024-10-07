@@ -5,14 +5,14 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum CategoryType {
-    payment("납부"), food("식비"), transportation("교통"), game("게임"), shopping("쇼핑"), etc("기타");
+public enum CategoryExpend {
+    PAYMENT("납부"), FOOD("식비"), TRANSPORTATION("교통"), GAME("게임"), SHOPPING("쇼핑"), ETC("기타");
 
     private final String categoryType;
 
     //카테고리 한글명 반환
-    public static CategoryType fromString(String categoryType) {
-        for (CategoryType ct : CategoryType.values()) {
+    public static CategoryExpend fromString(String categoryType) {
+        for (CategoryExpend ct : CategoryExpend.values()) {
             if (ct.getCategoryType().equalsIgnoreCase(categoryType)) {
                 return ct;
             }

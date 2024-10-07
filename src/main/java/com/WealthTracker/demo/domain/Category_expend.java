@@ -4,16 +4,10 @@ import com.WealthTracker.demo.enums.CategoryExpend;
 import jakarta.persistence.*;
 
 @Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn
-public class Category {
+public class Category_expend {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long categoryId;
 
-    //비용
-    private Long cost;
-
-    //enum
     @Enumerated(EnumType.STRING)
-    private CategoryExpend categoryType;
+    CategoryExpend categoryName;
 }

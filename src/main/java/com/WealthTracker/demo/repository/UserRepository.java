@@ -3,5 +3,11 @@ package com.WealthTracker.demo.repository;
 import com.WealthTracker.demo.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserRepository extends JpaRepository<User,Long> {
+
+import java.util.Optional;
+
+public interface UserRepository extends JpaRepository<User, Long> { // Email로 사용자의 정보를 조회 및 저장하는 Repository
+    Optional<User> findByEmail(String email);
+    boolean existsByEmail(String email); // 이메일 존재 여부 확인 메서드
+
 }
