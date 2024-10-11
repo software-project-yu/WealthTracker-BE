@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
         VerificationCode passwordResetCode = VerificationCode.builder()
                 .code(code)
                 .user(user)
-                .expiryDate(LocalDateTime.now().plusMinutes(60))  // 60분 유효
+                .expiryDate(LocalDateTime.now().plusMinutes(5))  // 5분 유효
                 .build();
         verificationCodeRepository.save(passwordResetCode);
     }

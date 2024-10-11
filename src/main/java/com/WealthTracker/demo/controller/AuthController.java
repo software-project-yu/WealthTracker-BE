@@ -50,7 +50,7 @@ public class AuthController { //** Signup 및 EmailAuth 담당 Controller **//
                 .code(code)
                 .email(savedUser.getEmail()) // email 필드 설정
                 .user(savedUser)
-                .expiryDate(LocalDateTime.now().plusMinutes(60))
+                .expiryDate(LocalDateTime.now().plusMinutes(5))
                 .build();
         verificationCodeRepository.save(verificationCode);
 
