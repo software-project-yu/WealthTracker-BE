@@ -1,11 +1,9 @@
 package com.WealthTracker.demo.service;
 
-import com.WealthTracker.demo.DTO.SignupRequestDTO;
 import com.WealthTracker.demo.domain.User;
 import com.WealthTracker.demo.domain.VerificationCode;
 import com.WealthTracker.demo.repository.UserRepository;
 import com.WealthTracker.demo.repository.VerificationCodeRepository;
-import com.WealthTracker.demo.util.VerificationCodeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,7 +14,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+public class SignupServiceImpl implements SignupService {
 
     private final UserRepository userRepository;
     private final VerificationCodeRepository verificationCodeRepository;
@@ -25,8 +23,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User registerUser(User user) {
-        // 비밀번호 암호화 처리 후 저장
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(passwordEncoder.encode(user.getPassword()));  // 암호화된 비밀번호를 저장
         return userRepository.save(user);
     }
 
@@ -87,5 +84,12 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
         verificationCodeRepository.delete(verificationCode);
+    }
+
+    @Override
+    @Transactional
+    public void enableUser(User user) {
+        user.enable();
+        userRepository.save(user);
     }
 }

@@ -7,7 +7,7 @@ import com.WealthTracker.demo.domain.User;
 import com.WealthTracker.demo.domain.VerificationCode;
 import com.WealthTracker.demo.repository.VerificationCodeRepository;
 import com.WealthTracker.demo.service.EmailService;
-import com.WealthTracker.demo.service.UserService;
+import com.WealthTracker.demo.service.SignupService;
 import com.WealthTracker.demo.util.VerificationCodeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +21,7 @@ import java.util.Optional;
 @RequestMapping("/api")
 public class AuthController { //** Signup 및 EmailAuth 담당 Controller **//
 
-    private final UserService userService;
+    private final SignupService signupService;
     private final EmailService emailService;
     private final VerificationCodeUtil verificationCodeUtil;
     private final VerificationCodeRepository verificationCodeRepository;
@@ -30,7 +30,7 @@ public class AuthController { //** Signup 및 EmailAuth 담당 Controller **//
     @PostMapping("/signup")
     public ResponseEntity<?> signupUser(@RequestBody SignupRequestDTO signupRequest) {
         // 이메일 중복 체크
-        if (userService.existsByEmail(signupRequest.getEmail())) {
+        if (signupService.existsByEmail(signupRequest.getEmail())) {
             return ResponseEntity.badRequest().body("이미 등록된 이메일입니다.");
         }
 
@@ -42,7 +42,7 @@ public class AuthController { //** Signup 및 EmailAuth 담당 Controller **//
                 .nickName(signupRequest.getNickName())
                 .enabled(false) // 인증 전 상태
                 .build();
-        User savedUser = userService.registerUser(user);
+        User savedUser = signupService.registerUser(user);
 
         // 인증 코드 생성 및 저장
         String code = verificationCodeUtil.generateVerificationCode();
@@ -79,10 +79,9 @@ public class AuthController { //** Signup 및 EmailAuth 담당 Controller **//
 
         // 사용자 활성화
         User user = verificationCode.getUser();
-        user.enable(); // 계정 활성화
-        userService.registerUser(user);
+        signupService.enableUser(user);
 
-        // 인증 코드 삭제 (선택 사항)
+        // 인증 코드 삭제
         verificationCodeRepository.delete(verificationCode);
 
         return ResponseEntity.ok("회원가입이 완료되었습니다.");
@@ -91,14 +90,14 @@ public class AuthController { //** Signup 및 EmailAuth 담당 Controller **//
     //** 비밀번호 재설정 요청
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody VerificationCodeRequestDTO request) {
-        Optional<User> userOpt = userService.getUserByEmail(request.getEmail());
+        Optional<User> userOpt = signupService.getUserByEmail(request.getEmail());
         if (!userOpt.isPresent()) {
             return ResponseEntity.badRequest().body("해당 이메일을 가진 사용자가 없습니다.");
         }
 
         User user = userOpt.get();
         String code = verificationCodeUtil.generateVerificationCode();
-        userService.createPasswordResetCode(user, code);
+        signupService.createPasswordResetCode(user, code);
         emailService.sendPasswordReset(user.getEmail(), code);
 
         return ResponseEntity.ok("비밀번호 재설정 이메일이 발송되었습니다.");
@@ -107,12 +106,12 @@ public class AuthController { //** Signup 및 EmailAuth 담당 Controller **//
     //** 비밀번호 재설정 확인
     @PostMapping("/confirm-reset-password")
     public ResponseEntity<?> confirmResetPassword(@RequestParam("code") String code, @RequestBody VerificationCodeConfirmDTO confirmDTO) {
-        String result = userService.validatePasswordResetCode(code);
+        String result = signupService.validatePasswordResetCode(code);
         if (!result.equals("valid")) {
             return ResponseEntity.badRequest().body("비밀번호 재설정 코드가 유효하지 않습니다.");
         }
 
-        userService.resetPassword(code, confirmDTO.getNewPassword());
+        signupService.resetPassword(code, confirmDTO.getNewPassword());
         return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
     }
 }
