@@ -35,6 +35,7 @@ public class JwtUtil {
     /** JWT 생성 **/
     private String createToken(CustomUserInfoDTO member, long expireTime) {
         Claims claims = Jwts.claims();
+        claims.put("userId", member.getUserId());
         claims.put("email", member.getEmail());
         claims.put("name", member.getName());
 

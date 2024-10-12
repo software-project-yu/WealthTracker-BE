@@ -19,7 +19,6 @@ public class LoginServiceImpl implements LoginService {
     private final JwtUtil jwtUtil;
 
     @Override
-    @Transactional(readOnly = true) //** 읽기 전용 트랜잭션으로 성능 최적화
     public User login(LoginRequestDTO loginRequestDTO) {
         User user = userRepository.findByEmail(loginRequestDTO.getEmail())
                 .orElseThrow(() -> new RuntimeException("해당 유저가 존재하지 않습니다."));
@@ -32,9 +31,9 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public CustomUserInfoDTO toCustomUserInfoDTO(User user) {
         return CustomUserInfoDTO.builder()
+                .userId(user.getUserId())
                 .email(user.getEmail())
                 .name(user.getName())
                 .build();

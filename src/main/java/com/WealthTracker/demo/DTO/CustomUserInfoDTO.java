@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CustomUserInfoDTO {
 
+    private Long userId;
+
     private String email;
 
     private String name;
