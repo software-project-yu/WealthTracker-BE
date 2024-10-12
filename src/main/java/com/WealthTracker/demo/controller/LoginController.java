@@ -7,9 +7,7 @@ import com.WealthTracker.demo.service.LoginService;
 import com.WealthTracker.demo.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,4 +27,13 @@ public class LoginController {
 
         return ResponseEntity.ok(jwtResponseDTO);
     }
+
+    @GetMapping("/api/return")
+    public ResponseEntity<Long> getUserIdFromToken(@RequestHeader("Authorization") String token) {
+        String accessToken = jwtUtil.getAccessToken(token);
+        Long userId = jwtUtil.getUserId(accessToken);
+
+        return ResponseEntity.ok(userId);
+    }
+
 }
