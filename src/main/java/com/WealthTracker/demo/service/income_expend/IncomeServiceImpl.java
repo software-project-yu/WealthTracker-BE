@@ -11,6 +11,7 @@ import com.WealthTracker.demo.repository.CategoryIncomeRepository;
 import com.WealthTracker.demo.repository.ExpendCategoryRepository;
 import com.WealthTracker.demo.repository.IncomeCategoryRepository;
 import com.WealthTracker.demo.repository.IncomeRepository;
+import com.WealthTracker.demo.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,11 +24,12 @@ public class IncomeServiceImpl implements IncomeService{
     private final IncomeRepository incomeRepository;
     private final CategoryIncomeRepository categoryIncomeRepository;
     private final IncomeCategoryRepository incomeCategoryRepository;
+    private final JwtUtil jwtUtil;
 
 
     @Override
     @Transactional
-    public Long writeIncome(IncomeRequestDTO incomeRequestDTO) {
+    public Long writeIncome(IncomeRequestDTO incomeRequestDTO,String token) {
         //카테고리명 변경
         String category=incomeRequestDTO.getCategory();
         CategoryIncome convertIncome=CategoryIncome.fromString(category);
@@ -40,8 +42,6 @@ public class IncomeServiceImpl implements IncomeService{
                 .build();
         categoryIncomeRepository.save(categoryIncome);
 
-        //임시 유저
-        User user1=new User();
 
 
         Income income=Income.builder()
@@ -49,7 +49,7 @@ public class IncomeServiceImpl implements IncomeService{
                 .incomeName(incomeRequestDTO.getIncomeName())
                 .asset(convertToAsset)
                 .cost(incomeRequestDTO.getCost())
-                .user(user1)
+
                 .build();
         incomeRepository.save(income);
 
