@@ -5,12 +5,15 @@ import com.WealthTracker.demo.domain.User;
 
 import java.util.Optional;
 
-public interface UserService {
-    User registerUser(User user);  // 사용자 등록
+public interface SignupService {
+
+    String signupUser(SignupRequestDTO signupRequestDTO); // 유저 회원가입 메서드
 
     Optional<User> getUserByEmail(String email);  // 이메일로 사용자 조회
 
     boolean existsByEmail(String email);  // 이메일 중복 체크
+
+    void enableUser(User user); // 사용자 활성화 메서드
 
     void createPasswordResetCode(User user, String code);  // 비밀번호 재설정 코드 생성
 

@@ -6,7 +6,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "verification_tokens")
+@Table(name = "verification_codes")
 @Getter
 @Builder
 @AllArgsConstructor
@@ -21,7 +21,7 @@ public class VerificationCode { // 이메일 인증을 위한 토큰 Entity
     private String email;
 
     @Column(unique = true, nullable = false)
-    private String code; //** 6자리 인증 코드입니다
+    private String code; //** 6자리 인증 코드
 
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(nullable = false, name = "userId")
