@@ -1,15 +1,13 @@
 package com.WealthTracker.demo.domain;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Builder
 public class CategoryIncome {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long categoryIncomeId;

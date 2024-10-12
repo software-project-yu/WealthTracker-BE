@@ -1,5 +1,6 @@
 package com.WealthTracker.demo.domain;
 
+import com.WealthTracker.demo.enums.Asset;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -22,8 +23,11 @@ public class Income {
     private String incomeName;
 
     //수입일자
-    @CreatedDate
-    private LocalDateTime incomeDate;
+    private String incomeDate;
+
+    @Enumerated(EnumType.STRING)
+    private Asset asset;
+
 
     //다대일
     @ManyToOne(fetch = FetchType.LAZY)

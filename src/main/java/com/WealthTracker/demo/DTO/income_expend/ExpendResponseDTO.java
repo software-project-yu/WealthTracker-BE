@@ -1,4 +1,4 @@
-package com.WealthTracker.demo.DTO;
+package com.WealthTracker.demo.DTO.income_expend;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,9 +14,6 @@ public class ExpendResponseDTO {
     //지출내용
     private String expendContent;
 
-    //상호
-    private String companyName;
-
     //날짜
     private String date;
 
@@ -25,4 +22,7 @@ public class ExpendResponseDTO {
 
     //금액
     private Long cost;
+
+    //분류
+    private String asset;
 }

@@ -1,5 +1,6 @@
 package com.WealthTracker.demo.domain;
 
+import com.WealthTracker.demo.enums.Asset;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.cglib.core.Local;
@@ -21,11 +22,15 @@ public class Expend {
     private Long cost;
 
     //지출일자
-    @CreatedDate
-    private LocalDateTime expendDate;
+    private String expendDate;
 
     //지출내용
     private String expendName;
+
+
+    //자산
+    @Enumerated(EnumType.STRING)
+    private Asset asset;
 
     //유저 ID
     @ManyToOne (fetch = FetchType.LAZY)
