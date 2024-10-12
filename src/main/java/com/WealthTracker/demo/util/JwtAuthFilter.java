@@ -31,10 +31,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String token = authorizationHeader.substring(7);
             // JWT 유효성 검사
             if (jwtUtil.validationToken(token)) {
-                String email = jwtUtil.getUserId(Long.valueOf(token));
+                Long userId = jwtUtil.getUserId(token);
 
                 // 유저와 토큰이 일치 시 userDetails 생성
-                UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+                UserDetails userDetails = customUserDetailsService.loadUserByUsername(String.valueOf(userId));
 
                 if (userDetails != null) {
                     // UserDetails, Password -> 접근 권한 인증 Token 생성

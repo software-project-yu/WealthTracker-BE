@@ -44,7 +44,7 @@ public class JwtUtil {
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(member.getEmail())
+                .setSubject(String.valueOf(member.getUserId()))
                 .setIssuedAt(Date.from(now.toInstant()))
                 .setExpiration(Date.from(tokenValidity.toInstant()))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -52,8 +52,8 @@ public class JwtUtil {
     }
 
     //** 토큰에서 userId 추출
-    public String getUserId(Long token) {
-        return parseClaims(String.valueOf(token)).getSubject();
+    public Long getUserId(String token) {
+        return Long.valueOf(parseClaims(token).getSubject());
     }
 
     // JWT 검증
