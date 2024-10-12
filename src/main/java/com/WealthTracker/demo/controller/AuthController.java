@@ -29,35 +29,12 @@ public class AuthController { //** Signup 및 EmailAuth 담당 Controller **//
     //** 회원가입 요청 (이메일 인증 코드 발송)
     @PostMapping("/signup")
     public ResponseEntity<?> signupUser(@RequestBody SignupRequestDTO signupRequest) {
-        // 이메일 중복 체크
-        if (signupService.existsByEmail(signupRequest.getEmail())) {
-            return ResponseEntity.badRequest().body("이미 등록된 이메일입니다.");
+        try {
+            String message = signupService.signupUser(signupRequest);
+            return ResponseEntity.ok(message);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-        // 사용자 정보 저장 (enabled=false)
-        User user = User.builder()
-                .email(signupRequest.getEmail())
-                .password(signupRequest.getPassword()) // 비밀번호 암호화는 서비스에서 처리
-                .name(signupRequest.getName())
-                .nickName(signupRequest.getNickName())
-                .enabled(false) // 인증 전 상태
-                .build();
-        User savedUser = signupService.registerUser(user);
-
-        // 인증 코드 생성 및 저장
-        String code = verificationCodeUtil.generateVerificationCode();
-        VerificationCode verificationCode = VerificationCode.builder()
-                .code(code)
-                .email(savedUser.getEmail()) // email 필드 설정
-                .user(savedUser)
-                .expiryDate(LocalDateTime.now().plusMinutes(5))
-                .build();
-        verificationCodeRepository.save(verificationCode);
-
-        // 이메일로 인증 코드 발송
-        emailService.sendEmailVerification(signupRequest.getEmail(), code);
-
-        return ResponseEntity.ok("이메일을 확인하여 인증을 완료해주세요.");
     }
 
     //** 이메일 인증 확인 및 회원가입 완료 (유저 정보 저장)

@@ -1,11 +1,13 @@
 package com.WealthTracker.demo.service;
 
+import com.WealthTracker.demo.DTO.SignupRequestDTO;
 import com.WealthTracker.demo.domain.User;
 
 import java.util.Optional;
 
 public interface SignupService {
-    User registerUser(User user);  // 사용자 등록
+
+    String signupUser(SignupRequestDTO signupRequestDTO); // 유저 회원가입 메서드
 
     Optional<User> getUserByEmail(String email);  // 이메일로 사용자 조회
 
