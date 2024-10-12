@@ -24,6 +24,7 @@ public class IncomeController {
     public ResponseEntity<?> write(@RequestBody IncomeRequestDTO incomeRequestDTO, @RequestHeader("Authorization") String token) throws Exception {
 
         incomeService.writeIncome(incomeRequestDTO, token);
+
         //성공메시지 리턴
         return new ResponseEntity<>(new ReturnCodeDTO(200, SuccessCode.SUCCESS_INCOME.getMessage()),
                 HttpStatusCode.valueOf(SuccessCode.SUCCESS_INCOME.getStatus()));

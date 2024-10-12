@@ -18,4 +18,8 @@ public enum Asset {
         }
         return null;
     }
+    //영어->한글
+    public static String toString(Asset asset){
+        return asset.getCategoryType();
+    }
 }

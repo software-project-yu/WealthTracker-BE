@@ -34,6 +34,10 @@ public class IncomeServiceImpl implements IncomeService {
     @Override
     @Transactional
     public Long writeIncome(IncomeRequestDTO incomeRequestDTO, String token) {
+        //jwt확인
+        if(!jwtUtil.validationToken(token)){
+            return -1L;
+        }
         //카테고리명 변경
         String category = incomeRequestDTO.getCategory();
         CategoryIncome convertIncome = CategoryIncome.fromString(category);
@@ -78,22 +82,23 @@ public class IncomeServiceImpl implements IncomeService {
 
         //카테고리 불러오기
 
-
         return incomeList.stream()
-                .map(income -> IncomeResponseDTO
-                        .builder()
-                        .incomeDate(income.getIncomeDate())
-                        .incomeName(income.getIncomeName())
-                        .asset(String.valueOf(income.getAsset()))
-                        .cost(income.getCost())
-                        .category(categoryIncomeRepository.findCategoryNameByIncomeId(income.getIncomeId()).get().toString())
-                        .build())
+                .map(income ->{
+                    CategoryIncome categoryIncome = CategoryIncome.valueOf(
+                            categoryIncomeRepository.findCategoryNameByIncomeId(income.getIncomeId()).get().toString()
+                    );
+                   return IncomeResponseDTO
+                            .builder()
+                            .incomeDate(income.getIncomeDate())
+                            .incomeName(income.getIncomeName())
+                            .asset(Asset.toString(income.getAsset()))
+                            .cost(income.getCost())
+                            .category(CategoryIncome.toString(categoryIncome))
+                            .build();
+                })
                 .toList();
     }
 
-    @Override
-    public Long test(String token) {
-        return jwtUtil.getUserId(token);
-    }
+
 
 }

@@ -10,5 +10,4 @@ public interface IncomeService {
 
     //지출 내역 모두 보내기
     List<IncomeResponseDTO> list(String token);
-    Long test(String token);
 }

@@ -20,4 +20,10 @@ public enum CategoryIncome {
         }
         return null;
     }
+
+
+    //영어->한글
+    public static String toString(CategoryIncome categoryIncome){
+        return categoryIncome.getCategoryType();
+    }
 }

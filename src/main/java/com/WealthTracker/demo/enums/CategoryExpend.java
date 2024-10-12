@@ -19,5 +19,9 @@ public enum CategoryExpend {
         }
         return null;
     }
+    //영어->한글
+    public static String toString(CategoryExpend categoryExpend){
+       return categoryExpend.getCategoryType();
+    }
 
 }
