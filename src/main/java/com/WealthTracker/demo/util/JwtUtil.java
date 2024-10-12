@@ -51,9 +51,9 @@ public class JwtUtil {
                 .compact();
     }
 
-    // 토큰에서 email 추출
-    public String getEmail(String token) {
-        return parseClaims(token).getSubject();
+    //** 토큰에서 userId 추출
+    public String getUserId(Long token) {
+        return parseClaims(String.valueOf(token)).getSubject();
     }
 
     // JWT 검증
