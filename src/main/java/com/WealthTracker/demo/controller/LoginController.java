@@ -17,6 +17,7 @@ public class LoginController {
     private final LoginService loginService;
     private final JwtUtil jwtUtil;
 
+    //** 서비스 자체 이메일 로그인
     @PostMapping("/api/login")
     public ResponseEntity<JwtResponseDTO> login(@RequestBody LoginRequestDTO loginRequestDTO) {
         User user = loginService.login(loginRequestDTO);
@@ -30,23 +31,23 @@ public class LoginController {
     }
 
     //** 토큰 테스트 코드
-//    @GetMapping("/api/return")
-//    public ResponseEntity<Long> getUserIdFromToken(@RequestHeader("Authorization") String token) {
-//        String accessToken = jwtUtil.getAccessToken(token);
-//        Long userId = jwtUtil.getUserId(accessToken);
-//
-//        return ResponseEntity.ok(userId);
-//    }
-//
-//    @GetMapping("/api/userinfo")
-//    public ResponseEntity<CustomUserInfoDTO> getUserInfoFromToken(@RequestHeader("Authorization") String token) {
-//        String accessToken = jwtUtil.getAccessToken(token);
-//        Long userId = jwtUtil.getUserId(accessToken);
-//
-//        // userId를 사용해 유저 정보 조회
-//        User user = loginService.getUserById(userId);
-//        CustomUserInfoDTO userInfoDTO = loginService.toCustomUserInfoDTO(user);
-//
-//        return ResponseEntity.ok(userInfoDTO);
-//    }
+    @GetMapping("/api/return")
+    public ResponseEntity<Long> getUserIdFromToken(@RequestHeader("Authorization") String token) {
+        String accessToken = jwtUtil.getAccessToken(token);
+        Long userId = jwtUtil.getUserId(accessToken);
+
+        return ResponseEntity.ok(userId);
+    }
+
+    @GetMapping("/api/userinfo")
+    public ResponseEntity<CustomUserInfoDTO> getUserInfoFromToken(@RequestHeader("Authorization") String token) {
+        String accessToken = jwtUtil.getAccessToken(token);
+        Long userId = jwtUtil.getUserId(accessToken);
+
+        // userId를 사용해 유저 정보 조회
+        User user = loginService.getUserById(userId);
+        CustomUserInfoDTO userInfoDTO = loginService.toCustomUserInfoDTO(user);
+
+        return ResponseEntity.ok(userInfoDTO);
+    }
 }

@@ -9,5 +9,5 @@ public interface LoginService {
     User login(LoginRequestDTO loginRequestDTO);
     CustomUserInfoDTO toCustomUserInfoDTO(User user);
 
-//    User getUserById(Long userId);
+    User getUserById(Long userId);
 }
