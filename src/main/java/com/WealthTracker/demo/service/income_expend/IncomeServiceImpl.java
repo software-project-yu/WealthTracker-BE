@@ -2,12 +2,14 @@ package com.WealthTracker.demo.service.income_expend;
 
 import com.WealthTracker.demo.DTO.income_expend.IncomeRequestDTO;
 import com.WealthTracker.demo.DTO.income_expend.IncomeResponseDTO;
+import com.WealthTracker.demo.constants.ErrorCode;
 import com.WealthTracker.demo.domain.Category_income;
 import com.WealthTracker.demo.domain.Income;
 import com.WealthTracker.demo.domain.User;
 import com.WealthTracker.demo.enums.Asset;
 import com.WealthTracker.demo.enums.CategoryExpend;
 import com.WealthTracker.demo.enums.CategoryIncome;
+import com.WealthTracker.demo.error.CustomException;
 import com.WealthTracker.demo.repository.*;
 import com.WealthTracker.demo.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +37,7 @@ public class IncomeServiceImpl implements IncomeService {
     @Transactional
     public Long writeIncome(IncomeRequestDTO incomeRequestDTO, String token) {
         //jwt확인
-        if(!jwtUtil.validationToken(token)){
+        if (!jwtUtil.validationToken(token)) {
             return -1L;
         }
         //카테고리명 변경
@@ -56,9 +58,11 @@ public class IncomeServiceImpl implements IncomeService {
                 .incomeName(incomeRequestDTO.getIncomeName())
                 .asset(convertToAsset)
                 .cost(incomeRequestDTO.getCost())
-                .user(userRepository.findByUserId(jwtUtil.getUserId(token)).get())
+                .user(userRepository.findByUserId(jwtUtil.getUserId(token)).orElseThrow(
+                        () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+                ))
                 .build();
-        log.info("userId",jwtUtil.getUserId(token));
+        log.info("userId", jwtUtil.getUserId(token));
         incomeRepository.save(income);
 
         com.WealthTracker.demo.domain.CategoryIncome categoryIncome1 = com.WealthTracker.demo.domain.CategoryIncome
@@ -78,16 +82,18 @@ public class IncomeServiceImpl implements IncomeService {
 
         //유저 정보 가져오기
         Optional<User> user = userRepository.findByUserId(jwtUtil.getUserId(token));
-        List<Income> incomeList = incomeRepository.findAllByUser(user.get());
+        List<Income> incomeList = incomeRepository.findAllByUser(user.orElseThrow(
+                ()->new CustomException(ErrorCode.USER_NOT_FOUND)
+        ));
 
         //카테고리 불러오기
 
         return incomeList.stream()
-                .map(income ->{
+                .map(income -> {
                     CategoryIncome categoryIncome = CategoryIncome.valueOf(
                             categoryIncomeRepository.findCategoryNameByIncomeId(income.getIncomeId()).get().toString()
                     );
-                   return IncomeResponseDTO
+                    return IncomeResponseDTO
                             .builder()
                             .incomeDate(income.getIncomeDate())
                             .incomeName(income.getIncomeName())
@@ -98,7 +104,6 @@ public class IncomeServiceImpl implements IncomeService {
                 })
                 .toList();
     }
-
 
 
 }

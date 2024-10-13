@@ -21,6 +21,8 @@ public enum ErrorCode {
     //500 INTERNAL SERVER ERROR
     INTERNAL_SERVER_ERROR(500, "서버 에러입니다. 서버 팀에 연락주세요!");
 
+
+
     private final int status;
     private final String message;
 }

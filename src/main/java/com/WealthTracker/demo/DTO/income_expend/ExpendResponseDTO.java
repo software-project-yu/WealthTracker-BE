@@ -12,17 +12,18 @@ import lombok.NoArgsConstructor;
 
 public class ExpendResponseDTO {
     //지출내용
-    private String expendContent;
+    private String expendName;
 
     //날짜
-    private String date;
+    private String expendDate;
 
-    //지불방법
-    private String expendMethod;
 
     //금액
     private Long cost;
 
     //분류
     private String asset;
+
+    //카테고리
+    private String category;
 }

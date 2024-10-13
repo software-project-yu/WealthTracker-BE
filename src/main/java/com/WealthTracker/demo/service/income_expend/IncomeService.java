@@ -8,6 +8,6 @@ import java.util.List;
 public interface IncomeService {
     Long writeIncome(IncomeRequestDTO incomeRequestDTO,String token);
 
-    //지출 내역 모두 보내기
+    //수입 내역 모두 보내기
     List<IncomeResponseDTO> list(String token);
 }
