@@ -38,4 +38,10 @@ public class LoginServiceImpl implements LoginService {
                 .name(user.getName())
                 .build();
     }
+
+//    @Override
+//    public User getUserById(Long userId) {
+//        return userRepository.findByUserId(userId)
+//                .orElseThrow(() -> new RuntimeException("해당 유저가 존재하지 않습니다."));
+//    }
 }
