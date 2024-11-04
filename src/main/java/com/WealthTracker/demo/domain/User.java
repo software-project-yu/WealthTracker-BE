@@ -29,6 +29,8 @@ public class User {
 
     private boolean enabled = false; // 이메일 인증 여부
 
+
+
     // 계정 활성화 메서드
     public void enable() {
         this.enabled = true;
