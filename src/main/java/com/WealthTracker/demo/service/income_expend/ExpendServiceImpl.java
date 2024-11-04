@@ -98,6 +98,7 @@ public class ExpendServiceImpl implements ExpendService {
                     );
                     return ExpendResponseDTO
                             .builder()
+                            .expendId(expend.getExpendId())
                             .expendDate(expend.getExpendDate())
                             .expendName(expend.getExpendName())
                             .asset(Asset.toString(expend.getAsset()))
@@ -107,4 +108,16 @@ public class ExpendServiceImpl implements ExpendService {
                 })
                 .toList();
     }
+
+    @Override
+    public ExpendResponseDTO expendDetail(String token, Long expendId) {
+        return null;
+    }
+
+//    @Override
+//    public ExpendResponseDTO expendDetail(String token, Long expendId) {
+//        expendRepository.findByExpendId(expendId).orElseThrow(
+//                () -> new CustomException(ErrorCode.EXPEND_NOT_FOUND)
+//        );
+//    }
 }

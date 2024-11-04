@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 
 public class ExpendResponseDTO {
+    //지출id
+    private Long expendId;
     //지출내용
     private String expendName;
 

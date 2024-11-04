@@ -95,6 +95,7 @@ public class IncomeServiceImpl implements IncomeService {
                     );
                     return IncomeResponseDTO
                             .builder()
+                            .incomeId(income.getIncomeId())
                             .incomeDate(income.getIncomeDate())
                             .incomeName(income.getIncomeName())
                             .asset(Asset.toString(income.getAsset()))
