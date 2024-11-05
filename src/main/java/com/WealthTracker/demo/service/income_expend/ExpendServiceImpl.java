@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -190,7 +191,45 @@ public class ExpendServiceImpl implements ExpendService {
 
     @Override
     public List<ExpendDateResponseDTO> getAmountByWeek(String token) {
-        return null;
+        //jwt토큰 검증 실시
+        Optional<User> findUser = userRepository.findByUserId(jwtUtil.getUserId(token));
+        User user = findUser.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        //이번달 불러오기
+        int nowMonth=LocalDate.now().getMonthValue();
+
+        //저번달
+        int prevMonth=nowMonth-1;
+        if(prevMonth==0){
+            prevMonth=12;
+        }
+
+        //주차별 총 지출금액 가져오기
+        List<Object[]> nowMonthData=expendRepository.getTotalExpendThisMonth(user);
+        List<Object[]> prevMonthData=expendRepository.getTotalExpendLastMonth(user);
+
+        List<ExpendDateResponseDTO> graphReport=new ArrayList<>();
+        Map<Integer,Integer> currentMonthMap=nowMonthData.stream()
+                .collect(Collectors.toMap(
+                        o->((Number) o[0]).intValue(),
+                        o->((Number) o[1]).intValue()
+                ));
+
+        Map<Integer,Integer> prevMonthMap=prevMonthData.stream()
+                .collect(Collectors.toMap(
+                        o->((Number) o[0]).intValue(),
+                        o->((Number) o[1]).intValue()
+                ));
+        for(int week=1;week<=5;week++){
+            ExpendDateResponseDTO dto=ExpendDateResponseDTO.builder()
+                    .month(nowMonth)
+                    .weekNum(week)
+                    .thisWeekTotalCost(currentMonthMap.getOrDefault(week,0))
+                    .lastWeekTotalCost(prevMonthMap.getOrDefault(week,0))
+                    .build();
+            graphReport.add(dto);
+        }
+        return graphReport;
     }
 
 //    @Override

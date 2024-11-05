@@ -1,6 +1,7 @@
 package com.WealthTracker.demo.controller;
 
 import com.WealthTracker.demo.DTO.ReturnCodeDTO;
+import com.WealthTracker.demo.DTO.income_expend.ExpendDateResponseDTO;
 import com.WealthTracker.demo.DTO.income_expend.ExpendRequestDTO;
 import com.WealthTracker.demo.DTO.income_expend.ExpendResponseDTO;
 import com.WealthTracker.demo.constants.SuccessCode;
@@ -58,5 +59,15 @@ public class ExpendController {
     @GetMapping("/expend/recent")
     public ResponseEntity<List<ExpendResponseDTO>> recentExpend(@RequestHeader("Authorization") String token) throws CustomException{
         return new ResponseEntity<>(expendService.getRecentExpend(token),HttpStatusCode.valueOf(SuccessCode.SUCCESS_EXPEND.getStatus()));
+    }
+
+    @Operation(summary = "지출 내역 달별 그래프를 위한 API입니다. [담당자]:김도연")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = {@Content(mediaType = "application/json", array = @ArraySchema (schema =@Schema (implementation = ExpendDateResponseDTO.class)))}),
+            @ApiResponse(responseCode = "500", description = "서버 오류", content = {@Content(mediaType = "string")})
+    })
+    @GetMapping("/expend/graph")
+    public ResponseEntity<List<ExpendDateResponseDTO>> amountByWeek(@RequestHeader("Authorization") String token){
+        return new ResponseEntity<>(expendService.getAmountByWeek(token),HttpStatusCode.valueOf(SuccessCode.SUCCESS_RESPOND_EXPEND.getStatus()));
     }
 }
