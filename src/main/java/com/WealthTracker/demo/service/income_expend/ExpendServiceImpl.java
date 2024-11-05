@@ -18,10 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -126,10 +123,26 @@ public class ExpendServiceImpl implements ExpendService {
     @Override
     public ExpendResponseDTO expendResponseDetail(String token, Long expendId) {
         //토큰 검증
+        //유저 정보 가져오기
+        Optional<User> user = userRepository.findByUserId(jwtUtil.getUserId(token));
+        User myUser=user.orElseThrow(
+                ()->new CustomException(ErrorCode.USER_NOT_FOUND)
+        );
+
         //지출아이디로 지출 내역 찾기
         Expend findExpend=expendRepository.findByExpendId(expendId).orElseThrow(
                 ()->new CustomException(ErrorCode.EXPEND_NOT_FOUND)
         );
+
+        //유저의 지출 내역인지 확인
+        if(!Objects.equals(findExpend.getUser().getUserId(), myUser.getUserId())){
+            throw  new CustomException(ErrorCode.USER_NOT_CORRECT);
+        }
+
+
+        //카테고리 변환
+        Category_Expend categoryExpend=findExpend.getCategoryExpend().getCategoryName();
+        String convertCategory=Category_Expend.toString(categoryExpend);
 
 
         return ExpendResponseDTO
@@ -139,7 +152,7 @@ public class ExpendServiceImpl implements ExpendService {
                 .asset(Asset.toString(findExpend.getAsset()))
                 .expendName(findExpend.getExpendName())
                 .cost(findExpend.getCost())
-                .category(findExpend.getCategoryExpend().toString())
+                .category(convertCategory)
                 .build();
     }
 

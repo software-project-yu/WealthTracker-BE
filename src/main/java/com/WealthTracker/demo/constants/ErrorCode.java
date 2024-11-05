@@ -17,6 +17,7 @@ public enum ErrorCode {
 
 
     //409 CONFLICT 중복된 리소스
+    USER_NOT_CORRECT(409,"해당 유저의 지출 또는 수입내역이 아닙니다."),
 
 
     //500 INTERNAL SERVER ERROR
