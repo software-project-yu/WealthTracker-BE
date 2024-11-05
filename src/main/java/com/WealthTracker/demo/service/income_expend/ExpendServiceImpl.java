@@ -168,8 +168,25 @@ public class ExpendServiceImpl implements ExpendService {
     }
 
     @Override
+    @Transactional
     public Long deleteExpend(String token, Long expendId) {
-        return null;
+        //유저 정보 가져오기
+        Optional<User> user = userRepository.findByUserId(jwtUtil.getUserId(token));
+        User myUser=user.orElseThrow(
+                ()->new CustomException(ErrorCode.USER_NOT_FOUND)
+        );
+        //지출아이디로 지출 내역 찾기
+        Expend findExpend=expendRepository.findByExpendId(expendId).orElseThrow(
+                ()->new CustomException(ErrorCode.EXPEND_NOT_FOUND)
+        );
+
+        //유저의 지출 내역인지 확인
+        if(!Objects.equals(findExpend.getUser().getUserId(), myUser.getUserId())){
+            throw  new CustomException(ErrorCode.USER_NOT_CORRECT);
+        }
+
+        expendRepository.deleteById(findExpend.getExpendId());
+        return 1L;
     }
 
     //최근 지출내역 5개 가져오기

@@ -4,6 +4,7 @@ import com.WealthTracker.demo.DTO.ReturnCodeDTO;
 import com.WealthTracker.demo.DTO.income_expend.ExpendDateResponseDTO;
 import com.WealthTracker.demo.DTO.income_expend.ExpendRequestDTO;
 import com.WealthTracker.demo.DTO.income_expend.ExpendResponseDTO;
+import com.WealthTracker.demo.constants.ErrorCode;
 import com.WealthTracker.demo.constants.SuccessCode;
 import com.WealthTracker.demo.error.CustomException;
 import com.WealthTracker.demo.service.income_expend.ExpendServiceImpl;
@@ -91,6 +92,36 @@ public class ExpendController {
         }catch (CustomException ex){
             //사용자의 지출내역이 아닌 경우 예외처리
             return new ResponseEntity<>(new ReturnCodeDTO(ex.getErrorCode().getStatus(),ex.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Operation(summary = "지출 내역 삭제를 위한 API입니다. [담당자]:김도연")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "삭제 성공", content = {@Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ReturnCodeDTO.class))}),
+            @ApiResponse(responseCode = "409",description = "유저 불일치"),
+            @ApiResponse(responseCode = "500", description = "서버 오류", content = {@Content(mediaType = "string")})
+    })
+    @DeleteMapping("/expend/delete/{expendId}")
+    public ResponseEntity<?> delete(@RequestHeader("Authorization") String token, @PathVariable Long expendId){
+        try {
+            // 지출 내역 삭제 메서드 호출
+            expendService.deleteExpend(token, expendId);
+            // 성공 메시지 반환
+            ReturnCodeDTO returnCodeDTO = ReturnCodeDTO.builder()
+                    .status(200)
+                    .message("삭제 성공")
+                    .build();
+            return new ResponseEntity<>(returnCodeDTO, HttpStatus.OK);
+        }catch (CustomException ex){
+            return new ResponseEntity<>(new ReturnCodeDTO(ex.getErrorCode().getStatus(),ex.getMessage()),HttpStatus.BAD_REQUEST);
+        }
+        //지출 내역이 존재하지 않을 때
+        catch (Exception ex){
+            // 일반 예외 처리
+            ReturnCodeDTO returnCodeDTO = new ReturnCodeDTO(ErrorCode.EXPEND_NOT_FOUND.getStatus(),
+                    ErrorCode.EXPEND_NOT_FOUND.getMessage());
+            return new ResponseEntity<>(returnCodeDTO, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

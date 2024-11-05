@@ -45,4 +45,7 @@ public interface ExpendRepository extends JpaRepository<Expend, Long> {
     )
     List<Object[]> getTotalExpendLastMonth(@Param("user") User user);
 
+    //지출내역 삭제
+    void deleteById(Long expendId);
+
 }

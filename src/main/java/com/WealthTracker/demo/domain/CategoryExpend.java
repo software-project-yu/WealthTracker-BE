@@ -16,7 +16,7 @@ public class CategoryExpend {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long categoryId;
 
-   @OneToMany(mappedBy = "categoryExpend")
+   @OneToMany(mappedBy = "categoryExpend",cascade = CascadeType.ALL)
     private List<Expend> expendList=new ArrayList<>();
 
    @Enumerated(EnumType.STRING)
