@@ -2,12 +2,6 @@ package com.WealthTracker.demo.service.income_expend;
 
 import com.WealthTracker.demo.DTO.income_expend.IncomeRequestDTO;
 import com.WealthTracker.demo.DTO.income_expend.IncomeResponseDTO;
-import com.WealthTracker.demo.constants.ErrorCode;
-import com.WealthTracker.demo.domain.Income;
-import com.WealthTracker.demo.domain.User;
-import com.WealthTracker.demo.enums.Asset;
-import com.WealthTracker.demo.enums.CategoryIncome;
-import com.WealthTracker.demo.error.CustomException;
 import com.WealthTracker.demo.repository.*;
 import com.WealthTracker.demo.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)

@@ -2,10 +2,11 @@ package com.WealthTracker.demo.service.income_expend;
 
 import com.WealthTracker.demo.DTO.income_expend.*;
 import com.WealthTracker.demo.constants.ErrorCode;
+import com.WealthTracker.demo.domain.CategoryExpend;
 import com.WealthTracker.demo.domain.Expend;
 import com.WealthTracker.demo.domain.User;
 import com.WealthTracker.demo.enums.Asset;
-import com.WealthTracker.demo.enums.CategoryExpend;
+import com.WealthTracker.demo.enums.Category_Expend;
 import com.WealthTracker.demo.error.CustomException;
 import com.WealthTracker.demo.repository.ExpendCategoryRepository;
 import com.WealthTracker.demo.repository.ExpendRepository;
@@ -17,9 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,7 +42,7 @@ public class ExpendServiceImpl implements ExpendService {
         }
         //카테고리명 변경
         String category = expendRequestDTO.getCategory();
-        CategoryExpend convertToCategory = CategoryExpend.fromString(category);
+        Category_Expend convertToCategory = Category_Expend.fromString(category);
 
         //변환결과 예외처리
         if(convertToCategory==null){
@@ -79,46 +81,63 @@ public class ExpendServiceImpl implements ExpendService {
 
     @Override
     public List<ExpendResponseDTO> expendList(String token) {
-        /*유저정보로 수입 지출 모두 반환*/
+        /*유저정보로 지출 모두 반환*/
 
         //유저 정보 가져오기
         Optional<User> user = userRepository.findByUserId(jwtUtil.getUserId(token));
-        List<Expend> expendList = expendRepository.findAllByUser(user.orElseThrow(
+        List<Expend> expendList = expendRepository.findAllByUserWithCategory(user.orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         ));
 
-        //카테고리 불러오기
+        //지출 카테고리 정보 가져오기
+        Map<Long, com.WealthTracker.demo.domain.CategoryExpend> categoryExpendMap = expendCategoryRepository.findAllById(
+                        expendList.stream()
+                                .map(Expend::getCategoryExpend)
+                                .map(com.WealthTracker.demo.domain.CategoryExpend::getCategoryId)
+                                .collect(Collectors.toList()))
+                .stream()
+                .collect(Collectors.toMap(
+                        com.WealthTracker.demo.domain.CategoryExpend::getCategoryId,
+                        Function.identity()));
+
 
         return expendList.stream()
-                .map(expend -> {
-                    return ExpendResponseDTO
-                            .builder()
-                            .expendId(expend.getExpendId())
-                            .expendDate(String.valueOf(expend.getExpendDate()))
-                            .expendName(expend.getExpendName())
-                            .asset(expend.getAsset().toString())
-                            .cost(expend.getCost())
-                            .category(expend.getCategoryExpend().toString())
-                            .build();
-                }).collect(Collectors.toList());
+                .map(expend -> mapToExpendResponseDTO(expend,categoryExpendMap))
+                .collect(Collectors.toList());
     }
+    private ExpendResponseDTO mapToExpendResponseDTO(Expend expend, Map<Long, com.WealthTracker.demo.domain.CategoryExpend> categoryExpendMap) {
+        CategoryExpend categoryExpend = categoryExpendMap.get(expend.getCategoryExpend().getCategoryId());
 
+        // 카테고리명 한글로 변환
+        String convertedCategory = (categoryExpend != null) ? Category_Expend.toString(categoryExpend.getCategoryName()): null;
+
+        return ExpendResponseDTO.builder()
+                .expendId(expend.getExpendId())
+                .expendDate(expend.getExpendDate().toString().substring(0,10))
+                .expendName(expend.getExpendName())
+                .asset(Asset.toString(expend.getAsset()))
+                .cost(expend.getCost())
+                .category(convertedCategory)
+                .build();
+    }
     //지출 상세 내역 리턴
     @Override
     public ExpendResponseDTO expendResponseDetail(String token, Long expendId) {
         //토큰 검증
         //지출아이디로 지출 내역 찾기
-        Optional<Expend> findExpend = expendRepository.findByExpendId(expendId);
+        Expend findExpend=expendRepository.findByExpendId(expendId).orElseThrow(
+                ()->new CustomException(ErrorCode.EXPEND_NOT_FOUND)
+        );
 
 
         return ExpendResponseDTO
                 .builder()
-                .expendId(findExpend.get().getExpendId())
-                .expendDate(findExpend.get().getExpendDate().toString())
-                .asset(findExpend.get().getAsset().toString())
-                .expendName(findExpend.get().getExpendName())
-                .cost(findExpend.get().getCost())
-                .category(findExpend.get().getCategoryExpend().toString())
+                .expendId(findExpend.getExpendId())
+                .expendDate(findExpend.getExpendDate().toString().substring(0,10))
+                .asset(Asset.toString(findExpend.getAsset()))
+                .expendName(findExpend.getExpendName())
+                .cost(findExpend.getCost())
+                .category(findExpend.getCategoryExpend().toString())
                 .build();
     }
 

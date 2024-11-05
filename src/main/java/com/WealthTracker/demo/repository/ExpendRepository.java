@@ -16,6 +16,10 @@ public interface ExpendRepository extends JpaRepository<Expend,Long> {
 
     Optional<Expend> findByExpendId(Long expendId);
 
+    //카테고리도 같이 가져오기
+    @Query("SELECT e FROM Expend e JOIN FETCH e.categoryExpend WHERE e.user = :user")
+    List<Expend> findAllByUserWithCategory(@Param("user")User user);
+
     //날짜로 최신순 정렬하여 5개 가져오기
     @Query("select e from Expend e "+
             "where e.user =: user order by e.expendDate desc"

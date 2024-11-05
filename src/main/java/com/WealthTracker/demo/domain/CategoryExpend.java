@@ -1,15 +1,14 @@
 package com.WealthTracker.demo.domain;
 
+import com.WealthTracker.demo.enums.Category_Expend;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
@@ -21,6 +20,6 @@ public class CategoryExpend {
     private List<Expend> expendList=new ArrayList<>();
 
    @Enumerated(EnumType.STRING)
-    private com.WealthTracker.demo.enums.CategoryExpend categoryName;
+    private Category_Expend categoryName;
 
 }

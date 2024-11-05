@@ -1,5 +1,6 @@
 package com.WealthTracker.demo.domain;
 
+import com.WealthTracker.demo.enums.Category_Income;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,7 +17,7 @@ public class CategoryIncome {
     private Long categoryId;
 
     @Enumerated(EnumType.STRING)
-    private com.WealthTracker.demo.enums.CategoryIncome categoryName;
+    private Category_Income categoryName;
 
     @OneToMany(mappedBy = "categoryIncome")
     private List<Income> incomeList=new ArrayList<>();
