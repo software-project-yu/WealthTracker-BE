@@ -6,19 +6,21 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 public class CategoryExpend {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long categoryExpendId;
+    private Long categoryId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "expendId")
-    private Expend expend;
+   @OneToMany(mappedBy = "categoryExpend")
+    private List<Expend> expendList=new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "categoryId")
-    private Category_expend categoryExpend;
+   @Enumerated(EnumType.STRING)
+    private com.WealthTracker.demo.enums.CategoryExpend categoryName;
+
 }

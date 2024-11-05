@@ -3,6 +3,9 @@ package com.WealthTracker.demo.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -10,13 +13,12 @@ import lombok.*;
 @Builder
 public class CategoryIncome {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long categoryIncomeId;
+    private Long categoryId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "incomeId")
-    private Income income;
+    @Enumerated(EnumType.STRING)
+    private com.WealthTracker.demo.enums.CategoryIncome categoryName;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "categoryId")
-    private Category_income categoryIncome;
+    @OneToMany(mappedBy = "categoryIncome")
+    private List<Income> incomeList=new ArrayList<>();
+
 }

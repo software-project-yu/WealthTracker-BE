@@ -10,7 +10,7 @@ public enum CategoryExpend {
 
     private final String categoryType;
 
-    //카테고리 한글명 반환
+    //한글->영어
     public static CategoryExpend fromString(String categoryType) {
         for (CategoryExpend ct : CategoryExpend.values()) {
             if (ct.getCategoryType().equalsIgnoreCase(categoryType)) {

@@ -47,6 +47,6 @@ public class ExpendController {
     })
     @GetMapping("/expend/list")
     public ResponseEntity<List<ExpendResponseDTO>> list(@RequestHeader("Authorization") String token) throws CustomException {
-        return new ResponseEntity<>(expendService.list(token), HttpStatusCode.valueOf(SuccessCode.SUCCESS_RESPOND_EXPEND.getStatus()));
+        return new ResponseEntity<>(expendService.expendList(token), HttpStatusCode.valueOf(SuccessCode.SUCCESS_RESPOND_EXPEND.getStatus()));
     }
 }

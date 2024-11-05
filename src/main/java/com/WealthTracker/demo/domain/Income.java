@@ -6,6 +6,8 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -27,6 +29,10 @@ public class Income {
 
     @Enumerated(EnumType.STRING)
     private Asset asset;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoryId")
+    private CategoryIncome categoryIncome;
 
 
     //다대일
