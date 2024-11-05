@@ -49,4 +49,14 @@ public class ExpendController {
     public ResponseEntity<List<ExpendResponseDTO>> list(@RequestHeader("Authorization") String token) throws CustomException {
         return new ResponseEntity<>(expendService.expendList(token), HttpStatusCode.valueOf(SuccessCode.SUCCESS_RESPOND_EXPEND.getStatus()));
     }
+
+    @Operation(summary = "지출 내역 최근 5개 조회 API입니다. [담당자]:김도연")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = {@Content(mediaType = "application/json", array = @ArraySchema (schema =@Schema (implementation = ExpendResponseDTO.class)))}),
+            @ApiResponse(responseCode = "500", description = "서버 오류", content = {@Content(mediaType = "string")})
+    })
+    @GetMapping("/expend/recent")
+    public ResponseEntity<List<ExpendResponseDTO>> recentExpend(@RequestHeader("Authorization") String token) throws CustomException{
+        return new ResponseEntity<>(expendService.getRecentExpend(token),HttpStatusCode.valueOf(SuccessCode.SUCCESS_EXPEND.getStatus()));
+    }
 }

@@ -53,7 +53,7 @@ public class ExpendServiceImpl implements ExpendService {
         Asset convertToAsset = Asset.fromString(asset);
 
         //카테고리 저장-기존 카테고리 존재 여부 확인
-        com.WealthTracker.demo.domain.CategoryExpend categoryExpend =
+       CategoryExpend categoryExpend =
                 expendCategoryRepository.findByCategoryName(convertToCategory)
                         .orElseGet(() -> {
                             com.WealthTracker.demo.domain.CategoryExpend newCategory = com.WealthTracker.demo.domain.CategoryExpend
@@ -90,14 +90,14 @@ public class ExpendServiceImpl implements ExpendService {
         ));
 
         //지출 카테고리 정보 가져오기
-        Map<Long, com.WealthTracker.demo.domain.CategoryExpend> categoryExpendMap = expendCategoryRepository.findAllById(
+        Map<Long, CategoryExpend> categoryExpendMap = expendCategoryRepository.findAllById(
                         expendList.stream()
                                 .map(Expend::getCategoryExpend)
-                                .map(com.WealthTracker.demo.domain.CategoryExpend::getCategoryId)
+                                .map(CategoryExpend::getCategoryId)
                                 .collect(Collectors.toList()))
                 .stream()
                 .collect(Collectors.toMap(
-                        com.WealthTracker.demo.domain.CategoryExpend::getCategoryId,
+                        CategoryExpend::getCategoryId,
                         Function.identity()));
 
 
@@ -105,6 +105,7 @@ public class ExpendServiceImpl implements ExpendService {
                 .map(expend -> mapToExpendResponseDTO(expend,categoryExpendMap))
                 .collect(Collectors.toList());
     }
+    //DTO로 매핑하는 함수
     private ExpendResponseDTO mapToExpendResponseDTO(Expend expend, Map<Long, com.WealthTracker.demo.domain.CategoryExpend> categoryExpendMap) {
         CategoryExpend categoryExpend = categoryExpendMap.get(expend.getCategoryExpend().getCategoryId());
 
@@ -166,20 +167,25 @@ public class ExpendServiceImpl implements ExpendService {
 
         //유저의 최신 지출 내역 5개 불러오기
         List<Expend> recentExpendList = expendRepository.findRecentExpend(
-                user, PageRequest.of(0, 5)
+                 PageRequest.of(0, 5)).orElseThrow(
+                ()->new CustomException(ErrorCode.INTERNAL_SERVER_ERROR)
         );
 
-        //Expend리스트를 ExpendResponseDTO리스트로 반환
+        //지출 카테고리 정보 가져오기
+        Map<Long, CategoryExpend> categoryExpendMap = expendCategoryRepository.findAllById(
+                        recentExpendList.stream()
+                                .map(Expend::getCategoryExpend)
+                                .map(CategoryExpend::getCategoryId)
+                                .collect(Collectors.toList()))
+                .stream()
+                .collect(Collectors.toMap(
+                        CategoryExpend::getCategoryId,
+                        Function.identity()));
+
+
         return recentExpendList.stream()
-                .map(expend -> ExpendResponseDTO.builder()
-                        .expendId(expend.getExpendId())
-                        .expendName(expend.getExpendName())
-                        .expendDate(expend.getExpendDate().toString())
-                        .asset(expend.getAsset().toString())
-                        .category(expend.getCategoryExpend().toString())
-                        .cost(expend.getCost())
-                        .build()
-                ).collect(Collectors.toList());
+                .map(expend -> mapToExpendResponseDTO(expend,categoryExpendMap))
+                .collect(Collectors.toList());
     }
 
     @Override

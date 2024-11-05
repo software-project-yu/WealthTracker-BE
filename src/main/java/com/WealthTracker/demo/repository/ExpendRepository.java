@@ -21,10 +21,9 @@ public interface ExpendRepository extends JpaRepository<Expend,Long> {
     List<Expend> findAllByUserWithCategory(@Param("user")User user);
 
     //날짜로 최신순 정렬하여 5개 가져오기
-    @Query("select e from Expend e "+
-            "where e.user =: user order by e.expendDate desc"
+    @Query("select e from Expend e order by e.expendDate desc"
     )
-    List<Expend> findRecentExpend(@Param("user")User user, Pageable pageable);
+   Optional< List<Expend>> findRecentExpend(Pageable pageable);
 
     //이번 달 주차별 지출 총액 리턴
     @Query("select WEEK(e.expendDate),SUM(e.cost) from Expend e "+
