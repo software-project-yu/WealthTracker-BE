@@ -29,6 +29,10 @@ public class User {
 
     private boolean enabled = false; // 이메일 인증 여부
 
+    @OneToOne
+    @JoinColumn(name = "feedbackId")
+    private FeedBack feedBack;
+
 
 
     // 계정 활성화 메서드

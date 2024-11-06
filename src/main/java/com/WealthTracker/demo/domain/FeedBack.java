@@ -24,8 +24,4 @@ public class FeedBack {
     @DateTimeFormat
     private LocalDateTime createdAt;
 
-    //유저랑 N 대 1
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userId")
-    private User user;
 }
