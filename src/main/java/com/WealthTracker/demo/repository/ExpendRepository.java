@@ -14,32 +14,32 @@ import java.util.Optional;
 public interface ExpendRepository extends JpaRepository<Expend, Long> {
     List<Expend> findAllByUser(User user);
 
-    Optional<Expend> findByExpendId(Long expendId);
+    @Query("SELECT e FROM Expend e WHERE e.expendId = :expendId")
+    Optional<Expend> findByExpendId(@Param("expendId") Long expendId);
 
     //카테고리도 같이 가져오기
     @Query("SELECT e FROM Expend e JOIN FETCH e.categoryExpend WHERE e.user = :user")
     List<Expend> findAllByUserWithCategory(@Param("user") User user);
 
     //날짜로 최신순 정렬하여 5개 가져오기
-    @Query("select e from Expend e order by e.expendDate desc"
-    )
+    @Query("select e from Expend e order by e.expendDate desc")
     Optional<List<Expend>> findRecentExpend(Pageable pageable);
 
     //이번 달 주차별 지출 총액 리턴
-    @Query("select CAST(FLOOR(DAY(e.expendDate)-1)/7 + 1 AS INTEGER) AS weekNum, "+
-            " SUM(e.cost) AS totalCost "+
+    @Query("select CAST(FLOOR(DAY(e.expendDate)-1)/7 + 1 AS INTEGER) AS weekNum, " +
+            " SUM(e.cost) AS totalCost " +
             "from Expend e " +
-            "where e.user = :user "+
+            "where e.user = :user " +
             " and MONTH(e.expendDate) = MONTH(CURRENT_DATE) " +
             "group by CAST((FLOOR(DAY(e.expendDate) - 1) / 7) + 1 AS INTEGER)"
     )
     List<Object[]> getTotalExpendThisMonth(@Param("user") User user);
 
     //저번 달 주차별 지출 총액 리턴
-    @Query("select CAST(FLOOR(DAY(e.expendDate)-1)/7 + 1 AS INTEGER) AS weekNum, "+
-            " SUM(e.cost) AS totalCost "+
+    @Query("select CAST(FLOOR(DAY(e.expendDate)-1)/7 + 1 AS INTEGER) AS weekNum, " +
+            " SUM(e.cost) AS totalCost " +
             "from Expend e " +
-            "where e.user = :user "+
+            "where e.user = :user " +
             " and MONTH(e.expendDate) = MONTH(CURRENT_DATE) - 1 " +
             "group by CAST((FLOOR(DAY(e.expendDate) - 1) / 7) + 1 AS INTEGER)"
     )

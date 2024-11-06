@@ -124,4 +124,27 @@ public class ExpendController {
             return new ResponseEntity<>(returnCodeDTO, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @Operation(summary = "지출 내역 수정을 위한 API입니다. [담당자]:김도연")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "삭제 성공", content = {@Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ReturnCodeDTO.class))}),
+            @ApiResponse(responseCode = "409",description = "유저 불일치"),
+            @ApiResponse(responseCode = "500", description = "서버 오류", content = {@Content(mediaType = "string")})
+    })
+    @PutMapping("/expend/update/{expendId}")
+    public ResponseEntity<?> update(@RequestHeader("Authorization") String token,@PathVariable Long expendId,@RequestBody ExpendRequestDTO expendRequestDTO){
+        try {
+            // 지출 내역 수정 메서드 호출
+            expendService.updateExpend(token,expendId,expendRequestDTO);
+            // 성공 메시지 반환
+            ReturnCodeDTO returnCodeDTO = ReturnCodeDTO.builder()
+                    .status(200)
+                    .message("수정 성공")
+                    .build();
+            return new ResponseEntity<>(returnCodeDTO, HttpStatus.OK);
+        }catch (CustomException ex){
+            return new ResponseEntity<>(new ReturnCodeDTO(ex.getErrorCode().getStatus(),ex.getMessage()),HttpStatus.BAD_REQUEST);
+        }
+    }
 }

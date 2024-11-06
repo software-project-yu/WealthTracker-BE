@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -163,8 +164,48 @@ public class ExpendServiceImpl implements ExpendService {
     }
 
     @Override
-    public Long updateExpend(String token, Long expendId) {
-        return null;
+    @Transactional
+    public Long updateExpend(String token, Long expendId,ExpendRequestDTO expendRequestDTO) {
+        // 유저 정보 가져오기
+        User myUser = userRepository.findByUserId(jwtUtil.getUserId(token))
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 지출아이디로 지출 내역 찾기
+        Expend findExpend = expendRepository.findByExpendId(expendId)
+                .orElse(null);
+        if(findExpend==null){
+            throw new CustomException(ErrorCode.EXPEND_NOT_FOUND);
+        }
+
+        // 유저의 지출 내역인지 확인
+        if (!Objects.equals(findExpend.getUser().getUserId(), myUser.getUserId())) {
+            throw new CustomException(ErrorCode.USER_NOT_CORRECT);
+        }
+
+        // 카테고리 ENUM으로 변환
+        Category_Expend newCategoryExpend = Category_Expend.fromString(expendRequestDTO.getCategory());
+        if (newCategoryExpend == null) {
+            throw new CustomException(ErrorCode.INVALID_CATEGORY);
+        }
+
+        // 새로운 카테고리 객체 찾기 또는 생성
+        CategoryExpend categoryExpendToUpdate = expendCategoryRepository.findByCategoryName(newCategoryExpend)
+                .orElseGet(() -> new CategoryExpend(null, new ArrayList<>(), newCategoryExpend));
+
+
+
+        //지출 내역수정
+        Expend updateExpend=findExpend.toBuilder()
+                .expendName(expendRequestDTO.getExpendName())
+                .expendDate(LocalDateTime.parse(expendRequestDTO.getExpendDate()+"T00:00"))
+                .asset(Asset.fromString(expendRequestDTO.getAsset()))
+                .cost(expendRequestDTO.getCost())
+                .categoryExpend(categoryExpendToUpdate)
+                .build();
+
+        //레포지토리에 수정
+        expendRepository.save(updateExpend);
+        return updateExpend.getExpendId();
     }
 
     @Override
@@ -261,11 +302,4 @@ public class ExpendServiceImpl implements ExpendService {
         }
         return graphReport;
     }
-
-//    @Override
-//    public ExpendResponseDTO expendDetail(String token, Long expendId) {
-//        expendRepository.findByExpendId(expendId).orElseThrow(
-//                () -> new CustomException(ErrorCode.EXPEND_NOT_FOUND)
-//        );
-//    }
 }
