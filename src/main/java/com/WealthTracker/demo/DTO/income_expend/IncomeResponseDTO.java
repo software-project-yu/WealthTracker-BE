@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class IncomeResponseDTO {
+    //수입 id
+    private Long incomeId;
     //날짜
     private String incomeDate;
     //금액

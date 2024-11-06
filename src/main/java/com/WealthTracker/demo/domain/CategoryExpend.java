@@ -1,24 +1,25 @@
 package com.WealthTracker.demo.domain;
 
+import com.WealthTracker.demo.enums.Category_Expend;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 public class CategoryExpend {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long categoryExpendId;
+    private Long categoryId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "expendId")
-    private Expend expend;
+   @OneToMany(mappedBy = "categoryExpend",cascade = CascadeType.ALL)
+    private List<Expend> expendList=new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "categoryId")
-    private Category_expend categoryExpend;
+   @Enumerated(EnumType.STRING)
+    private Category_Expend categoryName;
+
 }

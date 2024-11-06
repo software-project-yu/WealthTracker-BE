@@ -8,6 +8,7 @@ import lombok.Getter;
 public enum ErrorCode {
     //400 BAD_REQUEST 잘못된 요청
     INVALID_PARAMETER(400, "올바른 값을 확인해주세요."),
+    INVALID_CATEGORY(400,"잘못된 카테고리명입니다."),
 
     //404 NOT_FOUND 잘못된 리소스 접근
     USER_NOT_FOUND(404, "존재하지 않는 회원 ID 입니다."),
@@ -16,6 +17,7 @@ public enum ErrorCode {
 
 
     //409 CONFLICT 중복된 리소스
+    USER_NOT_CORRECT(409,"해당 유저의 지출 또는 수입내역이 아닙니다."),
 
 
     //500 INTERNAL SERVER ERROR
