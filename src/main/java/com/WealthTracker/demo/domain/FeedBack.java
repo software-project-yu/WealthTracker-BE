@@ -1,10 +1,8 @@
 package com.WealthTracker.demo.domain;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
@@ -12,16 +10,18 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "Feedback")
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class FeedBack {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long feedId;
+    private Long feedbackId;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String content;
 
-    @DateTimeFormat
+    @CreationTimestamp
+    @DateTimeFormat(pattern = "yyyy-MM-dd/HH:mm:ss")
     private LocalDateTime createdAt;
 
 }

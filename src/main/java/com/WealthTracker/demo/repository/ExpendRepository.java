@@ -61,4 +61,8 @@ public interface ExpendRepository extends JpaRepository<Expend, Long> {
             @Param("weekStart") LocalDateTime weekStart,
             @Param("weekEnd") LocalDateTime weekEnd
     );
+
+    //지출 업데이트 횟수-가장최근 지출 내역 기록 시간과 일치 로직을 통해 구현
+    @Query("SELECT MAX(e.createdAt) FROM Expend e WHERE e.user = :user")
+    LocalDateTime findLatestExpend(@Param("user") User user);
 }

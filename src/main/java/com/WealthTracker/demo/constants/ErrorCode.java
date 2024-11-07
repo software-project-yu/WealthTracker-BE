@@ -21,7 +21,8 @@ public enum ErrorCode {
 
 
     //500 INTERNAL SERVER ERROR
-    INTERNAL_SERVER_ERROR(500, "서버 에러입니다. 서버 팀에 연락주세요!");
+    INTERNAL_SERVER_ERROR(500, "서버 에러입니다. 서버 팀에 연락주세요!"),
+    TOOMANY_REQUEST(500,"API 요청을 잠시 후 다시 시도해 주세요.");
 
 
 
