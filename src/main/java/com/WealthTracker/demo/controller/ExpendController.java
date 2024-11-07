@@ -78,7 +78,7 @@ public class ExpendController {
         return new ResponseEntity<>(expendService.getAmountByWeek(token),HttpStatusCode.valueOf(SuccessCode.SUCCESS_RESPOND_EXPEND.getStatus()));
     }
 
-    @Operation(summary = "지출 내역 그래프를 위한 API입니다. [담당자]:김도연")
+    @Operation(summary = "지출 내역 상세보기를 위한 API입니다. [담당자]:김도연")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공", content = {@Content(mediaType = "application/json",
                     schema = @Schema(implementation = ReturnCodeDTO.class))}),
