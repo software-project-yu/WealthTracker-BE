@@ -65,4 +65,8 @@ public interface ExpendRepository extends JpaRepository<Expend, Long> {
     //지출 업데이트 횟수-가장최근 지출 내역 기록 시간과 일치 로직을 통해 구현
     @Query("SELECT MAX(e.createdAt) FROM Expend e WHERE e.user = :user")
     LocalDateTime findLatestExpend(@Param("user") User user);
+
+    //최근 수정 날짜
+    @Query("select max(e.updateDate) from Expend e where e.user = :user")
+    LocalDateTime findLatestUpdateDate(@Param("user")User user);
 }
