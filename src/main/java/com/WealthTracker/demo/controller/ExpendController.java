@@ -147,4 +147,21 @@ public class ExpendController {
             return new ResponseEntity<>(new ReturnCodeDTO(ex.getErrorCode().getStatus(),ex.getMessage()),HttpStatus.BAD_REQUEST);
         }
     }
+
+    @Operation(summary = "지출 내역 리스트(지출 내역 페이지)를 위한 API입니다. [담당자]:김도연")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "삭제 성공", content = {@Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ReturnCodeDTO.class))}),
+            @ApiResponse(responseCode = "409",description = "유저 불일치"),
+            @ApiResponse(responseCode = "500", description = "서버 오류", content = {@Content(mediaType = "string")})
+    })
+    @GetMapping("/expend/expendList")
+    public ResponseEntity<?> listWithExpendPage(@RequestHeader("Authorization") String token){
+        try {
+            // 성공 메시지 반환
+            return new ResponseEntity<>( expendService.getAmountByMonth(token),HttpStatusCode.valueOf(SuccessCode.SUCCESS_RESPOND_EXPEND.getStatus()));
+        }catch (CustomException ex){
+            return new ResponseEntity<>(new ReturnCodeDTO(ex.getErrorCode().getStatus(),ex.getMessage()),HttpStatus.BAD_REQUEST);
+        }
+    }
 }

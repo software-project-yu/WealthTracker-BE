@@ -27,6 +27,13 @@ public interface ExpendRepository extends JpaRepository<Expend, Long> {
     @Query("select e from Expend e order by e.expendDate desc")
     Optional<List<Expend>> findRecentExpend(Pageable pageable);
 
+    //이번 달 최신 지출 내역 2개
+    @Query("SELECT e FROM Expend e WHERE e.categoryExpend.categoryName = :category AND e.user = :user "+
+            "and month (e.expendDate) = month (current_date) "+
+            "and year (e.expendDate) = year (current_date) "+
+            " ORDER BY e.expendDate DESC")
+    List<Expend> findRecentExpend(User user, Category_Expend category, Pageable pageable);
+
     //이번 달 주차별 지출 총액 리턴
     @Query("select CAST(FLOOR(DAY(e.expendDate)-1)/7 + 1 AS INTEGER) AS weekNum, " +
             " SUM(e.cost) AS totalCost " +
@@ -65,4 +72,24 @@ public interface ExpendRepository extends JpaRepository<Expend, Long> {
     //지출 업데이트 횟수-가장최근 지출 내역 기록 시간과 일치 로직을 통해 구현
     @Query("SELECT MAX(e.createdAt) FROM Expend e WHERE e.user = :user")
     LocalDateTime findLatestExpend(@Param("user") User user);
+
+    //이번 달카테고리별 지출 총액 가져오기
+    @Query("select coalesce(sum (e.cost),0) from Expend e "+
+            "where e.user =:user "+
+            "and e.categoryExpend.categoryName= :categoryName " +
+            "and month (e.expendDate) = month (current_date) "+
+            "and year (e.expendDate) = year (current_date)"
+            )
+    Long thisMonthAmountByCategory(@Param("user")User user,@Param("categoryName") Category_Expend categoryName);
+
+    //저번 달 카테고리별 지출 총액 가져오기
+    @Query("select coalesce(sum (e.cost),0) from Expend e "+
+            "where e.user =:user "+
+            "and e.categoryExpend.categoryName = :categoryName " +
+            "and month (e.expendDate) = month (current_date) - 1 "+
+            "and year (e.expendDate) = year (current_date ) "+
+            "or (month (current_date ) = 1 and month (e.expendDate) = 12 and year(e.expendDate) = year (current_date) - 1)"
+    )
+    Long prevMonthAmountByCategory(@Param("user")User user,@Param("categoryName") Category_Expend categoryName);
+
 }

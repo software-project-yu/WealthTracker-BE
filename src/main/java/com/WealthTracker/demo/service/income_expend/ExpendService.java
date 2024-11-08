@@ -29,4 +29,7 @@ public interface ExpendService {
     //그래프를 위한 같은 주 저번달, 이번 달 지출 총액 불러오기
     List<ExpendDateResponseDTO> getAmountByWeek(String token);
 
+    //이번 비용 내역
+    List<ExpendCategoryAmountDTO> getAmountByMonth(String token);
+
 }
