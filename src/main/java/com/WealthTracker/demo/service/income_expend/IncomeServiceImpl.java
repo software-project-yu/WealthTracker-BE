@@ -158,7 +158,11 @@ public class IncomeServiceImpl implements IncomeService {
 
         // 새로운 카테고리 객체 찾기 또는 생성
         CategoryIncome categoryIncomeToUpdate = incomeCategoryRepository.findByCategoryName(newCategoryIncome)
-                .orElseGet(() -> new CategoryIncome(null, new ArrayList<>(), newCategoryIncome));
+                .orElseGet(() -> CategoryIncome
+                        .builder()
+                        .categoryName(newCategoryIncome)
+                        .build());
+        incomeCategoryRepository.save(categoryIncomeToUpdate);
 
 
         //수입 내역 수정
