@@ -1,9 +1,6 @@
 package com.WealthTracker.demo.service.income_expend;
 
-import com.WealthTracker.demo.DTO.income_expend.ExpendCategoryAmountDTO;
-import com.WealthTracker.demo.DTO.income_expend.ExpendDateResponseDTO;
-import com.WealthTracker.demo.DTO.income_expend.ExpendRequestDTO;
-import com.WealthTracker.demo.DTO.income_expend.ExpendResponseDTO;
+import com.WealthTracker.demo.DTO.income_expend.*;
 import com.WealthTracker.demo.domain.Expend;
 
 import java.util.List;
@@ -31,5 +28,8 @@ public interface ExpendService {
 
     //이번 비용 내역
     List<ExpendCategoryAmountDTO> getAmountByMonth(String token);
+
+    //일별 지출 총합-2주
+    List<ExpendDayResponseDTO> getAmountByDate(String token);
 
 }

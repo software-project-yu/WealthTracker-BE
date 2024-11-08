@@ -342,8 +342,8 @@ public class ExpendServiceImpl implements ExpendService {
             }
 
             //카테고리 상세 내역 2개씩 리스트
-            List<Expend> expendList=expendRepository.findRecentExpend(user,category,PageRequest.of(0,2));
-            List<ExpendResponseDTO> expendResponseDTOList=expendList.stream()
+            List<Expend> expendList = expendRepository.findRecentExpend(user, category, PageRequest.of(0, 2));
+            List<ExpendResponseDTO> expendResponseDTOList = expendList.stream()
                     .map(expend -> ExpendResponseDTO.builder()
                             .expendId(expend.getExpendId())
                             .expendName(expend.getExpendName())
@@ -364,5 +364,42 @@ public class ExpendServiceImpl implements ExpendService {
             nowMonthList.add(expendCategoryAmountDTO);
         }
         return nowMonthList;
+    }
+
+    @Override
+    public List<ExpendDayResponseDTO> getAmountByDate(String token) {
+        //jwt토큰 검증 실시
+        Optional<User> findUser = userRepository.findByUserId(jwtUtil.getUserId(token));
+        User user = findUser.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+
+        //2주 계산
+        LocalDateTime startDate = LocalDateTime.now().minusWeeks(2);
+        LocalDateTime endDate = LocalDateTime.now();
+
+        //2주 단위 가져오기
+        List<Object[]> totalExpendList = expendRepository.findExpendTotalByDateRange(user, startDate, endDate);
+        List<ExpendDayResponseDTO> expendDayResponseDTOList = new ArrayList<>();
+
+        //데이터 반환
+        for (int i = 0; i < 14; i++) {
+            LocalDate targetDate = LocalDate.now().minusDays(13 - i);
+
+            Long dailyExpendTotal = totalExpendList.stream()
+                    .filter(dayTotal -> targetDate.equals(((LocalDateTime) dayTotal[1]).toLocalDate()))
+                    .map(dayTotal->(Long) dayTotal[0])
+                    .findFirst()
+                    .orElse(0L);
+
+            ExpendDayResponseDTO expendDayResponseDTO = ExpendDayResponseDTO.builder()
+                    .dayNum(i + 1)
+                    .dayNum(targetDate.getDayOfMonth())
+                    .costSum(dailyExpendTotal)
+                    .build();
+
+            expendDayResponseDTOList.add(expendDayResponseDTO);
+
+        }
+        return expendDayResponseDTOList;
     }
 }

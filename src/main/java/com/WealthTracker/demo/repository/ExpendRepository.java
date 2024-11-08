@@ -1,5 +1,6 @@
 package com.WealthTracker.demo.repository;
 
+import com.WealthTracker.demo.DTO.income_expend.ExpendDayResponseDTO;
 import com.WealthTracker.demo.domain.Expend;
 import com.WealthTracker.demo.domain.User;
 import com.WealthTracker.demo.enums.Category_Expend;
@@ -7,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -92,4 +94,12 @@ public interface ExpendRepository extends JpaRepository<Expend, Long> {
     )
     Long prevMonthAmountByCategory(@Param("user")User user,@Param("categoryName") Category_Expend categoryName);
 
+
+    //2주단위로 일별 총지출 금액
+    @Query("select coalesce( sum (e.cost) , 0), e.expendDate from Expend e "+
+            "where e.expendDate between :startDate and :endDate "+
+            "and e.user = :user "+
+            "group by e.expendDate "+
+            "order by e.expendDate")
+    List<Object[]> findExpendTotalByDateRange(@Param("user")User user,@Param("startDate")LocalDateTime startDate,@Param("endDate")LocalDateTime endDate);
 }
