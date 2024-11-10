@@ -9,7 +9,7 @@
 | :recycle: | refact | 기능 변화가 아닌 코드 리팩터링 |
 | :white_check_mark: | test | 테스트 코드 추가/수정 |
 | :pushpin: | chore | 패키지 매니저 수정, 그 외 기타 수정 ex) .gitignore |
-
+| 🛠️                 | merge   | 병합      |
 
 ### Directory Achitecture
 ```
