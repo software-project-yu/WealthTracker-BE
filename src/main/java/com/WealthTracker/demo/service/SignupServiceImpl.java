@@ -66,12 +66,6 @@ public class SignupServiceImpl implements SignupService {
         return userRepository.findByEmail(email);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public boolean existsByEmail(String email) {
-        return userRepository.existsByEmail(email);
-    }
-
     // 비밀번호 재설정 코드 생성 및 저장
     @Override
     @Transactional
