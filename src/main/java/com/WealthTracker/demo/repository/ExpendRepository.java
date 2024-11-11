@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -47,5 +48,10 @@ public interface ExpendRepository extends JpaRepository<Expend, Long> {
 
     //지출내역 삭제
     void deleteById(Long expendId);
+
+    //월별 지출내역 리스트 반환 - 날짜는 상관없음
+    @Query("select e from Expend e "+
+            "where e.user = :user and MONTH(e.expendDate) = :month")
+    Optional<List<Expend>> findAllByExpendDate(@Param("user")User user, @Param("month")int month);
 
 }
