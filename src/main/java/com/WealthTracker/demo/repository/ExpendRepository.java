@@ -2,11 +2,13 @@ package com.WealthTracker.demo.repository;
 
 import com.WealthTracker.demo.domain.Expend;
 import com.WealthTracker.demo.domain.User;
+import com.WealthTracker.demo.enums.Category_Expend;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -48,4 +50,23 @@ public interface ExpendRepository extends JpaRepository<Expend, Long> {
     //지출내역 삭제
     void deleteById(Long expendId);
 
+    //카테고리에 따른 지출 합계
+    @Query("SELECT COALESCE(SUM(e.cost), 0) FROM Expend e " +
+            "WHERE e.user = :user " +
+            "AND e.categoryExpend.categoryName = :categoryName " +
+            "AND e.expendDate BETWEEN :weekStart AND :weekEnd")
+    Long amountByCategory(
+            @Param("user") User user,
+            @Param("categoryName") Category_Expend categoryName,
+            @Param("weekStart") LocalDateTime weekStart,
+            @Param("weekEnd") LocalDateTime weekEnd
+    );
+
+    //지출 업데이트 횟수-가장최근 지출 내역 기록 시간과 일치 로직을 통해 구현
+    @Query("SELECT MAX(e.createdAt) FROM Expend e WHERE e.user = :user")
+    LocalDateTime findLatestExpend(@Param("user") User user);
+
+    //최근 수정 날짜
+    @Query("select max(e.updateDate) from Expend e where e.user = :user")
+    LocalDateTime findLatestUpdateDate(@Param("user")User user);
 }
