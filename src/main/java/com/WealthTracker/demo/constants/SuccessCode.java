@@ -13,7 +13,8 @@ public enum SuccessCode {
     SUCCESS_RESPOND_EXPEND(200, "지출을 성공적으로 불러왔습니다."),
     SUCCESS_SIGNUP(200, "회원가입을 성공했습니다."),
     SUCCESS_FEEDBACK(200,"피드백을 성공적으로 불러왔습니다."),
-    SUCCESS_LOGIN(200, "로그인을 성공했습니다.");
+    SUCCESS_LOGIN(200, "로그인을 성공했습니다."),
+    SUCCESS_EXPEND_INCOME(200,"지출과 수입 내역을 성공적으로 불러왔습니다.");
     private final int status;
     private final String message;
 

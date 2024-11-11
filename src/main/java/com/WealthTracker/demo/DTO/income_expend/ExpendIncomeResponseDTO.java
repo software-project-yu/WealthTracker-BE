@@ -6,6 +6,8 @@ import lombok.Data;
 @Data
 @Builder
 public class ExpendIncomeResponseDTO {
+    //지출 or 수입 타입
+    private String type;
     //지출,수입 아이디
     private Long id;
 
