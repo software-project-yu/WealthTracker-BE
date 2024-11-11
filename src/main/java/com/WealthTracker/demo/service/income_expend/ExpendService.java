@@ -10,7 +10,7 @@ public interface ExpendService {
     Long writeExpend(ExpendRequestDTO expendRequestDTO, String token);
 
     //지출 내역 모두 보기
-    List<ExpendResponseDTO> expendList(String token);
+    List<ExpendResponseDTO> expendList(String token,int month);
 
     //지출 내역 상세보기
     ExpendResponseDTO  expendResponseDetail(String token,Long expendId);
