@@ -9,7 +9,7 @@ public interface IncomeService {
     Long writeIncome(IncomeRequestDTO incomeRequestDTO,String token);
 
     //수입 내역 모두 보내기
-    List<IncomeResponseDTO> incomeList(String token);
+    List<IncomeResponseDTO> incomeList(String token,int month);
 
     //수입 내역 상세보기
     IncomeResponseDTO incomeResponseDetail(String token,Long incomeId);

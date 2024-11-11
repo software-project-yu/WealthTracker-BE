@@ -53,8 +53,8 @@ public class IncomeController {
             @ApiResponse(responseCode = "500", description = "서버 오류", content = {@Content(mediaType = "string")})
     })
     @GetMapping("/income/list")
-    public ResponseEntity<List<IncomeResponseDTO>> list(@RequestHeader("Authorization") String token) throws CustomException {
-        return new ResponseEntity<>(incomeService.incomeList(token), HttpStatusCode.valueOf(SuccessCode.SUCCESS_RESPOND_EXPEND.getStatus()));
+    public ResponseEntity<List<IncomeResponseDTO>> list(@RequestHeader("Authorization") String token,@RequestParam("month")int month) throws CustomException {
+        return new ResponseEntity<>(incomeService.incomeList(token,month), HttpStatusCode.valueOf(SuccessCode.SUCCESS_RESPOND_EXPEND.getStatus()));
     }
 
     @Operation(summary = "수입 내역 최근 5개 조회 API입니다. [담당자]:김도연")
