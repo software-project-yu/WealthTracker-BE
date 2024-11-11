@@ -75,6 +75,7 @@ public interface ExpendRepository extends JpaRepository<Expend, Long> {
     @Query("SELECT MAX(e.createdAt) FROM Expend e WHERE e.user = :user")
     LocalDateTime findLatestExpend(@Param("user") User user);
 
+
     //이번 달카테고리별 지출 총액 가져오기
     @Query("select coalesce(sum (e.cost),0) from Expend e "+
             "where e.user =:user "+
@@ -102,4 +103,9 @@ public interface ExpendRepository extends JpaRepository<Expend, Long> {
             "group by e.expendDate "+
             "order by e.expendDate")
     List<Object[]> findExpendTotalByDateRange(@Param("user")User user,@Param("startDate")LocalDateTime startDate,@Param("endDate")LocalDateTime endDate);
+
+    //최근 수정 날짜
+    @Query("select max(e.updateDate) from Expend e where e.user = :user")
+    LocalDateTime findLatestUpdateDate(@Param("user")User user);
+
 }

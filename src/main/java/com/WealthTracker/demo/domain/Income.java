@@ -1,6 +1,7 @@
 package com.WealthTracker.demo.domain;
 
 import com.WealthTracker.demo.enums.Asset;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -42,9 +43,15 @@ public class Income {
     @JoinColumn(name = "userId")
     private User user;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoryId")
     private CategoryIncome categoryIncome;
+
+
+    //수정 날짜
+    @Nullable
+    private LocalDateTime updateDate;
 
 
 }

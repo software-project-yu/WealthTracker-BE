@@ -12,6 +12,7 @@ import com.WealthTracker.demo.repository.FeedbackRepository;
 import com.WealthTracker.demo.repository.UserRepository;
 import com.WealthTracker.demo.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +28,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FeedbackServiceImpl implements FeedbackService {
 
     @Autowired
@@ -81,9 +83,12 @@ public class FeedbackServiceImpl implements FeedbackService {
         User myUser = user.orElseThrow(
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND)
         );
-        //최신 피드백 날짜
+        //최신 지출 날짜
         LocalDateTime latestExpendDate = expendRepository.findLatestExpend(myUser);
 
+        //최신 지출 수정 날짜
+        LocalDateTime latestUpdateExpendDate=expendRepository.findLatestUpdateDate(myUser);
+        log.info(latestUpdateExpendDate.toString());
         //현재 주의 시작과 끝 날짜 계산
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime weekStart = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toLocalDate().atStartOfDay();
@@ -95,9 +100,14 @@ public class FeedbackServiceImpl implements FeedbackService {
             //지출 내역 업데이트 유무 확인
             LocalDateTime feedbackCreationDate = existingFeedback.get().getCreatedAt();
 
-            if (latestExpendDate != null && !latestExpendDate.isAfter(feedbackCreationDate)) {
-                return existingFeedback.get().getContent();
+            // 새로운 지출이 있거나 지출이 수정된 경우 새로운 피드백 생성
+            if ((latestExpendDate != null && latestExpendDate.isAfter(feedbackCreationDate)) ||
+                    (latestUpdateExpendDate != null && latestUpdateExpendDate.isAfter(feedbackCreationDate))) {
+                return generateAndSaveFeedback(myUser, requestUrl);
             }
+
+            // 변경사항이 없는 경우 기존 피드백 반환
+            return existingFeedback.get().getContent();
         }
         //새로운 피드백 생성
         return generateAndSaveFeedback(myUser, requestUrl);
@@ -108,7 +118,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         String prompt = generateMessage(user);
         ChatRequest request = new ChatRequest(prompt);
         ChatResponse response = template.postForObject(requestUrl, request, ChatResponse.class);
-        String feedback = response.getCandidates().get(0).getContent().getParts().get(0).getText().toString();
+        String feedback = response.getCandidates().get(0).getContent().getParts().get(0).getText().toString().replaceAll("[\\n*]" ,"");
 
         //새 피드백 저장.
         FeedBack feedBack = FeedBack.builder()

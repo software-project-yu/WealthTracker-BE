@@ -192,7 +192,11 @@ public class ExpendServiceImpl implements ExpendService {
 
         // 새로운 카테고리 객체 찾기 또는 생성
         CategoryExpend categoryExpendToUpdate = expendCategoryRepository.findByCategoryName(newCategoryExpend)
-                .orElseGet(() -> new CategoryExpend(null, new ArrayList<>(), newCategoryExpend));
+                .orElseGet(() ->CategoryExpend
+                        .builder()
+                        .categoryName(newCategoryExpend)
+                        .build());
+        expendCategoryRepository.save(categoryExpendToUpdate);
 
 
         //지출 내역수정
@@ -202,6 +206,7 @@ public class ExpendServiceImpl implements ExpendService {
                 .asset(Asset.fromString(expendRequestDTO.getAsset()))
                 .cost(expendRequestDTO.getCost())
                 .categoryExpend(categoryExpendToUpdate)
+                .updateDate(LocalDateTime.now())
                 .build();
 
         //레포지토리에 수정
