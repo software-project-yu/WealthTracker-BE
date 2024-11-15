@@ -6,7 +6,6 @@ import com.WealthTracker.demo.DTO.target.TargetResponseDTO;
 import com.WealthTracker.demo.domain.DailySaving;
 import com.WealthTracker.demo.domain.Target;
 import com.WealthTracker.demo.domain.User;
-import com.WealthTracker.demo.repository.DailySavingRepository;
 import com.WealthTracker.demo.repository.TargetRepository;
 import com.WealthTracker.demo.repository.UserRepository;
 import com.WealthTracker.demo.util.JwtUtil;
@@ -25,8 +24,7 @@ public class TargetServiceImpl implements TargetService {
     @Override
     @Transactional
     public TargetResponseDTO createTarget(TargetRequestDTO requestDTO, String token) { //* 새로운 목표 생성하는 서비스 로직
-        Long userId = jwtUtil.getUserId(token);
-        User user = userRepository.findByUserId(userId)
+        User user = userRepository.findByUserId(jwtUtil.getUserId(token))
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
         // 정상적으로 진행되는 서비스 로직 구현부
         Target target = Target.builder()
