@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Getter
 @Builder
 @NoArgsConstructor
@@ -12,4 +14,8 @@ import lombok.NoArgsConstructor;
 public class TargetRequestDTO {
 
     private int targetAmount;
+
+    private LocalDate startDate;
+
+    private LocalDate endDate;
 }
