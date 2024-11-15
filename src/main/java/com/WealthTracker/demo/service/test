@@ -1,0 +1,16 @@
+package com.WealthTracker.demo.service.payment;
+
+import com.WealthTracker.demo.DTO.payment.PaymentRequestDTO;
+import com.WealthTracker.demo.DTO.payment.PaymentResponseDTO;
+import com.WealthTracker.demo.domain.Payment;
+import com.WealthTracker.demo.domain.User;
+
+import java.util.List;
+
+public interface PaymentService {
+    // 결제 내역 쓰기
+    Long writePayment(PaymentRequestDTO paymentRequestDTO);
+    Long writePayment(PaymentRequestDTO paymentRequestDTO, String token);
+    // 결제 내역 모두 보기
+    List<PaymentResponseDTO> listPayments(String token);
+}

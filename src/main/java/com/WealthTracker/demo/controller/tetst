@@ -1,0 +1,61 @@
+package com.WealthTracker.demo.controller;
+
+import com.WealthTracker.demo.DTO.ReturnCodeDTO;
+import com.WealthTracker.demo.DTO.payment.PaymentRequestDTO;
+import com.WealthTracker.demo.DTO.payment.PaymentResponseDTO;
+import com.WealthTracker.demo.constants.SuccessCode;
+import com.WealthTracker.demo.error.CustomException;
+import com.WealthTracker.demo.service.payment.PaymentServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api")
+@Tag(name = "결제", description = "결제 내역 API")
+public class PaymentController {
+    private final PaymentServiceImpl paymentService;
+
+    @Operation(summary = "결제 내역 기록 API 입니다.", description = "결제 내역을 작성합니다.")
+    @ApiResponses(value = {
+         @ApiResponse(responseCode = "200", description = "기록 성공", content =
+         {@Content(mediaType = "application/json", schema = @Schema(implementation = ReturnCodeDTO.class))}),
+         @ApiResponse(responseCode = "500", , description = "서버 오류", content
+         = {@Content(mediaType = "string")})
+    })
+    @PostMapping("/payment")
+    public ResponseEntity<?> write(@RequestBody PaymentRequestDTO paymentResponseDTO,
+            @RequestHeader("Authorization") String token) throws CustomException {
+        paymentService.writePayment(paymentResponseDTO, token);
+
+        return new ResponseEntity<>(new ReturnCodeDTO(200, SuccessCode.SUCCESS_PAYMENT.getMessage()),
+            HttpStatusCode.valueOf(SuccessCode.SUCCESS_PAYMENT.getStatus()));
+    }
+    @Operation(summary = "결제 내역 조회 API 입니다.", description = "결제 내역을 조회합니다.")
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "조회 성공", content =
+                {@Content(mediaType = "application/json", array = @ArraySchema (schema =@Schema
+                (implementation = PaymentResponseDTO.class)))}),
+                @ApiResponse(responseCode = "500", description = "서버 오류", content =
+                {@Content(mediaType = "string")})
+        })
+        @GetMapping("/payment/list")
+        public ResponseEntity<List<PaymentResponseDTO>> list(@RequestHeader("Authorization")
+        String token) throws CustomException {
+            // 결제 내역 조회
+            List<PaymentResponseDTO> paymentResponseDTOList = paymentService.listPayments(token);
+            // 조회 성공 시 결제 내역 리스트 반환
+            return ResponseEntity.status(200).body(paymentResponseDTOList);
+        }
+}

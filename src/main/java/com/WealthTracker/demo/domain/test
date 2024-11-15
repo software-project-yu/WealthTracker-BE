@@ -1,0 +1,44 @@
+package com.WealthTracker.demo.domain;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import lombok.*;
+
+@Entity
+@Table(name="payment")
+@Getter
+@Builder
+@AllArgsConstructor(access=AccessLevel.PROTECTED)
+@NoArgsConstructor
+
+public class Payment {
+    @Id
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    private Long paymentId;
+
+    private LocalDateTime dueDate;
+
+    @Column(nullable = false)
+    private String paymentDetail;
+
+    private LocalDateTime lastPayment;
+
+    @Column(nullable = false)
+    private Long cost;
+
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(nullable = false, name = "userId")
+    private User user;
+
+    @Column(nullable = false)
+    private String tradeName;
+
+    public Payment(LocalDateTime dueDate, String paymentDetail, LocalDateTime lastPayment, Long cost){
+        this.dueDate = dueDate;
+        this.paymentDetail = paymentDetail;
+        this.lastPayment = lastPayment;
+        this.cost = cost;
+        this.user = user;
+        this.tradeName = tradeName;
+    }
+}
