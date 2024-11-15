@@ -1,0 +1,18 @@
+package com.WealthTracker.demo.constants;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public enum SuccessCode {
+    // 결제 관련 성공 코드
+    SUCCESS_PAYMENT(200, "결제 내역이 성공적으로 기록되었습니다."),
+    SUCCESS_PAYMENT(200, "결제 내역이 성공적으로 수정되었습니다."),
+    SUCCESS_PAYMENT(200, "결제 내역이 성공적으로 삭제되었습니다."),
+    SUCCESS_SIGNUP(200, "회원가입을 성공했습니다."),
+    SUCCESS_LOGIN(200, "로그인을 성공했습니다.");
+
+    private final int status;
+    private final String message;
+}
