@@ -67,17 +67,13 @@ public class AuthController { //** Signup 및 EmailAuth 담당 Controller **//
     //** 비밀번호 재설정 요청
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody VerificationCodeRequestDTO request) {
-        Optional<User> userOpt = signupService.getUserByEmail(request.getEmail());
-        if (!userOpt.isPresent()) {
-            return ResponseEntity.badRequest().body("해당 이메일을 가진 사용자가 없습니다.");
+        try {
+            // 비밀번호 재설정 코드 생성 및 이메일 발송 로직 처리
+            signupService.createPasswordResetCode(request.getEmail());
+            return ResponseEntity.ok("비밀번호 재설정 이메일이 발송되었습니다.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-        User user = userOpt.get();
-        String code = verificationCodeUtil.generateVerificationCode();
-        signupService.createPasswordResetCode(user, code);
-        emailService.sendPasswordReset(user.getEmail(), code);
-
-        return ResponseEntity.ok("비밀번호 재설정 이메일이 발송되었습니다.");
     }
 
     //** 비밀번호 재설정 확인
