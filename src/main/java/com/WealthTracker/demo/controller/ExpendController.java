@@ -1,9 +1,7 @@
 package com.WealthTracker.demo.controller;
 
 import com.WealthTracker.demo.DTO.ReturnCodeDTO;
-import com.WealthTracker.demo.DTO.income_expend.ExpendDateResponseDTO;
-import com.WealthTracker.demo.DTO.income_expend.ExpendRequestDTO;
-import com.WealthTracker.demo.DTO.income_expend.ExpendResponseDTO;
+import com.WealthTracker.demo.DTO.income_expend.*;
 import com.WealthTracker.demo.constants.ErrorCode;
 import com.WealthTracker.demo.constants.SuccessCode;
 import com.WealthTracker.demo.error.CustomException;
@@ -78,7 +76,7 @@ public class ExpendController {
         return new ResponseEntity<>(expendService.getAmountByWeek(token),HttpStatusCode.valueOf(SuccessCode.SUCCESS_RESPOND_EXPEND.getStatus()));
     }
 
-    @Operation(summary = "지출 내역 그래프를 위한 API입니다. [담당자]:김도연")
+    @Operation(summary = "지출 내역 상세보기를 위한 API입니다. [담당자]:김도연")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공", content = {@Content(mediaType = "application/json",
                     schema = @Schema(implementation = ReturnCodeDTO.class))}),
@@ -143,6 +141,40 @@ public class ExpendController {
                     .message("수정 성공")
                     .build();
             return new ResponseEntity<>(returnCodeDTO, HttpStatus.OK);
+        }catch (CustomException ex){
+            return new ResponseEntity<>(new ReturnCodeDTO(ex.getErrorCode().getStatus(),ex.getMessage()),HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Operation(summary = "지출 내역 리스트(지출 내역 페이지)를 위한 API입니다. [담당자]:김도연")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = {@Content(mediaType = "application/json",
+                    array = @ArraySchema (schema =@Schema (implementation = ExpendCategoryAmountDTO.class)))}),
+            @ApiResponse(responseCode = "409",description = "유저 불일치"),
+            @ApiResponse(responseCode = "500", description = "서버 오류", content = {@Content(mediaType = "string")})
+    })
+    @GetMapping("/expend/expendList")
+    public ResponseEntity<?> listWithExpendPage(@RequestHeader("Authorization") String token){
+        try {
+            // 성공 메시지 반환
+            return new ResponseEntity<>( expendService.getAmountByMonth(token),HttpStatusCode.valueOf(SuccessCode.SUCCESS_RESPOND_EXPEND.getStatus()));
+        }catch (CustomException ex){
+            return new ResponseEntity<>(new ReturnCodeDTO(ex.getErrorCode().getStatus(),ex.getMessage()),HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Operation(summary = "지출 일별 총 지출액 리스트(지출 내역 페이지)를 위한 API입니다. [담당자]:김도연")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공", content = {@Content(mediaType = "application/json",
+                    array = @ArraySchema (schema =@Schema (implementation = ExpendDayResponseDTO.class)))}),
+            @ApiResponse(responseCode = "409",description = "유저 불일치"),
+            @ApiResponse(responseCode = "500", description = "서버 오류", content = {@Content(mediaType = "string")})
+    })
+    @GetMapping("/expend/expendList/day")
+    public ResponseEntity<?> listByDayWithExpendPage(@RequestHeader("Authorization") String token){
+        try {
+            // 성공 메시지 반환
+            return new ResponseEntity<>( expendService.getAmountByDate(token),HttpStatusCode.valueOf(SuccessCode.SUCCESS_RESPOND_EXPEND.getStatus()));
         }catch (CustomException ex){
             return new ResponseEntity<>(new ReturnCodeDTO(ex.getErrorCode().getStatus(),ex.getMessage()),HttpStatus.BAD_REQUEST);
         }

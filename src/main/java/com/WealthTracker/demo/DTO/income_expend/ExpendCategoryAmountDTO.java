@@ -16,10 +16,13 @@ public class ExpendCategoryAmountDTO {
     private String categoryName;
 
     //지츌 총합
-    private  int amount;
+    private  Long amount;
 
     //지출 퍼센트
     private int percent;
+
+    //up or down
+    private String upOrDown;
 
     //지출 리스트
     private List<ExpendResponseDTO> expendList;
