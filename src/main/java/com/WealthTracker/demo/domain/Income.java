@@ -17,6 +17,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@Table(name = "income")
 public class Income {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long incomeId;

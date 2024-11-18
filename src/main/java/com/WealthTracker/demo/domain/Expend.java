@@ -18,6 +18,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@Table(name = "expend")
 public class Expend {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true)
