@@ -36,9 +36,5 @@ out/
 
 ### VS Code ###
 .vscode/
-<<<<<<< HEAD
-application.properties
-=======
 
-/src/main/resources/application.properties
->>>>>>> 0535f149c5774d6d5abf3e433dc1088c9e1731f0
+application-secret.properties
