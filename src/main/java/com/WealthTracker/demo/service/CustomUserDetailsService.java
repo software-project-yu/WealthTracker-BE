@@ -17,7 +17,7 @@ public class CustomUserDetailsService {
     private final UserRepository userRepository;
 
     public UserDetails loadUserByUsername(Long userId) throws UsernameNotFoundException {
-        // email을 기반으로 사용자 정보 로드
+        // userId를 기반으로 사용자 정보 로드
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
 
