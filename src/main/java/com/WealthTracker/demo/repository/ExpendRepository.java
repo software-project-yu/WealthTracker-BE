@@ -8,8 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.core.parameters.P;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -58,6 +56,12 @@ public interface ExpendRepository extends JpaRepository<Expend, Long> {
 
     //지출내역 삭제
     void deleteById(Long expendId);
+
+
+    //월별 지출내역 리스트 반환 - 날짜는 상관없음
+    @Query("select e from Expend e "+
+            "where e.user = :user and MONTH(e.expendDate) = :month")
+    List<Expend>findAllByExpendDate(@Param("user")User user, @Param("month")int month);
 
     //카테고리에 따른 지출 합계
     @Query("SELECT COALESCE(SUM(e.cost), 0) FROM Expend e " +
