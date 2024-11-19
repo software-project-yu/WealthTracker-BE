@@ -1,29 +1,21 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Set the path where your JAR files are located
-ROOT_PATH="/home/ubuntu/libs"  # Adjust to the correct directory
-JAR="$ROOT_PATH/application.jar"
+PROJECT_ROOT="/home/ubuntu/app"
+JAR_FILE="$PROJECT_ROOT/spring-webapp.jar"
 
-APP_LOG="$ROOT_PATH/application.log"
-ERROR_LOG="$ROOT_PATH/error.log"
-START_LOG="$ROOT_PATH/start.log"
+APP_LOG="$PROJECT_ROOT/application.log"
+ERROR_LOG="$PROJECT_ROOT/error.log"
+DEPLOY_LOG="$PROJECT_ROOT/deploy.log"
 
-NOW=$(date +%c)
+TIME_NOW=$(date +%c)
 
-# Log the JAR copy action
-echo "[$NOW] $JAR 복사" >> $START_LOG
+# build 파일 복사
+echo "$TIME_NOW > $JAR_FILE 파일 복사" >> $DEPLOY_LOG
+cp $PROJECT_ROOT/build/libs/*.jar $JAR_FILE
 
-# Adjusted copy path to the build directory, assuming your JAR is in /libs/
-cp $ROOT_PATH/spring-github-action-1.0.0.jar $JAR
+# jar 파일 실행
+echo "$TIME_NOW > $JAR_FILE 파일 실행" >> $DEPLOY_LOG
+nohup java -jar $JAR_FILE > $APP_LOG 2> $ERROR_LOG &
 
-# Log the JAR execution
-echo "[$NOW] > $JAR 실행" >> $START_LOG
-
-# Run the application in the background
-nohup java -jar $JAR > $APP_LOG 2> $ERROR_LOG &
-
-# Get the service PID
-SERVICE_PID=$(pgrep -f $JAR)
-
-# Log the service PID
-echo "[$NOW] > 서비스 PID: $SERVICE_PID" >> $START_LOG
+CURRENT_PID=$(pgrep -f $JAR_FILE)
+echo "$TIME_NOW > 실행된 프로세스 아이디 $CURRENT_PID 입니다." >> $DEPLOY_LOG
