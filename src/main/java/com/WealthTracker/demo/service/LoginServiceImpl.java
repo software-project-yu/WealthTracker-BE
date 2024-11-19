@@ -16,12 +16,16 @@ public class LoginServiceImpl implements LoginService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder; //** SpringBean에 등록한 passwordEncoder를 주입해주기!
-    private final JwtUtil jwtUtil;
 
     @Override
     public User login(LoginRequestDTO loginRequestDTO) {
         User user = userRepository.findByEmail(loginRequestDTO.getEmail())
                 .orElseThrow(() -> new RuntimeException("해당 유저가 존재하지 않습니다."));
+
+        // enabled 값이 false인 경우 로그인 불가
+        if (!user.isEnabled()) {
+            throw new RuntimeException("이메일 인증이 완료되지 않았습니다. 인증 후 다시 시도해주세요.");
+        }
 
         if (!passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword())) {
             throw new RuntimeException("비밀번호가 일치하지 않습니다.");

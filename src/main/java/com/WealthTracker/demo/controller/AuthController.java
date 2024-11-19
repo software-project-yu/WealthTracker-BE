@@ -51,6 +51,8 @@ public class AuthController { //** Signup 및 EmailAuth 담당 Controller **//
 
         // 코드 만료 여부 확인
         if (verificationCode.getExpiryDate().isBefore(LocalDateTime.now())) {
+            // 인증 코드가 만료되었으면 삭제
+            verificationCodeRepository.delete(verificationCode);
             return ResponseEntity.badRequest().body("인증 코드가 만료되었습니다.");
         }
 
@@ -62,6 +64,38 @@ public class AuthController { //** Signup 및 EmailAuth 담당 Controller **//
         verificationCodeRepository.delete(verificationCode);
 
         return ResponseEntity.ok("회원가입이 완료되었습니다.");
+    }
+
+    //** 인증 코드 재생성 요청 (이메일로 새로운 코드 발송)
+    @PostMapping("/resend-code")
+    public ResponseEntity<?> resendVerificationCode(@RequestBody VerificationCodeRequestDTO requestDTO) {
+        // 기존 인증 코드 삭제
+        verificationCodeRepository.deleteByEmail(requestDTO.getEmail());
+
+        // User 조회
+        Optional<User> userOpt = signupService.getUserByEmail(requestDTO.getEmail());
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("해당 이메일로 등록된 사용자를 찾을 수 없습니다.");
+        }
+        User user = userOpt.get();
+
+        // 새로운 인증 코드 생성
+        String newCode = verificationCodeUtil.generateVerificationCode();
+        LocalDateTime expiryDate = LocalDateTime.now().plusMinutes(5);
+
+        // 새로운 인증 코드 저장
+        VerificationCode newVerificationCode = VerificationCode.builder()
+                .email(requestDTO.getEmail())
+                .code(newCode)
+                .expiryDate(expiryDate)
+                .user(user)
+                .build();
+        verificationCodeRepository.save(newVerificationCode);
+
+        // 이메일 발송
+        emailService.sendEmailVerification(requestDTO.getEmail(), newCode);
+
+        return ResponseEntity.ok("새로운 인증 코드가 이메일로 발송되었습니다.");
     }
 
     //** 비밀번호 재설정 요청
@@ -83,8 +117,12 @@ public class AuthController { //** Signup 및 EmailAuth 담당 Controller **//
         if (!result.equals("valid")) {
             return ResponseEntity.badRequest().body("비밀번호 재설정 코드가 유효하지 않습니다.");
         }
-
-        signupService.resetPassword(code, confirmDTO.getNewPassword());
-        return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+        try {
+            // 비밀번호 재설정
+            signupService.resetPassword(code, confirmDTO.getNewPassword());
+            return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
