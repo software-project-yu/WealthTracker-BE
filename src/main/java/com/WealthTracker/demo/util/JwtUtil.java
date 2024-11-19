@@ -53,29 +53,32 @@ public class JwtUtil {
 
     //** 토큰에서 userId 추출
     public Long getUserId(String token) {
-        return Long.valueOf(parseClaims(token).getSubject());
+        String accessToken = getAccessToken(token);
+        return Long.valueOf(parseClaims(accessToken).getSubject());
     }
 
     // JWT 검증
     public boolean validationToken(String token) {
+        String accessToken = getAccessToken(token);
         try {
-            if (token.trim().isEmpty()) {
-                throw new JwtException("JWT is empty");
+            if (accessToken.trim().isEmpty()) {
+                throw new JwtException("JWT가 비어 있습니다.");
             }
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken);
             return true;
         } catch (JwtException e) {
-            log.info("Invalid JWT Token", e);
+            log.info("유효하지 않은 JWT 토큰입니다.", e);
             return false;
         }
     }
 
     public Claims parseClaims(String token) {
+        String accessToken = getAccessToken(token);
         try {
-            if (token.trim().isEmpty()) {
-                throw new JwtException("JWT is empty");
+            if (accessToken.trim().isEmpty()) {
+                throw new JwtException("JWT가 비어 있습니다.");
             }
-            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();
         } catch (ExpiredJwtException e) {
             return e.getClaims();
         }
