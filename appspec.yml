@@ -2,12 +2,12 @@ version: 0.0
 os: linux
 
 files:
-  - source:  /
-    destination: /home/ubuntu/spring-github-action
+  - source:  ./
+    destination: /home/ubuntu/libs
     overwrite: yes
 
 permissions:
-  - object: /
+  - object: /home/ubuntu/libs
     owner: ubuntu
     group: ubuntu
 
