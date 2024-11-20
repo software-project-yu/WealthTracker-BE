@@ -9,6 +9,8 @@ public enum ErrorCode {
     //400 BAD_REQUEST 잘못된 요청
     INVALID_PARAMETER(400, "올바른 값을 확인해주세요."),
     INVALID_CATEGORY(400,"잘못된 카테고리명입니다."),
+    TARGET_ALREADY_EXISTS(400, "이미 존재하는 목표입니다."),
+    TARGET_NOT_FOUND(400, "해당 목표가 존재하지 않습니다."),
 
     //404 NOT_FOUND 잘못된 리소스 접근
     USER_NOT_FOUND(404, "존재하지 않는 회원 ID 입니다."),
