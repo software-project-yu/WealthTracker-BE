@@ -9,6 +9,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor
+
 public class User {
 
     @Id
@@ -29,6 +30,10 @@ public class User {
 
     private boolean enabled = false; // 이메일 인증 여부
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "feedbackId")
+    private FeedBack feedBack;
+
 
 
     // 계정 활성화 메서드
@@ -39,5 +44,10 @@ public class User {
     // 비밀번호 변경 메서드
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    //유저의 피드백 저장 설정 메서드
+    public void setFeedBack(FeedBack feedBack){
+        this.feedBack=feedBack;
     }
 }

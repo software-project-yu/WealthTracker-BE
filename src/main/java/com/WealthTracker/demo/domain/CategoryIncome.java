@@ -12,14 +12,15 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Builder
+@Table(name = "category_income")
 public class CategoryIncome {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long categoryId;
 
+    @OneToMany(mappedBy = "categoryIncome",cascade = CascadeType.ALL)
+    private List<Income> incomeList=new ArrayList<>();
+
     @Enumerated(EnumType.STRING)
     private Category_Income categoryName;
-
-    @OneToMany(mappedBy = "categoryIncome")
-    private List<Income> incomeList=new ArrayList<>();
 
 }
