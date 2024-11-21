@@ -1,8 +1,10 @@
 package com.WealthTracker.demo.service;
 
 import com.WealthTracker.demo.DTO.SignupRequestDTO;
+import com.WealthTracker.demo.constants.ErrorCode;
 import com.WealthTracker.demo.domain.User;
 import com.WealthTracker.demo.domain.VerificationCode;
+import com.WealthTracker.demo.error.CustomException;
 import com.WealthTracker.demo.repository.UserRepository;
 import com.WealthTracker.demo.repository.VerificationCodeRepository;
 import com.WealthTracker.demo.util.VerificationCodeUtil;
@@ -32,7 +34,7 @@ public class SignupServiceImpl implements SignupService {
         if (existingUserOpt.isPresent()) {
             User existingUser = existingUserOpt.get();
             if (existingUser.isEnabled()) {
-                throw new IllegalArgumentException("이미 등록된 이메일입니다.");
+                throw new CustomException(ErrorCode.EMAIL_ALREADY_REGISTERED);
             }
         }
 
@@ -42,7 +44,7 @@ public class SignupServiceImpl implements SignupService {
                     if (verificationCode.getExpiryDate().isBefore(LocalDateTime.now())) {
                         verificationCodeRepository.delete(verificationCode);
                     } else {
-                        throw new IllegalArgumentException("이미 인증 코드가 발송되었습니다. 만료 시간을 기다려주세요.");
+                        throw new CustomException(ErrorCode.EMAIL_ALREADY_SENT);
                     }
                 });
 
@@ -109,7 +111,7 @@ public class SignupServiceImpl implements SignupService {
     public void createPasswordResetCode(String email) {
         // User 찾기
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("해당 이메일을 가진 사용자가 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 기존 인증 코드 삭제 또는 갱신
         Optional<VerificationCode> existingCode = verificationCodeRepository.findByEmail(user.getEmail());
@@ -152,12 +154,12 @@ public class SignupServiceImpl implements SignupService {
     public void resetPassword(String code, String newPassword) {
         Optional<VerificationCode> optionalCode = verificationCodeRepository.findByCode(code);
         if (!optionalCode.isPresent()) {
-            throw new IllegalArgumentException("유효하지 않은 코드");
+            throw new CustomException(ErrorCode.INVALID_VERIFICATION_CODE);
         }
 
         VerificationCode verificationCode = optionalCode.get();
         if (verificationCode.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("코드가 만료되었습니다.");
+            throw new CustomException(ErrorCode.EXPIRED_VERIFICATION_CODE);
         }
 
         User user = verificationCode.getUser();

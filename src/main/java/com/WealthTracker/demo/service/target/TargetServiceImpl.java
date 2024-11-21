@@ -3,9 +3,11 @@ package com.WealthTracker.demo.service.target;
 import com.WealthTracker.demo.DTO.dailysaving.DailySavingRequestDTO;
 import com.WealthTracker.demo.DTO.target.TargetRequestDTO;
 import com.WealthTracker.demo.DTO.target.TargetResponseDTO;
+import com.WealthTracker.demo.constants.ErrorCode;
 import com.WealthTracker.demo.domain.DailySaving;
 import com.WealthTracker.demo.domain.Target;
 import com.WealthTracker.demo.domain.User;
+import com.WealthTracker.demo.error.CustomException;
 import com.WealthTracker.demo.repository.DailySavingRepository;
 import com.WealthTracker.demo.repository.TargetRepository;
 import com.WealthTracker.demo.repository.UserRepository;
@@ -31,7 +33,7 @@ public class TargetServiceImpl implements TargetService {
     @Transactional
     public TargetResponseDTO createTarget(TargetRequestDTO requestDTO, String token) { //* 새로운 목표 생성하는 서비스 로직
         User user = userRepository.findByUserId(getUserIdFromToken(token))
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         // 정상적으로 진행되는 서비스 로직 구현부
         Target target = Target.builder()
                 .user(user)
@@ -46,8 +48,7 @@ public class TargetServiceImpl implements TargetService {
         return new TargetResponseDTO(
                 savedTarget.getTargetId(),
                 savedTarget.getTargetAmount(),
-                savedTarget.getSavedAmount(),
-                savedTarget.getAchievementRate()
+                savedTarget.getSavedAmount()
         ); // DTO형태로 반환
     }
 
@@ -57,7 +58,7 @@ public class TargetServiceImpl implements TargetService {
         Long userId = getUserIdFromToken(token);
 
         Target target = targetRepository.findByTargetIdAndUserUserId(targetId, userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저에게는 존재하지 않는 목표입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.TARGET_NOT_FOUND));
 
         target.updateTarget(requestDTO.getTargetAmount(), requestDTO.getStartDate(), requestDTO.getEndDate());
 
@@ -66,8 +67,7 @@ public class TargetServiceImpl implements TargetService {
         return new TargetResponseDTO(
                 updatedTarget.getTargetId(),
                 updatedTarget.getTargetAmount(),
-                updatedTarget.getSavedAmount(),
-                updatedTarget.getAchievementRate()
+                updatedTarget.getSavedAmount()
         );
     }
 
@@ -77,7 +77,7 @@ public class TargetServiceImpl implements TargetService {
         Long userId = getUserIdFromToken(token);
 
         Target target = targetRepository.findByTargetIdAndUserUserId(targetId, userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저에게는 존재하지 않는 목표입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.TARGET_NOT_FOUND));
 
         targetRepository.delete(target);
     }
@@ -88,7 +88,7 @@ public class TargetServiceImpl implements TargetService {
         Long userId = getUserIdFromToken(token);
 
         Target target = targetRepository.findByTargetIdAndUserUserId(targetId, userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저에게는 존재하지 않는 목표입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.TARGET_NOT_FOUND));
         // 날짜별 저축에 날짜와 목표에 대한 내용 저장
         DailySaving dailySaving = DailySaving.builder()
                 .target(target)
@@ -103,16 +103,5 @@ public class TargetServiceImpl implements TargetService {
         dailySavingRepository.save(dailySaving); // dailySaving 저장
         targetRepository.save(target); // savedAmount 업데이트를 반영하기 위해 저장
 
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public double getAchievementRate(Long targetId, String token) { //* 저축 목표 달성률 반환하는 서비스 로직
-        Long userId = getUserIdFromToken(token);
-
-        Target target = targetRepository.findByTargetIdAndUserUserId(targetId, userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저에게는 존재하지 않는 목표입니다."));
-
-        return target.getAchievementRate();
     }
 }
