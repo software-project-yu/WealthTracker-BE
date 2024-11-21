@@ -68,12 +68,22 @@ public class CategoryTargetServiceImpl implements CategoryTargetService {
     public CategoryTargetResponseDTO getTarget(String token, Category_Expend category) {
         Long userId = jwtUtil.getUserId(token);
         User user = getUserById(userId);
-
         CategoryTarget categoryTarget = categoryTargetRepository.findByUserAndCategory(user, category)
-                .orElseThrow(() -> new CustomException(ErrorCode.TARGET_NOT_FOUND));
+                .orElse(null); // 목표가 없으면 null 반환
 
-        Long currentExpenditure = expendRepository.thisMonthAmountByCategory(user, category);
+        Long currentExpenditure = expendRepository.thisMonthAmountByCategory(user, category); // 현재 카테고리의 총 지출 금액
 
+        if (categoryTarget == null) {
+            // 목표가 없을 경우 default를 0원으로 설정해주기
+            return new CategoryTargetResponseDTO(
+                    category,
+                    0L, // 목표 금액 기본값
+                    currentExpenditure,
+                    "아직 목표를 설정하지 않았습니다. 현재 지출은 " + currentExpenditure + "원입니다."
+            );
+        }
+
+        // 목표가 있을 경우 기존 로직 사용
         return new CategoryTargetResponseDTO(
                 categoryTarget.getCategory(),
                 categoryTarget.getTargetAmount(),
