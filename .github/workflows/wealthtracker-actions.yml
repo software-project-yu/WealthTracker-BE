@@ -1,0 +1,61 @@
+name: wealthtracker-actions
+run-name: Running
+
+on:
+  pull_request:
+    types: [closed] # PR이 병합(closed)될 때 실행
+    branches:
+      - master       # 대상 브랜치가 master일 때 실행
+env:
+  PROJECT_NAME: wealth tracker
+  AWS_REGION: ap-northeast-1
+  AWS_S3_BUCKET: wealthtrackerbucket
+  AWS_CODE_DEPLOY_APPLICATION: cicd
+  AWS_CODE_DEPLOY_GROUP: cicd-group
+
+jobs:
+  deploy:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: master 브랜치 이동
+        uses: actions/checkout@v3
+
+      - name: make application-secret.properties
+        run: |
+          cd ./src/main/resources
+          touch ./application-secret.properties
+          echo "${{ secrets.PROPERTIES_SECRET }}" > ./application-secret.properties
+        shell: bash
+
+      - name: JDK 21 설치
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+
+      - name: gadlew 실행 권한 부여
+        run: chmod +x ./gradlew
+
+      - name: 프로젝트 빌드
+        run: ./gradlew clean build -x test
+
+      - name: AWS Credential 설정
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.CICD_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.CICD_SECRET_KEY }}
+
+      - name: S3 업로드
+        run: aws s3 cp --region ap-northeast-1 ./$GITHUB_SHA.zip s3://$AWS_S3_BUCKET/$PROJECT_NAME/$GITHUB_SHA.zip
+
+      - name: EC2 업로드
+        run: |
+          aws deploy create-deployment \
+            --application-name $AWS_CODE_DEPLOY_APPLICATION \
+            --deployment-config-name CodeDeployDefault.AllAtOnce \
+            --deployment-group-name $AWS_CODE_DEPLOY_GROUP \
+            --s3-location bucket=$BUCKET_NAME,bundleType=zip,key=$PROJECT_NAME/$GITHUB_SHA.zip
+

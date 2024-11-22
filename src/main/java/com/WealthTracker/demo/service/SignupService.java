@@ -13,7 +13,7 @@ public interface SignupService {
 
     void enableUser(User user); // 사용자 활성화 메서드
 
-    void createPasswordResetCode(User user, String code);  // 비밀번호 재설정 코드 생성
+    void createPasswordResetCode(String email);  // 비밀번호 재설정 코드 생성
 
     String validatePasswordResetCode(String code);  // 비밀번호 재설정 코드 검증
 

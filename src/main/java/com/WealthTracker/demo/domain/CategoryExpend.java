@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
+@Table(name = "category_expend")
 public class CategoryExpend {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long categoryId;

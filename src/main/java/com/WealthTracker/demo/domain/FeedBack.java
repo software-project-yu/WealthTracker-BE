@@ -8,7 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Feedback")
+@Table(name = "feedback")
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

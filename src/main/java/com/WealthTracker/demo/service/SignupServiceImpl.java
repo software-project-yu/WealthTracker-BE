@@ -69,13 +69,23 @@ public class SignupServiceImpl implements SignupService {
     // 비밀번호 재설정 코드 생성 및 저장
     @Override
     @Transactional
-    public void createPasswordResetCode(User user, String code) {
-        VerificationCode passwordResetCode = VerificationCode.builder()
+    public void createPasswordResetCode(String email) {
+        // User 찾기
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당 이메일을 가진 사용자가 없습니다."));
+
+        // 랜덤 코드 생성
+        String code = verificationCodeUtil.generateVerificationCode();
+
+        // VerificationCode 생성
+        VerificationCode verificationCode = VerificationCode.builder()
                 .code(code)
                 .user(user)
-                .expiryDate(LocalDateTime.now().plusMinutes(5))  // 5분 유효
+                .email(user.getEmail())
+                .expiryDate(LocalDateTime.now().plusMinutes(5))
                 .build();
-        verificationCodeRepository.save(passwordResetCode);
+        verificationCodeRepository.save(verificationCode);
+        emailService.sendPasswordReset(user.getEmail(), code); // 코드 발송
     }
 
     @Override
@@ -108,8 +118,17 @@ public class SignupServiceImpl implements SignupService {
         }
 
         User user = verificationCode.getUser();
+
+        // 기존 비밀번호와 새 비밀번호 비교
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new IllegalArgumentException("새 비밀번호는 기존 비밀번호와 같을 수 없습니다.");
+        }
+
+        // 비밀번호 업데이트
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+
+        // 사용된 인증 코드 삭제
         verificationCodeRepository.delete(verificationCode);
     }
 
