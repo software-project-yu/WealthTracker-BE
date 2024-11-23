@@ -7,6 +7,7 @@ import lombok.Getter;
 @Getter
 public enum SuccessCode {
     //200
+    SUCCESS_PAYMENT(200, "결제 내역을 성공적으로 기록했습니다."),
     SUCCESS_INCOME(200, "수입을 성공적으로 기록했습니다."),
     SUCCESS_EXPEND(200, "지출을 성공적으로 기록했습니다."),
     SUCCESS_RESPOND_INCOME(200, "수입을 성공적으로 불러왔습니다."),
