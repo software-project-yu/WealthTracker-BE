@@ -14,9 +14,9 @@ public interface SignupService {
 
     void cleanupExpiredVerificationCodes(); // 만료된 인증코드 삭제
 
-    VerificationCode createVerificationCode(String email, User user); // 새로운 인증코드 생성
+    String createVerificationCodeAndSendEmail(String email); // 새로운 인증코드 생성
 
-    void enableUser(User user); // 사용자 활성화 메서드
+    void verifyEmail(String email, String code); // 이메일 인증코드 검증
 
     void createPasswordResetCode(String email);  // 비밀번호 재설정 코드 생성
 
