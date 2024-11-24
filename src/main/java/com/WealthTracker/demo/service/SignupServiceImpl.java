@@ -1,8 +1,10 @@
 package com.WealthTracker.demo.service;
 
 import com.WealthTracker.demo.DTO.SignupRequestDTO;
+import com.WealthTracker.demo.constants.ErrorCode;
 import com.WealthTracker.demo.domain.User;
 import com.WealthTracker.demo.domain.VerificationCode;
+import com.WealthTracker.demo.error.CustomException;
 import com.WealthTracker.demo.repository.UserRepository;
 import com.WealthTracker.demo.repository.VerificationCodeRepository;
 import com.WealthTracker.demo.util.VerificationCodeUtil;
@@ -27,12 +29,26 @@ public class SignupServiceImpl implements SignupService {
     @Override
     @Transactional
     public String signupUser(SignupRequestDTO signupRequest) {
-        // 1. 이메일 중복 체크
-        if (userRepository.existsByEmail(signupRequest.getEmail())) {
-            throw new IllegalArgumentException("이미 등록된 이메일입니다.");
+        // 1. 이메일 중복 체크 및 유효한 유저 존재 여부 확인
+        Optional<User> existingUserOpt = userRepository.findByEmail(signupRequest.getEmail());
+        if (existingUserOpt.isPresent()) {
+            User existingUser = existingUserOpt.get();
+            if (existingUser.isEnabled()) {
+                throw new CustomException(ErrorCode.EMAIL_ALREADY_REGISTERED);
+            }
         }
 
-        // 2. 사용자 정보 생성 및 비밀번호 암호화
+        // 2. 기존 인증 코드 삭제 (유효하지 않은 인증 코드 제거)
+        verificationCodeRepository.findByEmail(signupRequest.getEmail())
+                .ifPresent(verificationCode -> {
+                    if (verificationCode.getExpiryDate().isBefore(LocalDateTime.now())) {
+                        verificationCodeRepository.delete(verificationCode);
+                    } else {
+                        throw new CustomException(ErrorCode.EMAIL_ALREADY_SENT);
+                    }
+                });
+
+        // 3. 사용자 정보 생성 및 비밀번호 암호화
         User user = User.builder()
                 .email(signupRequest.getEmail())
                 .password(passwordEncoder.encode(signupRequest.getPassword())) // 비밀번호 암호화
@@ -40,8 +56,7 @@ public class SignupServiceImpl implements SignupService {
                 .nickName(signupRequest.getNickName())
                 .enabled(false) // 인증 전 상태
                 .build();
-
-        // 3. 사용자 저장
+      
         User savedUser = userRepository.save(user);
 
         // 4. 인증 코드 생성 및 저장
@@ -72,7 +87,7 @@ public class SignupServiceImpl implements SignupService {
     public void createPasswordResetCode(String email) {
         // User 찾기
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("해당 이메일을 가진 사용자가 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 랜덤 코드 생성
         String code = verificationCodeUtil.generateVerificationCode();
@@ -109,12 +124,12 @@ public class SignupServiceImpl implements SignupService {
     public void resetPassword(String code, String newPassword) {
         Optional<VerificationCode> optionalCode = verificationCodeRepository.findByCode(code);
         if (!optionalCode.isPresent()) {
-            throw new IllegalArgumentException("유효하지 않은 코드");
+            throw new CustomException(ErrorCode.INVALID_VERIFICATION_CODE);
         }
 
         VerificationCode verificationCode = optionalCode.get();
         if (verificationCode.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("코드가 만료되었습니다.");
+            throw new CustomException(ErrorCode.EXPIRED_VERIFICATION_CODE);
         }
 
         User user = verificationCode.getUser();

@@ -3,9 +3,11 @@ package com.WealthTracker.demo.service.target;
 import com.WealthTracker.demo.DTO.dailysaving.DailySavingRequestDTO;
 import com.WealthTracker.demo.DTO.target.TargetRequestDTO;
 import com.WealthTracker.demo.DTO.target.TargetResponseDTO;
+import com.WealthTracker.demo.constants.ErrorCode;
 import com.WealthTracker.demo.domain.DailySaving;
 import com.WealthTracker.demo.domain.Target;
 import com.WealthTracker.demo.domain.User;
+import com.WealthTracker.demo.error.CustomException;
 import com.WealthTracker.demo.repository.DailySavingRepository;
 import com.WealthTracker.demo.repository.TargetRepository;
 import com.WealthTracker.demo.repository.UserRepository;
@@ -31,7 +33,7 @@ public class TargetServiceImpl implements TargetService {
     @Transactional
     public TargetResponseDTO createTarget(TargetRequestDTO requestDTO, String token) { //* 새로운 목표 생성하는 서비스 로직
         User user = userRepository.findByUserId(getUserIdFromToken(token))
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         // 정상적으로 진행되는 서비스 로직 구현부
         Target target = Target.builder()
                 .user(user)
@@ -42,7 +44,7 @@ public class TargetServiceImpl implements TargetService {
                 .build();
         // 목표에 대한 내용들을 builder로 저장한 후
         Target savedTarget = targetRepository.save(target); // 목표를 저장
-
+      
         return TargetResponseDTO.builder()
                 .targetId(savedTarget.getTargetId())
                 .targetAmount(savedTarget.getTargetAmount())
@@ -52,21 +54,15 @@ public class TargetServiceImpl implements TargetService {
 
     @Override
     @Transactional
-    public TargetResponseDTO updateTarget(Long targetId, TargetRequestDTO requestDTO, String token) { //* 목표 수정 로직
+    public void updateTarget(Long targetId, TargetRequestDTO requestDTO, String token) { //* 목표 수정 로직
         Long userId = getUserIdFromToken(token);
 
         Target target = targetRepository.findByTargetIdAndUserUserId(targetId, userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저에게는 존재하지 않는 목표입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.TARGET_NOT_FOUND));
 
         target.updateTarget(requestDTO.getTargetAmount(), requestDTO.getStartDate(), requestDTO.getEndDate());
 
-        Target updatedTarget = targetRepository.save(target);
-
-        return TargetResponseDTO.builder()
-                .targetId(updatedTarget.getTargetId())
-                .targetAmount(updatedTarget.getTargetAmount())
-                .savedAmount(updatedTarget.getSavedAmount())
-                .build();
+        targetRepository.save(target);
     }
 
     @Override
@@ -75,7 +71,7 @@ public class TargetServiceImpl implements TargetService {
         Long userId = getUserIdFromToken(token);
 
         Target target = targetRepository.findByTargetIdAndUserUserId(targetId, userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저에게는 존재하지 않는 목표입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.TARGET_NOT_FOUND));
 
         targetRepository.delete(target);
     }
@@ -86,7 +82,7 @@ public class TargetServiceImpl implements TargetService {
         Long userId = getUserIdFromToken(token);
 
         Target target = targetRepository.findByTargetIdAndUserUserId(targetId, userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저에게는 존재하지 않는 목표입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.TARGET_NOT_FOUND));
         // 날짜별 저축에 날짜와 목표에 대한 내용 저장
         DailySaving dailySaving = DailySaving.builder()
                 .target(target)
