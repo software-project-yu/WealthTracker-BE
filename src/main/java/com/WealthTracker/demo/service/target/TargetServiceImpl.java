@@ -54,7 +54,7 @@ public class TargetServiceImpl implements TargetService {
 
     @Override
     @Transactional
-    public TargetResponseDTO updateTarget(Long targetId, TargetRequestDTO requestDTO, String token) { //* 목표 수정 로직
+    public void updateTarget(Long targetId, TargetRequestDTO requestDTO, String token) { //* 목표 수정 로직
         Long userId = getUserIdFromToken(token);
 
         Target target = targetRepository.findByTargetIdAndUserUserId(targetId, userId)
@@ -62,13 +62,7 @@ public class TargetServiceImpl implements TargetService {
 
         target.updateTarget(requestDTO.getTargetAmount(), requestDTO.getStartDate(), requestDTO.getEndDate());
 
-        Target updatedTarget = targetRepository.save(target);
-
-        return new TargetResponseDTO(
-                updatedTarget.getTargetId(),
-                updatedTarget.getTargetAmount(),
-                updatedTarget.getSavedAmount()
-        );
+        targetRepository.save(target);
     }
 
     @Override

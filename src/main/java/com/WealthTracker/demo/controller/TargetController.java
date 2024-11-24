@@ -27,8 +27,8 @@ public class TargetController {
     public ResponseEntity<TargetResponseDTO> updateTarget(@PathVariable Long targetId,
                                                           @RequestBody TargetRequestDTO requestDTO,
                                                           @RequestHeader("Authorization") String token) {
-        TargetResponseDTO responseDTO = targetService.updateTarget(targetId, requestDTO, token);
-        return ResponseEntity.ok(responseDTO);
+        targetService.updateTarget(targetId, requestDTO, token);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/delete/{targetId}") //* 목표 삭제하는 API
