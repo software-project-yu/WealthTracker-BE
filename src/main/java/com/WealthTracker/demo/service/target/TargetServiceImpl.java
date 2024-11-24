@@ -44,12 +44,12 @@ public class TargetServiceImpl implements TargetService {
                 .build();
         // 목표에 대한 내용들을 builder로 저장한 후
         Target savedTarget = targetRepository.save(target); // 목표를 저장
-
-        return new TargetResponseDTO(
-                savedTarget.getTargetId(),
-                savedTarget.getTargetAmount(),
-                savedTarget.getSavedAmount()
-        ); // DTO형태로 반환
+      
+        return TargetResponseDTO.builder()
+                .targetId(savedTarget.getTargetId())
+                .targetAmount(savedTarget.getTargetAmount())
+                .savedAmount(savedTarget.getSavedAmount())
+                .build();
     }
 
     @Override
@@ -98,4 +98,5 @@ public class TargetServiceImpl implements TargetService {
         targetRepository.save(target); // savedAmount 업데이트를 반영하기 위해 저장
 
     }
+
 }

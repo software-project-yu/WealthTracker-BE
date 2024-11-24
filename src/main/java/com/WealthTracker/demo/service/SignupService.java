@@ -2,7 +2,6 @@ package com.WealthTracker.demo.service;
 
 import com.WealthTracker.demo.DTO.SignupRequestDTO;
 import com.WealthTracker.demo.domain.User;
-import com.WealthTracker.demo.domain.VerificationCode;
 
 import java.util.Optional;
 
@@ -11,10 +10,6 @@ public interface SignupService {
     String signupUser(SignupRequestDTO signupRequestDTO); // 유저 회원가입 메서드
 
     Optional<User> getUserByEmail(String email);  // 이메일로 사용자 조회
-
-    void cleanupExpiredVerificationCodes(); // 만료된 인증코드 삭제
-
-    VerificationCode createVerificationCode(String email, User user); // 새로운 인증코드 생성
 
     void enableUser(User user); // 사용자 활성화 메서드
 

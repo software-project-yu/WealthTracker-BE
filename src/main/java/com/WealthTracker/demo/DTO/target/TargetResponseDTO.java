@@ -16,5 +16,4 @@ public class TargetResponseDTO {
     private int targetAmount;
 
     private int savedAmount;
-
 }

@@ -56,11 +56,10 @@ public class SignupServiceImpl implements SignupService {
                 .nickName(signupRequest.getNickName())
                 .enabled(false) // 인증 전 상태
                 .build();
-
-        // 4. 사용자 저장
+      
         User savedUser = userRepository.save(user);
 
-        // 5. 인증 코드 생성 및 저장
+        // 4. 인증 코드 생성 및 저장
         String code = verificationCodeUtil.generateVerificationCode();
         VerificationCode verificationCode = VerificationCode.builder()
                 .code(code)
@@ -70,7 +69,7 @@ public class SignupServiceImpl implements SignupService {
                 .build();
         verificationCodeRepository.save(verificationCode);
 
-        // 6. 이메일로 인증 코드 발송
+        // 5. 이메일로 인증 코드 발송
         emailService.sendEmailVerification(savedUser.getEmail(), code);
 
         return "이메일을 확인하여 인증을 완료해주세요.";
@@ -82,29 +81,6 @@ public class SignupServiceImpl implements SignupService {
         return userRepository.findByEmail(email);
     }
 
-    @Override
-    @Transactional
-    public void cleanupExpiredVerificationCodes() {
-        verificationCodeRepository.deleteByExpiryDateBefore(LocalDateTime.now());
-    }
-
-    @Override
-    @Transactional
-    public VerificationCode createVerificationCode(String email, User user) {
-        String code = verificationCodeUtil.generateVerificationCode();
-
-        LocalDateTime expiryDate = LocalDateTime.now().plusMinutes(5);
-
-        VerificationCode verificationCode = VerificationCode.builder()
-                .code(code)
-                .email(email)
-                .expiryDate(expiryDate)
-                .user(user)
-                .build();
-
-        return verificationCodeRepository.save(verificationCode);
-    }
-
     // 비밀번호 재설정 코드 생성 및 저장
     @Override
     @Transactional
@@ -112,10 +88,6 @@ public class SignupServiceImpl implements SignupService {
         // User 찾기
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        // 기존 인증 코드 삭제 또는 갱신
-        Optional<VerificationCode> existingCode = verificationCodeRepository.findByEmail(user.getEmail());
-        existingCode.ifPresent(verificationCodeRepository::delete);
 
         // 랜덤 코드 생성
         String code = verificationCodeUtil.generateVerificationCode();
@@ -128,9 +100,7 @@ public class SignupServiceImpl implements SignupService {
                 .expiryDate(LocalDateTime.now().plusMinutes(5))
                 .build();
         verificationCodeRepository.save(verificationCode);
-
-        // 이메일 발송
-        emailService.sendPasswordReset(user.getEmail(), code);
+        emailService.sendPasswordReset(user.getEmail(), code); // 코드 발송
     }
 
     @Override
@@ -163,6 +133,11 @@ public class SignupServiceImpl implements SignupService {
         }
 
         User user = verificationCode.getUser();
+
+        // 기존 비밀번호와 새 비밀번호 비교
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new IllegalArgumentException("새 비밀번호는 기존 비밀번호와 같을 수 없습니다.");
+        }
 
         // 비밀번호 업데이트
         user.setPassword(passwordEncoder.encode(newPassword));
