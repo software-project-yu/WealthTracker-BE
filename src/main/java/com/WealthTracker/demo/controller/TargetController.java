@@ -46,10 +46,4 @@ public class TargetController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/achievement-rate/{targetId}") //* 목표 달성률 반환하는 API
-    public ResponseEntity<Double> getAchievementRate(@PathVariable Long targetId,
-                                                     @RequestHeader("Authorization") String token) {
-        double achievementRate = targetService.getAchievementRate(targetId, token);
-        return ResponseEntity.ok(achievementRate);
-    }
 }

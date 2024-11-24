@@ -47,11 +47,6 @@ public class Target {
         savedAmount += dailySaving.getAmount();
     }
 
-    public double getAchievementRate() {
-        if (targetAmount == 0) return 0.0;
-        return ((double) savedAmount / targetAmount) * 100;
-    }
-
     public void updateTarget(int targetAmount, LocalDate startDate, LocalDate endDate) {
         this.targetAmount = targetAmount;
         this.startDate = startDate;

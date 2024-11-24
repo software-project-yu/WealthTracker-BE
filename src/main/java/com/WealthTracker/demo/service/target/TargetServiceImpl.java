@@ -43,12 +43,11 @@ public class TargetServiceImpl implements TargetService {
         // 목표에 대한 내용들을 builder로 저장한 후
         Target savedTarget = targetRepository.save(target); // 목표를 저장
 
-        return new TargetResponseDTO(
-                savedTarget.getTargetId(),
-                savedTarget.getTargetAmount(),
-                savedTarget.getSavedAmount(),
-                savedTarget.getAchievementRate()
-        ); // DTO형태로 반환
+        return TargetResponseDTO.builder()
+                .targetId(savedTarget.getTargetId())
+                .targetAmount(savedTarget.getTargetAmount())
+                .savedAmount(savedTarget.getSavedAmount())
+                .build();
     }
 
     @Override
@@ -63,12 +62,11 @@ public class TargetServiceImpl implements TargetService {
 
         Target updatedTarget = targetRepository.save(target);
 
-        return new TargetResponseDTO(
-                updatedTarget.getTargetId(),
-                updatedTarget.getTargetAmount(),
-                updatedTarget.getSavedAmount(),
-                updatedTarget.getAchievementRate()
-        );
+        return TargetResponseDTO.builder()
+                .targetId(updatedTarget.getTargetId())
+                .targetAmount(updatedTarget.getTargetAmount())
+                .savedAmount(updatedTarget.getSavedAmount())
+                .build();
     }
 
     @Override
@@ -105,14 +103,4 @@ public class TargetServiceImpl implements TargetService {
 
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public double getAchievementRate(Long targetId, String token) { //* 저축 목표 달성률 반환하는 서비스 로직
-        Long userId = getUserIdFromToken(token);
-
-        Target target = targetRepository.findByTargetIdAndUserUserId(targetId, userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저에게는 존재하지 않는 목표입니다."));
-
-        return target.getAchievementRate();
-    }
 }

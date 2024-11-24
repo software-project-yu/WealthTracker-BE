@@ -75,28 +75,28 @@ public class CategoryTargetServiceImpl implements CategoryTargetService {
 
         if (categoryTarget == null) {
             // 목표가 없을 경우 default를 0원으로 설정해주기
-            return new CategoryTargetResponseDTO(
-                    category,
-                    0L, // 목표 금액 기본값
-                    currentExpenditure,
-                    "아직 목표를 설정하지 않았습니다. 현재 지출은 " + currentExpenditure + "원입니다."
-            );
+            return CategoryTargetResponseDTO.builder()
+                    .category(category)
+                    .targetAmount(0L)
+                    .currentExpend(currentExpenditure)
+                    .message("아직 목표를 설정하지 않았습니다. 현재 지출은 " + currentExpenditure + "원 입니다.")
+                    .build();
         }
 
         // 목표가 있을 경우 기존 로직 사용
-        return new CategoryTargetResponseDTO(
-                categoryTarget.getCategory(),
-                categoryTarget.getTargetAmount(),
-                currentExpenditure,
-                getMessage(categoryTarget.getTargetAmount(), currentExpenditure)
-        );
+        return CategoryTargetResponseDTO.builder()
+                .category(categoryTarget.getCategory())
+                .targetAmount(categoryTarget.getTargetAmount())
+                .currentExpend(currentExpenditure)
+                .message(getMessage(categoryTarget.getTargetAmount(), currentExpenditure))
+                .build();
     }
 
     private String getMessage(Long targetAmount, Long currentExpenditure) {
         if (currentExpenditure > targetAmount) {
-            return "목표보다 " + (currentExpenditure - targetAmount) + "원 더 쓰고 있습니다.";
+            return "(UP) 목표보다 " + (currentExpenditure - targetAmount) + "원 더 쓰고 있습니다.";
         } else {
-            return "목표보다 " + (targetAmount - currentExpenditure) + "원 덜 쓰고 있습니다.";
+            return "(DOWN) 목표보다 " + (targetAmount - currentExpenditure) + "원 덜 쓰고 있습니다.";
         }
     }
 
