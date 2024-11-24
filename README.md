@@ -10,7 +10,7 @@
 | :white_check_mark: | test | 테스트 코드 추가/수정 |
 | :pushpin: | chore | 패키지 매니저 수정, 그 외 기타 수정 ex) .gitignore |
 | 🛠️                 | merge   | 병합      |
-
+| 🚑 | hotfix | master브랜치로 긴급 수정 |
 ### Directory Achitecture
 ```
 ├── HELP.md
