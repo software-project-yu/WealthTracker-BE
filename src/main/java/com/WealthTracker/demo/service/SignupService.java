@@ -2,7 +2,6 @@ package com.WealthTracker.demo.service;
 
 import com.WealthTracker.demo.DTO.SignupRequestDTO;
 import com.WealthTracker.demo.domain.User;
-import com.WealthTracker.demo.domain.VerificationCode;
 
 import java.util.Optional;
 

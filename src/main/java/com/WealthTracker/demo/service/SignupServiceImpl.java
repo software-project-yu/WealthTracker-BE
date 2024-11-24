@@ -59,7 +59,6 @@ public class SignupServiceImpl implements SignupService {
         try {
             VerificationCode verificationCode = verificationCodeRepository.findByEmail(email)
                     .orElseThrow(() -> new CustomException(ErrorCode.VERIFICATION_CODE_NOT_FOUND));
-
             if (!verificationCode.getCode().equals(code)) {
                 throw new CustomException(ErrorCode.INVALID_VERIFICATION_CODE);
             }
@@ -161,6 +160,11 @@ public class SignupServiceImpl implements SignupService {
         // email을 사용해 User 찾기
         User user = userRepository.findByEmail(verificationCode.getEmail())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 기존 비밀번호와 새 비밀번호 비교
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new IllegalArgumentException("새 비밀번호는 기존 비밀번호와 같을 수 없습니다.");
+        }
 
         // 비밀번호 업데이트
         user.setPassword(passwordEncoder.encode(newPassword));
