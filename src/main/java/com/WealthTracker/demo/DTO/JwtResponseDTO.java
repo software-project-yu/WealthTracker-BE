@@ -10,12 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class JwtResponseDTO {
-
     private String token;
-
-    private String type = "Bearer";
-
-    public JwtResponseDTO(String token) {
-        this.token = token;
-    }
 }

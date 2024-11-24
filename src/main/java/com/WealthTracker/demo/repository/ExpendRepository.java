@@ -8,8 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.core.parameters.P;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -67,7 +65,8 @@ public interface ExpendRepository extends JpaRepository<Expend, Long> {
     @Query("SELECT COALESCE(SUM(e.cost), 0) FROM Expend e " +
             "WHERE e.user = :user " +
             "AND e.categoryExpend.categoryName = :categoryName " +
-            "AND e.expendDate BETWEEN :weekStart AND :weekEnd")
+            "AND e.expendDate BETWEEN :weekStart AND :weekEnd "+
+            "AND FUNCTION('YEARWEEK',e.expendDate) = FUNCTION('YEARWEEK', :weekStart) ")
     Long amountByCategory(
             @Param("user") User user,
             @Param("categoryName") Category_Expend categoryName,

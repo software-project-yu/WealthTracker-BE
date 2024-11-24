@@ -3,12 +3,16 @@ package com.WealthTracker.demo.controller;
 import com.WealthTracker.demo.DTO.VerificationCodeConfirmDTO;
 import com.WealthTracker.demo.DTO.VerificationCodeRequestDTO;
 import com.WealthTracker.demo.DTO.SignupRequestDTO;
+import com.WealthTracker.demo.constants.ErrorCode;
+import com.WealthTracker.demo.constants.SuccessCode;
 import com.WealthTracker.demo.domain.User;
 import com.WealthTracker.demo.domain.VerificationCode;
+import com.WealthTracker.demo.error.CustomException;
 import com.WealthTracker.demo.repository.VerificationCodeRepository;
 import com.WealthTracker.demo.service.EmailService;
 import com.WealthTracker.demo.service.SignupService;
 import com.WealthTracker.demo.util.VerificationCodeUtil;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,73 +26,82 @@ import java.util.Optional;
 public class AuthController { //** Signup 및 EmailAuth 담당 Controller **//
 
     private final SignupService signupService;
-    private final EmailService emailService;
-    private final VerificationCodeUtil verificationCodeUtil;
     private final VerificationCodeRepository verificationCodeRepository;
 
-    //** 회원가입 요청 (이메일 인증 코드 발송)
-    @PostMapping("/signup")
-    public ResponseEntity<?> signupUser(@RequestBody SignupRequestDTO signupRequest) {
+    //* 이메일 인증 코드 발송
+    @PostMapping("/send-code")
+    public ResponseEntity<?> sendVerificationCode(@RequestBody VerificationCodeRequestDTO verificationCodeRequestDTO) {
         try {
-            String message = signupService.signupUser(signupRequest);
-            return ResponseEntity.ok(message);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            signupService.createVerificationCodeAndSendEmail(verificationCodeRequestDTO.getEmail());
+            return ResponseEntity.ok(SuccessCode.SUCCESS_EMAIL_SENT.getMessage());
+        } catch (CustomException e) {
+            return ResponseEntity.badRequest().body(ErrorCode.EMAIL_ALREADY_REGISTERED.getMessage());
         }
     }
 
-    //** 이메일 인증 확인 및 회원가입 완료 (유저 정보 저장)
+    //* 이메일 인증 확인
     @GetMapping("/verify")
     public ResponseEntity<?> verifyUser(@RequestParam("email") String email,
                                         @RequestParam("code") String code) {
-        // 이메일과 코드로 인증 코드 확인
-        Optional<VerificationCode> verificationCodeOpt = verificationCodeRepository.findByEmailAndCode(email, code);
-        if (!verificationCodeOpt.isPresent()) {
-            return ResponseEntity.badRequest().body("인증 코드가 유효하지 않습니다.");
+        try {
+            signupService.verifyEmail(email, code);
+            return ResponseEntity.ok(SuccessCode.EMAIL_VERIFIED.getMessage());
+        } catch (CustomException e) {
+            return ResponseEntity.badRequest().body(ErrorCode.INVALID_VERIFICATION_CODE.getMessage());
         }
-
-        VerificationCode verificationCode = verificationCodeOpt.get();
-
-        // 코드 만료 여부 확인
-        if (verificationCode.getExpiryDate().isBefore(LocalDateTime.now())) {
-            return ResponseEntity.badRequest().body("인증 코드가 만료되었습니다.");
-        }
-
-        // 사용자 활성화
-        User user = verificationCode.getUser();
-        signupService.enableUser(user);
-
-        // 인증 코드 삭제
-        verificationCodeRepository.delete(verificationCode);
-
-        return ResponseEntity.ok("회원가입이 완료되었습니다.");
     }
 
-    //** 비밀번호 재설정 요청
+    //* 회원가입 및 유저 등록
+    @PostMapping("/signup")
+    public ResponseEntity<?> signupUser(@RequestBody SignupRequestDTO requestDTO) {
+        try {
+            signupService.signupUser(requestDTO);
+            return ResponseEntity.ok(SuccessCode.SUCCESS_SIGNUP.getMessage());
+        } catch (CustomException e) {
+            return ResponseEntity.badRequest().body(ErrorCode.EMAIL_CONFLICT.getMessage());
+        }
+    }
+
+
+    //* 인증 코드 재생성 요청 (이메일로 새로운 코드 발송)
+    @PostMapping("/resend-code")
+    public ResponseEntity<?> resendVerificationCode(@RequestBody VerificationCodeRequestDTO requestDTO) {
+        try {
+            // 기존 인증 코드 삭제
+            verificationCodeRepository.deleteByEmail(requestDTO.getEmail());
+            // 새로운 인증 코드 생성 및 이메일 발송
+            signupService.createVerificationCodeAndSendEmail(requestDTO.getEmail());
+            return ResponseEntity.ok(SuccessCode.SUCCESS_RESET_CODE_SENT.getMessage());
+        } catch (CustomException e) {
+            return ResponseEntity.badRequest().body(ErrorCode.USER_NOT_FOUND.getMessage());
+        }
+    }
+
+    //* 비밀번호 재설정 요청
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody VerificationCodeRequestDTO request) {
-        Optional<User> userOpt = signupService.getUserByEmail(request.getEmail());
-        if (!userOpt.isPresent()) {
-            return ResponseEntity.badRequest().body("해당 이메일을 가진 사용자가 없습니다.");
+    public ResponseEntity<?> resetPassword(@RequestBody @Valid VerificationCodeRequestDTO request) {
+        try {
+            // 비밀번호 재설정 코드 생성 및 이메일 발송 로직 처리
+            signupService.createPasswordResetCode(request.getEmail());
+            return ResponseEntity.ok(SuccessCode.SUCCESS_RESET_CODE_SENT.getMessage());
+        } catch (CustomException e) {
+            return ResponseEntity.badRequest().body(ErrorCode.USER_NOT_FOUND.getMessage());
         }
-
-        User user = userOpt.get();
-        String code = verificationCodeUtil.generateVerificationCode();
-        signupService.createPasswordResetCode(user, code);
-        emailService.sendPasswordReset(user.getEmail(), code);
-
-        return ResponseEntity.ok("비밀번호 재설정 이메일이 발송되었습니다.");
     }
 
-    //** 비밀번호 재설정 확인
+    //* 비밀번호 재설정 확인
     @PostMapping("/confirm-reset-password")
-    public ResponseEntity<?> confirmResetPassword(@RequestParam("code") String code, @RequestBody VerificationCodeConfirmDTO confirmDTO) {
+    public ResponseEntity<?> confirmResetPassword(@RequestParam("code") String code, @RequestBody @Valid  VerificationCodeConfirmDTO confirmDTO) {
         String result = signupService.validatePasswordResetCode(code);
         if (!result.equals("valid")) {
-            return ResponseEntity.badRequest().body("비밀번호 재설정 코드가 유효하지 않습니다.");
+            return ResponseEntity.badRequest().body(ErrorCode.PASSWORD_RESET_INVALID.getMessage());
         }
-
-        signupService.resetPassword(code, confirmDTO.getNewPassword());
-        return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+        try {
+            // 비밀번호 재설정
+            signupService.resetPassword(code, confirmDTO.getNewPassword());
+            return ResponseEntity.ok(SuccessCode.SUCCESS_PASSWORD_RESET.getMessage());
+        } catch (CustomException e) {
+            return ResponseEntity.badRequest().body(ErrorCode.PASSWORD_RESET_INVALID.getMessage());
+        }
     }
 }

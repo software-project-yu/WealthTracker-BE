@@ -11,9 +11,13 @@ public interface SignupService {
 
     Optional<User> getUserByEmail(String email);  // 이메일로 사용자 조회
 
-    void enableUser(User user); // 사용자 활성화 메서드
+    void cleanupExpiredVerificationCodes(); // 만료된 인증코드 삭제
 
-    void createPasswordResetCode(User user, String code);  // 비밀번호 재설정 코드 생성
+    String createVerificationCodeAndSendEmail(String email); // 새로운 인증코드 생성
+
+    void verifyEmail(String email, String code); // 이메일 인증코드 검증
+
+    void createPasswordResetCode(String email);  // 비밀번호 재설정 코드 생성
 
     String validatePasswordResetCode(String code);  // 비밀번호 재설정 코드 검증
 
