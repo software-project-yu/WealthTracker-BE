@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Builder
+@Table(name = "category_income")
 public class CategoryIncome {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long categoryId;
