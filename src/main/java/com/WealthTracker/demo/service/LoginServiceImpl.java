@@ -26,7 +26,7 @@ public class LoginServiceImpl implements LoginService {
 
         // enabled 값이 false인 경우 로그인 불가
         if (!user.isEnabled()) {
-            throw new CustomException(ErrorCode.EMAIL_NOT_VERIFIED);
+            throw new CustomException(ErrorCode.EMAIL_VERIFY_NEED);
         }
 
         if (!passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword())) {
