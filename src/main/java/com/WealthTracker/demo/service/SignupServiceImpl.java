@@ -1,8 +1,11 @@
 package com.WealthTracker.demo.service;
 
 import com.WealthTracker.demo.DTO.SignupRequestDTO;
+import com.WealthTracker.demo.constants.ErrorCode;
+import com.WealthTracker.demo.constants.SuccessCode;
 import com.WealthTracker.demo.domain.User;
 import com.WealthTracker.demo.domain.VerificationCode;
+import com.WealthTracker.demo.error.CustomException;
 import com.WealthTracker.demo.repository.UserRepository;
 import com.WealthTracker.demo.repository.VerificationCodeRepository;
 import com.WealthTracker.demo.util.VerificationCodeUtil;
@@ -26,52 +29,70 @@ public class SignupServiceImpl implements SignupService {
 
     @Override
     @Transactional
-    public String signupUser(SignupRequestDTO signupRequest) {
-        // 1. 이메일 중복 체크 및 유효한 유저 존재 여부 확인
-        Optional<User> existingUserOpt = userRepository.findByEmail(signupRequest.getEmail());
-        if (existingUserOpt.isPresent()) {
-            User existingUser = existingUserOpt.get();
-            if (existingUser.isEnabled()) {
-                throw new IllegalArgumentException("이미 등록된 이메일입니다.");
-            }
+    public String createVerificationCodeAndSendEmail(String email) {
+        // 이메일 중복 확인
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new CustomException(ErrorCode.EMAIL_ALREADY_REGISTERED);
         }
 
-        // 2. 기존 인증 코드 삭제 (유효하지 않은 인증 코드 제거)
-        verificationCodeRepository.findByEmail(signupRequest.getEmail())
-                .ifPresent(verificationCode -> {
-                    if (verificationCode.getExpiryDate().isBefore(LocalDateTime.now())) {
-                        verificationCodeRepository.delete(verificationCode);
-                    } else {
-                        throw new IllegalArgumentException("이미 인증 코드가 발송되었습니다. 만료 시간을 기다려주세요.");
-                    }
-                });
+        // 기존 인증 코드 삭제
+        verificationCodeRepository.findByEmail(email).ifPresent(verificationCodeRepository::delete);
 
-        // 3. 사용자 정보 생성 및 비밀번호 암호화
-        User user = User.builder()
-                .email(signupRequest.getEmail())
-                .password(passwordEncoder.encode(signupRequest.getPassword())) // 비밀번호 암호화
-                .name(signupRequest.getName())
-                .nickName(signupRequest.getNickName())
-                .enabled(false) // 인증 전 상태
-                .build();
-
-        // 4. 사용자 저장
-        User savedUser = userRepository.save(user);
-
-        // 5. 인증 코드 생성 및 저장
+        // 인증 코드 생성
         String code = verificationCodeUtil.generateVerificationCode();
         VerificationCode verificationCode = VerificationCode.builder()
+                .email(email)
                 .code(code)
-                .email(savedUser.getEmail()) // email 필드 설정
-                .user(savedUser)
                 .expiryDate(LocalDateTime.now().plusMinutes(5))
                 .build();
+
         verificationCodeRepository.save(verificationCode);
+        // 이메일 발송
+        emailService.sendEmailVerification(email, code);
 
-        // 6. 이메일로 인증 코드 발송
-        emailService.sendEmailVerification(savedUser.getEmail(), code);
+        return SuccessCode.SUCCESS_EMAIL_SENT.getMessage();
+    }
 
-        return "이메일을 확인하여 인증을 완료해주세요.";
+    @Override
+    @Transactional
+    public void verifyEmail(String email, String code) {
+        try {
+            VerificationCode verificationCode = verificationCodeRepository.findByEmail(email)
+                    .orElseThrow(() -> new CustomException(ErrorCode.VERIFICATION_CODE_NOT_FOUND));
+            if (!verificationCode.getCode().equals(code)) {
+                throw new CustomException(ErrorCode.INVALID_VERIFICATION_CODE);
+            }
+
+            if (verificationCode.getExpiryDate().isBefore(LocalDateTime.now())) {
+                verificationCodeRepository.delete(verificationCode); // 만료된 인증 코드 삭제
+                throw new CustomException(ErrorCode.INVALID_VERIFICATION_CODE);
+            }
+        } catch (CustomException e) {
+            throw new CustomException(ErrorCode.EMAIL_VERIFY_FAIL);
+        }
+    }
+
+    @Override
+    @Transactional
+    public String signupUser(SignupRequestDTO signupRequestDTO) {
+        // 인증된 이메일인지 확인
+        VerificationCode verificationCode = verificationCodeRepository.findByEmail(signupRequestDTO.getEmail())
+                .orElseThrow(() -> new CustomException(ErrorCode.EMAIL_VERIFY_NEED));
+
+        // 회원가입 로직
+        User user = User.builder()
+                .email(signupRequestDTO.getEmail())
+                .password(passwordEncoder.encode(signupRequestDTO.getPassword()))
+                .name(signupRequestDTO.getName())
+                .nickName(signupRequestDTO.getNickName())
+                .enabled(true)
+                .build();
+
+        userRepository.save(user);
+        // 인증 코드 삭제
+        verificationCodeRepository.delete(verificationCode);
+
+        return SuccessCode.SUCCESS_SIGNUP.getMessage();
     }
 
     @Override
@@ -86,34 +107,16 @@ public class SignupServiceImpl implements SignupService {
         verificationCodeRepository.deleteByExpiryDateBefore(LocalDateTime.now());
     }
 
-    @Override
-    @Transactional
-    public VerificationCode createVerificationCode(String email, User user) {
-        String code = verificationCodeUtil.generateVerificationCode();
-
-        LocalDateTime expiryDate = LocalDateTime.now().plusMinutes(5);
-
-        VerificationCode verificationCode = VerificationCode.builder()
-                .code(code)
-                .email(email)
-                .expiryDate(expiryDate)
-                .user(user)
-                .build();
-
-        return verificationCodeRepository.save(verificationCode);
-    }
-
     // 비밀번호 재설정 코드 생성 및 저장
     @Override
     @Transactional
     public void createPasswordResetCode(String email) {
         // User 찾기
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("해당 이메일을 가진 사용자가 없습니다."));
+        userRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 기존 인증 코드 삭제 또는 갱신
-        Optional<VerificationCode> existingCode = verificationCodeRepository.findByEmail(user.getEmail());
-        existingCode.ifPresent(verificationCodeRepository::delete);
+        verificationCodeRepository.deleteByEmail(email);
 
         // 랜덤 코드 생성
         String code = verificationCodeUtil.generateVerificationCode();
@@ -121,46 +124,47 @@ public class SignupServiceImpl implements SignupService {
         // VerificationCode 생성
         VerificationCode verificationCode = VerificationCode.builder()
                 .code(code)
-                .user(user)
-                .email(user.getEmail())
+                .email(email)
                 .expiryDate(LocalDateTime.now().plusMinutes(5))
                 .build();
         verificationCodeRepository.save(verificationCode);
 
         // 이메일 발송
-        emailService.sendPasswordReset(user.getEmail(), code);
+        emailService.sendPasswordReset(email, code);
     }
 
     @Override
     @Transactional(readOnly = true)
     public String validatePasswordResetCode(String code) {
-        Optional<VerificationCode> optionalCode = verificationCodeRepository.findByCode(code);
-        if (!optionalCode.isPresent()) {
-            return "유효하지 않은 코드";
-        }
+        VerificationCode verificationCode = verificationCodeRepository.findByCode(code)
+                .orElseThrow(() -> new CustomException(ErrorCode.PASSWORD_RESET_INVALID));
 
-        VerificationCode verificationCode = optionalCode.get();
         if (verificationCode.getExpiryDate().isBefore(LocalDateTime.now())) {
-            return "코드가 만료되었습니다.";
+            throw new CustomException(ErrorCode.PASSWORD_RESET_INVALID);
         }
 
-        return "valid";
+        return SuccessCode.SUCCESS_PASSWORD_RESET.getMessage();
     }
 
     @Override
     @Transactional
     public void resetPassword(String code, String newPassword) {
-        Optional<VerificationCode> optionalCode = verificationCodeRepository.findByCode(code);
-        if (!optionalCode.isPresent()) {
-            throw new IllegalArgumentException("유효하지 않은 코드");
-        }
+        VerificationCode verificationCode = verificationCodeRepository.findByCode(code)
+                .orElseThrow(() -> new CustomException(ErrorCode.PASSWORD_RESET_INVALID));
 
-        VerificationCode verificationCode = optionalCode.get();
         if (verificationCode.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("코드가 만료되었습니다.");
+            verificationCodeRepository.delete(verificationCode);
+            throw new CustomException(ErrorCode.PASSWORD_RESET_INVALID);
         }
 
-        User user = verificationCode.getUser();
+        // email을 사용해 User 찾기
+        User user = userRepository.findByEmail(verificationCode.getEmail())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 기존 비밀번호와 새 비밀번호 비교
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new IllegalArgumentException("새 비밀번호는 기존 비밀번호와 같을 수 없습니다.");
+        }
 
         // 비밀번호 업데이트
         user.setPassword(passwordEncoder.encode(newPassword));
@@ -170,10 +174,4 @@ public class SignupServiceImpl implements SignupService {
         verificationCodeRepository.delete(verificationCode);
     }
 
-    @Override
-    @Transactional
-    public void enableUser(User user) {
-        user.enable();
-        userRepository.save(user);
-    }
 }
