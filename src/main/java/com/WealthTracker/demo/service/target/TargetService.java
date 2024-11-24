@@ -13,6 +13,4 @@ public interface TargetService {
     void deleteTarget(Long targetId, String token); //* 목표 삭제하는 서비스
 
     void addDailySaving(Long targetId, DailySavingRequestDTO requestDTO, String token); //* 저축한 금액 더하는 서비스
-
-    double getAchievementRate(Long targetId, String token); //* 목표 달성률
 }

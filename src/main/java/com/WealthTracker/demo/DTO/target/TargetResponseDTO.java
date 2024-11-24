@@ -16,6 +16,4 @@ public class TargetResponseDTO {
     private int targetAmount;
 
     private int savedAmount;
-
-    private double achievementRate;
 }
