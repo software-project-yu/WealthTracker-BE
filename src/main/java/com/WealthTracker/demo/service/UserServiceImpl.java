@@ -29,4 +29,42 @@ public class UserServiceImpl implements UserService {
                 .nickName(user.getNickName())
                 .build();
     }
+
+    @Transactional
+    @Override
+    public UserProfileResponseDTO updateProfile(String token, UserProfileResponseDTO updateRequestDTO) {
+        Long userId = jwtUtil.getUserId(token);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        String updatedName = updateRequestDTO.getName();
+        String updatedNickName = updateRequestDTO.getNickName();
+
+        // 기존 프로필이랑 변경 사항이 있는지 확인
+        boolean isUpdated = false;
+
+        User.UserBuilder userBuilder = user.toBuilder(); // 엔터티의 일부(이름, 닉네임)만 변경하도록
+
+        if (updatedName != null && !updatedName.equals(user.getName())) { // 사용자의 이름을 수정하는 로직
+            userBuilder.name(updatedName);
+            isUpdated = true;
+        }
+
+        if (updatedNickName != null && !updatedNickName.equals(user.getNickName())) { // 사용자의 닉네임을 수정하는 로직
+            userBuilder.nickName(updatedNickName);
+            isUpdated = true;
+        }
+
+        if (!isUpdated) {
+            throw new CustomException(ErrorCode.INVALID_UPDATE_REQUEST);
+        }
+
+        User updatedUser = userBuilder.build();
+        userRepository.save(updatedUser);
+
+        return UserProfileResponseDTO.builder()
+                .name(updatedUser.getName())
+                .nickName(updatedUser.getNickName())
+                .build();
+    }
 }
