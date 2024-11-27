@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
-    // 400 BAD_REQUEST 잘못된 요청
+    //400 BAD_REQUEST 잘못된 요청
     INVALID_PARAMETER(400, "올바른 값을 확인해주세요."),
     INVALID_CATEGORY(400,"잘못된 카테고리명입니다."),
     INVALID_VERIFICATION_CODE(400, "유효하지 않은 인증 코드이거나 만료된 코드입니다."),
@@ -28,6 +28,9 @@ public enum ErrorCode {
     USER_NOT_CORRECT(409, "해당 유저의 지출 또는 수입 내역이 아닙니다."),
     EMAIL_CONFLICT(409, "해당 이메일은 이미 등록되어 있습니다."),
 
+
+
+    PAYMENT_CONFLICT(409, "결제 내역이 이미 존재합니다."),
 
 
     //500 INTERNAL SERVER ERROR
