@@ -1,8 +1,10 @@
 package com.WealthTracker.demo.service;
 
+import com.WealthTracker.demo.DTO.PaymentAmountDTO;
 import com.WealthTracker.demo.DTO.PaymentRequestDTO;
 import com.WealthTracker.demo.DTO.PaymentResponseDTO;
 import com.WealthTracker.demo.DTO.income_expend.ExpendCategoryAmountDTO;
+import com.WealthTracker.demo.domain.Payment;
 
 import java.util.List;
 
@@ -18,5 +20,5 @@ public interface PaymentService {
     // 최근 결제 내역 2개 불러오기
     List<PaymentResponseDTO> getRecentPayments(String token);
 
-    List<ExpendCategoryAmountDTO> getAmountByMonth(String token);
+    List<PaymentAmountDTO> getAmountByMonth(String token);
 }

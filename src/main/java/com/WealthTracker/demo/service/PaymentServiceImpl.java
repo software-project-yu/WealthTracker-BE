@@ -1,6 +1,7 @@
 package com.WealthTracker.demo.service;
 
 
+import com.WealthTracker.demo.DTO.PaymentAmountDTO;
 import com.WealthTracker.demo.DTO.PaymentRequestDTO;
 import com.WealthTracker.demo.DTO.PaymentResponseDTO;
 import com.WealthTracker.demo.DTO.income_expend.ExpendCategoryAmountDTO;
@@ -170,12 +171,12 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public List<ExpendCategoryAmountDTO> getAmountByMonth(String token) {
+    public List<PaymentAmountDTO> getAmountByMonth(String token) {
         //jwt토큰 검증 실시
         Optional<User> findUser = userRepository.findByUserId(jwtUtil.getUserId(token));
         User user = findUser.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         // 월별 결제 내역 저장할 리스트
-        List<ExpendCategoryAmountDTO> nowMonthList = new ArrayList<>();
+        List<PaymentAmountDTO> nowMonthList = new ArrayList<>();
         // 이번 달 결제액 불러오기
         Long thisMonthAmount = paymentRepository.thisMonthAmount(user);
         // 저번 달 결제액 불러오기
@@ -202,24 +203,23 @@ public class PaymentServiceImpl implements PaymentService {
 
         // 결제 내역 2개씩 리스트
         List<Payment> paymentList = paymentRepository.findRecentPayment(user, PageRequest.of(0, 2));
-        List<ExpendResponseDTO> expendResponseDTOList = paymentList.stream()
-                .map(payment -> ExpendResponseDTO.builder()
-                        .expendId(payment.getPaymentId())
-                        .expendName(payment.getTradeName())
-                        .expendDate(payment.getLastPayment().toString())
+        List<PaymentResponseDTO> paymentResponseDTOList = paymentList.stream()
+                .map(payment -> PaymentResponseDTO.builder()
+                        .paymentId(payment.getPaymentId())
+                        .tradeName(payment.getTradeName())
+                        .lastPayment(LocalDateTime.parse(payment.getLastPayment().toString()))
                         .cost(payment.getCost())
                         .build())
                 .toList();
         // 월별 결제 내역 DTO
-        ExpendCategoryAmountDTO expendCategoryAmountDTO = ExpendCategoryAmountDTO.builder()
-                .categoryName("Payment")
+        PaymentAmountDTO paymentAmountDTO = PaymentAmountDTO.builder()
                 .amount(thisMonthAmount)
                 .percent(percentChange)
                 .upOrDown(upOrDown)
-                .expendList(expendResponseDTOList)
+                .paymentList(paymentResponseDTOList)
                 .build();
 
-        nowMonthList.add(expendCategoryAmountDTO);
+        nowMonthList.add(paymentAmountDTO);
 
         return nowMonthList;
     }
