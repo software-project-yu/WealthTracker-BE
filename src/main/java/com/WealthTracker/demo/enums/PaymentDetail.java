@@ -12,7 +12,7 @@ public enum PaymentDetail {
     RENT("월세"),
     UTILITIES("공과금"),
     INSURANCE("보험료"),
-    SUBSCRIPTION("구독서비스"),
+    SUBSCRIPTION("구독 서비스"),
     LOAN("대출");
     // 결제 상세 내용 설명 한글로 반환
     private final String paymentDetailType;
