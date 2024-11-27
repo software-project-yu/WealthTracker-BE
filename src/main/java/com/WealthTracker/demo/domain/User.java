@@ -6,7 +6,7 @@ import lombok.*;
 @Entity
 @Table(name = "users")
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor
 
