@@ -19,6 +19,6 @@ public interface PaymentService {
     Long deletePayment(String token,Long paymentId);
     // 최근 결제 내역 2개 불러오기
     List<PaymentResponseDTO> getRecentPayments(String token);
-
+    // 이번 결제 내역
     List<PaymentAmountDTO> getAmountByMonth(String token);
 }
