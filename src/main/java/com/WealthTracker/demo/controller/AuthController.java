@@ -91,14 +91,14 @@ public class AuthController { //** Signup 및 EmailAuth 담당 Controller **//
 
     //* 비밀번호 재설정 확인
     @PostMapping("/confirm-reset-password")
-    public ResponseEntity<?> confirmResetPassword(@RequestParam("code") String code, @RequestBody @Valid  VerificationCodeConfirmDTO confirmDTO) {
-        String result = signupService.validatePasswordResetCode(code);
+    public ResponseEntity<?> confirmResetPassword(@RequestBody @Valid VerificationCodeConfirmDTO confirmDTO) {
+        String result = signupService.validatePasswordResetCode(confirmDTO.getCode());
         if (!result.equals("valid")) {
             return ResponseEntity.badRequest().body(ErrorCode.PASSWORD_RESET_INVALID.getMessage());
         }
         try {
             // 비밀번호 재설정
-            signupService.resetPassword(code, confirmDTO.getNewPassword());
+            signupService.resetPassword(confirmDTO.getCode(), confirmDTO.getNewPassword());
             return ResponseEntity.ok(SuccessCode.SUCCESS_PASSWORD_RESET.getMessage());
         } catch (CustomException e) {
             return ResponseEntity.badRequest().body(ErrorCode.PASSWORD_RESET_INVALID.getMessage());
