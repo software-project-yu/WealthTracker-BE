@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class VerificationCodeConfirmDTO {
     @NotNull
-
     private String code;
     private String newPassword;
 }

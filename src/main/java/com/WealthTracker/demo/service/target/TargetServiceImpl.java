@@ -1,6 +1,7 @@
 package com.WealthTracker.demo.service.target;
 
 import com.WealthTracker.demo.DTO.dailysaving.DailySavingRequestDTO;
+import com.WealthTracker.demo.DTO.target.TargetGraphDTO;
 import com.WealthTracker.demo.DTO.target.TargetRequestDTO;
 import com.WealthTracker.demo.DTO.target.TargetResponseDTO;
 import com.WealthTracker.demo.constants.ErrorCode;
@@ -97,6 +98,21 @@ public class TargetServiceImpl implements TargetService {
         dailySavingRepository.save(dailySaving); // dailySaving 저장
         targetRepository.save(target); // savedAmount 업데이트를 반영하기 위해 저장
 
+    }
+
+    @Override
+    public TargetGraphDTO getGraphData(int month, String token) {
+        Long userId=getUserIdFromToken(token);
+
+        //현재 금액
+        int nowAmount=targetRepository.getAllSavedAmountByMonth(month);
+        //목표 금액
+        int targetAmount=targetRepository.getAllTargetAmountByMonth(month);
+
+        return TargetGraphDTO.builder()
+                .nowAmount(nowAmount)
+                .targetAmount(targetAmount)
+                .build();
     }
 
 }
