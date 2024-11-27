@@ -79,14 +79,13 @@ public class ExpendServiceImpl implements ExpendService {
 
 
     @Override
-    public List<ExpendResponseDTO> expendList(String token) {
+    public List<ExpendResponseDTO> expendList(String token, int month) {
         /*유저정보로 지출 모두 반환*/
 
         //유저 정보 가져오기
         Optional<User> user = userRepository.findByUserId(jwtUtil.getUserId(token));
-        List<Expend> expendList = expendRepository.findAllByUserWithCategory(user.orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
-        ));
+        User findUser = user.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        List<Expend> expendList = expendRepository.findAllByExpendDate(findUser, month);
 
         //지출 카테고리 정보 가져오기
         Map<Long, CategoryExpend> categoryExpendMap = expendCategoryRepository.findAllById(
@@ -192,7 +191,7 @@ public class ExpendServiceImpl implements ExpendService {
 
         // 새로운 카테고리 객체 찾기 또는 생성
         CategoryExpend categoryExpendToUpdate = expendCategoryRepository.findByCategoryName(newCategoryExpend)
-                .orElseGet(() ->CategoryExpend
+                .orElseGet(() -> CategoryExpend
                         .builder()
                         .categoryName(newCategoryExpend)
                         .build());
@@ -392,7 +391,7 @@ public class ExpendServiceImpl implements ExpendService {
 
             Long dailyExpendTotal = totalExpendList.stream()
                     .filter(dayTotal -> targetDate.equals(((LocalDateTime) dayTotal[1]).toLocalDate()))
-                    .map(dayTotal->(Long) dayTotal[0])
+                    .map(dayTotal -> (Long) dayTotal[0])
                     .findFirst()
                     .orElse(0L);
 

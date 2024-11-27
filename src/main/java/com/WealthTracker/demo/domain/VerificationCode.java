@@ -23,10 +23,6 @@ public class VerificationCode { // 이메일 인증을 위한 토큰 Entity
     @Column(unique = true, nullable = false)
     private String code; //** 6자리 인증 코드
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(nullable = false, name = "userId")
-    private User user;
-
     private LocalDateTime expiryDate;
 
     public VerificationCode(String code, String email, LocalDateTime expiryDate) {

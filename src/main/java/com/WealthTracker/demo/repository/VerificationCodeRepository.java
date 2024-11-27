@@ -9,7 +9,6 @@ import java.util.Optional;
 
 public interface VerificationCodeRepository extends JpaRepository<VerificationCode, Long> { // Email 인증 코드를 조회와 저장하는 Repository
     Optional<VerificationCode> findByCode(String Code);
-    Optional<VerificationCode> findByEmailAndCode(String email, String code);
 
     Optional<VerificationCode> findByEmail(String email);
 

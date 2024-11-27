@@ -23,22 +23,22 @@ public class TargetController {
         return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{targetId}/update") //* 목표 수정하는 API
+    @PutMapping("/update/{targetId}") //* 목표 수정하는 API
     public ResponseEntity<TargetResponseDTO> updateTarget(@PathVariable Long targetId,
                                                           @RequestBody TargetRequestDTO requestDTO,
                                                           @RequestHeader("Authorization") String token) {
-        TargetResponseDTO responseDTO = targetService.updateTarget(targetId, requestDTO, token);
-        return ResponseEntity.ok(responseDTO);
+        targetService.updateTarget(targetId, requestDTO, token);
+        return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/{targetId}/delete") //* 목표 삭제하는 API
+    @DeleteMapping("/delete/{targetId}") //* 목표 삭제하는 API
     public ResponseEntity<Void> deleteTarget(@PathVariable Long targetId,
                                              @RequestHeader("Authorization") String token) {
         targetService.deleteTarget(targetId, token);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{targetId}/savings") //* 목표에 저축하는 API
+    @PostMapping("/savings/{targetId}") //* 목표에 저축하는 API
     public ResponseEntity<Void> addDailySaving(@PathVariable Long targetId,
                                                @RequestBody DailySavingRequestDTO requestDTO,
                                                @RequestHeader("Authorization") String token) {
@@ -46,10 +46,4 @@ public class TargetController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{targetId}/achievement-rate") //* 목표 달성률 반환하는 API
-    public ResponseEntity<Double> getAchievementRate(@PathVariable Long targetId,
-                                                     @RequestHeader("Authorization") String token) {
-        double achievementRate = targetService.getAchievementRate(targetId, token);
-        return ResponseEntity.ok(achievementRate);
-    }
 }
