@@ -101,13 +101,15 @@ public class TargetServiceImpl implements TargetService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public TargetGraphDTO getGraphData(int month, String token) {
-        Long userId=getUserIdFromToken(token);
+        User user = userRepository.findByUserId(getUserIdFromToken(token))
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         //현재 금액
-        int nowAmount=targetRepository.getAllSavedAmountByMonth(month);
+        int nowAmount=targetRepository.getAllSavedAmountByMonth(month,user);
         //목표 금액
-        int targetAmount=targetRepository.getAllTargetAmountByMonth(month);
+        int targetAmount=targetRepository.getAllTargetAmountByMonth(month,user);
 
         return TargetGraphDTO.builder()
                 .nowAmount(nowAmount)
