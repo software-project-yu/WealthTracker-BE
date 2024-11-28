@@ -10,7 +10,6 @@ public enum ErrorCode {
     INVALID_PARAMETER(400, "올바른 값을 확인해주세요."),
     INVALID_CATEGORY(400,"잘못된 카테고리명입니다."),
     INVALID_PAYMENT_DETAIL(400, "유효하지 않은 결제 상세 정보입니다."),
-    PAYMENT_DETAIL_EMPTY(400, "결제 상세 정보가 비어 있습니다."),
     INVALID_PAYMENT_DETAIL_PARAMETER(400, "결제 상세 정보를 변환할 수 없습니다."),
     PAYMENT_DATE_EMPTY(400, "결제 예정일 또는 마지막 결제일이 비어 있습니다."),
     INVALID_PAYMENT_DATE(400, "결제 날짜 형식이 유효하지 않습니다."),

@@ -1,6 +1,5 @@
 package com.WealthTracker.demo.service;
 
-
 import com.WealthTracker.demo.DTO.PaymentAmountDTO;
 import com.WealthTracker.demo.DTO.PaymentRequestDTO;
 import com.WealthTracker.demo.DTO.PaymentResponseDTO;
@@ -44,10 +43,6 @@ public class PaymentServiceImpl implements PaymentService {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if (paymentRequestDTO.getPaymentDetail() == null || paymentRequestDTO.getPaymentDetail().isEmpty()) {
-            throw new CustomException(ErrorCode.PAYMENT_DETAIL_EMPTY);
-        }
-
         PaymentDetail convertToPaymentDetail;
         try {
             convertToPaymentDetail = PaymentDetail.fromString(paymentRequestDTO.getPaymentDetail());
@@ -78,8 +73,6 @@ public class PaymentServiceImpl implements PaymentService {
                 .user(user)
                 .build();
 
-        // 결제 금액
-        Long cost = paymentRequestDTO.getCost();
         // 결제 저장
         Payment savePayment = paymentRepository.save(payment);
         // 사용자의 총 결제 금액

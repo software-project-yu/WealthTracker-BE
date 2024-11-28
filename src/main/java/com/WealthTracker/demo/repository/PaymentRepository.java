@@ -21,8 +21,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     List<Payment> findAllByUser(User user);
     // 결제 ID로 결제 내역 조회
     Optional<Payment> findByPaymentId(Long paymentId);
-    // 결제 예정일과 특정 날짜가 일치하는 결제 내역 조회
-    //List<Payment> findByDueDate(LocalDateTime dueDate);
 
     // 사용자의 결제 금액 합산
     @Query("SELECT SUM(p.cost) FROM Payment p WHERE p.user.userId = :userId")
