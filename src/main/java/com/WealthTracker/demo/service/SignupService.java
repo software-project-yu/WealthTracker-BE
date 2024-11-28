@@ -1,5 +1,6 @@
 package com.WealthTracker.demo.service;
 
+import com.WealthTracker.demo.DTO.PasswordConfirmDTO;
 import com.WealthTracker.demo.DTO.SignupRequestDTO;
 import com.WealthTracker.demo.domain.User;
 
@@ -16,6 +17,8 @@ public interface SignupService {
     String createVerificationCodeAndSendEmail(String email); // 새로운 인증코드 생성
 
     void verifyEmail(String email, String code); // 이메일 인증코드 검증
+
+    String confirmPassword(String token, PasswordConfirmDTO passwordConfirmDTO); // 비밀번호 확인 메서드
 
     void createPasswordResetCode(String email);  // 비밀번호 재설정 코드 생성
 
