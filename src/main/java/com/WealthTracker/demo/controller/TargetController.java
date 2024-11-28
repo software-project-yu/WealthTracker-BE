@@ -1,6 +1,7 @@
 package com.WealthTracker.demo.controller;
 
 import com.WealthTracker.demo.DTO.dailysaving.DailySavingRequestDTO;
+import com.WealthTracker.demo.DTO.target.TargetGraphDTO;
 import com.WealthTracker.demo.DTO.target.TargetRequestDTO;
 import com.WealthTracker.demo.DTO.target.TargetResponseDTO;
 import com.WealthTracker.demo.service.target.TargetService;
@@ -44,6 +45,12 @@ public class TargetController {
                                                @RequestHeader("Authorization") String token) {
         targetService.addDailySaving(targetId, requestDTO, token);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/graph")
+    public ResponseEntity<?> getGraphData(@RequestHeader("Authorization")String token,@RequestParam("month")int month){
+        TargetGraphDTO targetGraphDTO=targetService.getGraphData(month, token);
+        return new ResponseEntity<>(targetGraphDTO,HttpStatus.OK);
     }
 
 }
