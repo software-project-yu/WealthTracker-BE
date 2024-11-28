@@ -57,12 +57,10 @@ public interface ExpendRepository extends JpaRepository<Expend, Long> {
     //지출내역 삭제
     void deleteById(Long expendId);
 
-
     //월별 지출내역 리스트 반환 - 날짜는 상관없음
     @Query("select e from Expend e "+
             "where e.user = :user and MONTH(e.expendDate) = :month")
     List<Expend>findAllByExpendDate(@Param("user")User user, @Param("month")int month);
-
     //카테고리에 따른 지출 합계
     @Query("SELECT COALESCE(SUM(e.cost), 0) FROM Expend e " +
             "WHERE e.user = :user " +

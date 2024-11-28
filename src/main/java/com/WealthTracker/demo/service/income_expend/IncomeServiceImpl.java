@@ -74,12 +74,11 @@ public class IncomeServiceImpl implements IncomeService {
 
 
     @Override
-    public List<IncomeResponseDTO> incomeList(String token) {
+    public List<IncomeResponseDTO> incomeList(String token,int month) {
         //유저 정보 가져오기
         Optional<User> user = userRepository.findByUserId(jwtUtil.getUserId(token));
-        List<Income> incomeList = incomeRepository.findAllByUserWithCategory(user.orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
-        ));
+        User findUser=user.orElseThrow(()->new CustomException(ErrorCode.USER_NOT_FOUND));
+        List<Income> incomeList = incomeRepository.findAllByIncomeDate(findUser,month);
 
         //수입 카테고리 정보 가져오기
         Map<Long, CategoryIncome> categoryIncomeMap = incomeCategoryRepository.findAllById(

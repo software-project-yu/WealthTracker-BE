@@ -34,13 +34,6 @@ public class User {
     @JoinColumn(name = "feedbackId")
     private FeedBack feedBack;
 
-
-
-    // 계정 활성화 메서드
-    public void enable() {
-        this.enabled = true;
-    }
-
     // 비밀번호 변경 메서드
     public void setPassword(String password) {
         this.password = password;

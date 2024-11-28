@@ -66,12 +66,15 @@ public class FeedbackServiceImpl implements FeedbackService {
         Long etcSum = expendRepository.amountByCategory(user, Category_Expend.ETC, mondayStart, sundayEnd);
 
         //메세지만들기
-        return "이번 주 지출 내역은 납부는 " + paymentCategorySum + "원 ," +
+        String message = "이번 주 지출 내역은 납부는 " + paymentCategorySum + "원 ," +
                 "식비 지출은 " + foodCategorySum + "원 ," +
                 "교통비 지출은 " + transportationSum + "원 ," +
                 "오락비 지출은 " + gameSum + "원 ," +
                 "쇼핑비 지출은 " + shoppingSum + "원 ," +
                 "기타 지출은 " + etcSum + "원이야 이번 주 총 지출금액, 카테고리별 지출금액도 보여주고 지출내역에 대해 자세한 충고해줘,나열식이 아니라 한 문단으로 요약,%로 분석";
+
+        log.info(message);
+        return message;
     }
 
     @Override
@@ -87,7 +90,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         LocalDateTime latestExpendDate = expendRepository.findLatestExpend(myUser);
 
         //최신 지출 수정 날짜
-        LocalDateTime latestUpdateExpendDate=expendRepository.findLatestUpdateDate(myUser);
+        LocalDateTime latestUpdateExpendDate = expendRepository.findLatestUpdateDate(myUser);
         log.info(latestUpdateExpendDate.toString());
         //현재 주의 시작과 끝 날짜 계산
         LocalDateTime now = LocalDateTime.now();
@@ -118,7 +121,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         String prompt = generateMessage(user);
         ChatRequest request = new ChatRequest(prompt);
         ChatResponse response = template.postForObject(requestUrl, request, ChatResponse.class);
-        String feedback = response.getCandidates().get(0).getContent().getParts().get(0).getText().toString().replaceAll("[\\n*]" ,"");
+        String feedback = response.getCandidates().get(0).getContent().getParts().get(0).getText().toString().replaceAll("[\\n*]", "");
 
         //새 피드백 저장.
         FeedBack feedBack = FeedBack.builder()
