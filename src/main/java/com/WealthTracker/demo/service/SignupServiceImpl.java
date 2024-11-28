@@ -143,7 +143,7 @@ public class SignupServiceImpl implements SignupService {
             throw new CustomException(ErrorCode.PASSWORD_RESET_INVALID);
         }
 
-        return SuccessCode.SUCCESS_PASSWORD_RESET.getMessage();
+        return "valid";
     }
 
     @Override
