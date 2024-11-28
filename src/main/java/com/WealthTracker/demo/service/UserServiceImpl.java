@@ -2,6 +2,7 @@ package com.WealthTracker.demo.service;
 
 import com.WealthTracker.demo.DTO.UserProfileResponseDTO;
 import com.WealthTracker.demo.constants.ErrorCode;
+import com.WealthTracker.demo.constants.SuccessCode;
 import com.WealthTracker.demo.domain.User;
 import com.WealthTracker.demo.error.CustomException;
 import com.WealthTracker.demo.repository.UserRepository;
@@ -56,7 +57,10 @@ public class UserServiceImpl implements UserService {
         }
 
         if (!isUpdated) {
-            throw new CustomException(ErrorCode.INVALID_UPDATE_REQUEST);
+            return UserProfileResponseDTO.builder()
+                    .name(user.getName())
+                    .nickName(user.getNickName())
+                    .build();
         }
 
         User updatedUser = userBuilder.build();
