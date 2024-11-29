@@ -28,6 +28,15 @@
     - Release 관리
       
 - 박재성
+    - Spring Security Config 설정
+    - ERD 구성
+    - JavaMailSender를 활용한 이메일 인증 기반 회원가입 API 구현
+    - Naver SMTP를 이용한 Custom 인증코드 전송 구현
+    - 이메일 로그인 API 구현
+    - Json Web Token ( JWT )을 활용한 로그인 사용자 보안 강화 및 관리
+    - 프로필 정보 관리 API 구현
+    - 월별 저축 목표 및 일별 목표 금액 저축 API 구현
+    - 카테고리별 지출 목표 API 구현
     
 - 정현아
 <br/>
