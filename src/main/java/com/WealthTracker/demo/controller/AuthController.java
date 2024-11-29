@@ -1,5 +1,6 @@
 package com.WealthTracker.demo.controller;
 
+import com.WealthTracker.demo.DTO.PasswordConfirmDTO;
 import com.WealthTracker.demo.DTO.VerificationCodeConfirmDTO;
 import com.WealthTracker.demo.DTO.VerificationCodeRequestDTO;
 import com.WealthTracker.demo.DTO.SignupRequestDTO;
@@ -51,6 +52,18 @@ public class AuthController { //** Signup 및 EmailAuth 담당 Controller **//
         }
     }
 
+    //* 비밀번호 확인
+    @PostMapping("/confirm-password")
+    public ResponseEntity<?> confirmPassword(@RequestHeader("Authorization") String token,
+                                             @RequestBody PasswordConfirmDTO passwordConfirmDTO) {
+        try {
+            signupService.confirmPassword(token, passwordConfirmDTO);
+            return ResponseEntity.ok(SuccessCode.SUCCESS_PASSWORD_CONFIRM.getMessage());
+        } catch (CustomException e) {
+            return ResponseEntity.badRequest().body(ErrorCode.PASSWORD_MISMATCH.getMessage());
+        }
+    }
+
     //* 회원가입 및 유저 등록
     @PostMapping("/signup")
     public ResponseEntity<?> signupUser(@RequestBody SignupRequestDTO requestDTO) {
@@ -77,7 +90,7 @@ public class AuthController { //** Signup 및 EmailAuth 담당 Controller **//
         }
     }
 
-    //* 비밀번호 재설정 요청
+    //** 비밀번호 재설정 요청
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody @Valid VerificationCodeRequestDTO request) {
         try {

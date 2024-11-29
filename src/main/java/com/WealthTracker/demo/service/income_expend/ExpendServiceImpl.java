@@ -107,7 +107,7 @@ public class ExpendServiceImpl implements ExpendService {
                 .collect(Collectors.toList());
     }
 
-    //DTO로 매핑하는 함수
+    // DTO로 매핑하는 함수
     private ExpendResponseDTO mapToExpendResponseDTO(Expend expend, Map<Long, com.WealthTracker.demo.domain.CategoryExpend> categoryExpendMap) {
         CategoryExpend categoryExpend = categoryExpendMap.get(expend.getCategoryExpend().getCategoryId());
 
