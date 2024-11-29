@@ -24,6 +24,7 @@ public enum ErrorCode {
     //404 NOT_FOUND 잘못된 리소스 접근
     USER_NOT_FOUND(404, "존재하지 않는 회원 ID 입니다."),
     VERIFICATION_CODE_NOT_FOUND(404, "인증 코드가 존재하지 않습니다."),
+    PAYMENT_NOT_FOUND(404, "존재하지 않는 결제 내역입니다."),
     TARGET_ALREADY_EXISTS(400, "이미 존재하는 목표입니다."),
     TARGET_NOT_FOUND(400, "해당 목표가 존재하지 않습니다."),
     PASSWORD_MISMATCH(400, "비밀번호가 일치하지 않습니다."),
