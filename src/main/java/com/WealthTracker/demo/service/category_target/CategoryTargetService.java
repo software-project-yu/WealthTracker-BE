@@ -10,5 +10,5 @@ public interface CategoryTargetService {
 
     void updateTarget(String token, CategoryTargetRequestDTO requestDTO); // 카테고리 별 지출 목표 금액 업데이트
 
-    CategoryTargetResponseDTO getTarget(String token, Category_Expend category);
+    CategoryTargetResponseDTO getTarget(String token, Category_Expend category); // 카테고리 별 지출 목표 조회
 }

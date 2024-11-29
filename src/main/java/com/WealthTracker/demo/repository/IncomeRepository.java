@@ -31,7 +31,7 @@ public interface IncomeRepository extends JpaRepository<Income,Long> {
 
     //이번 달 수입 총 내역
     @Query("select i from Income i "+
-            "where month(i.incomeDate) = :month and i.user =:user "+
+            "where month(i.incomeDate) = :month and i.user = :user "+
             "order by i.incomeDate desc")
     List<Income>findAllByIncomeDate(@Param("user")User user,@Param("month")int month);
 }
