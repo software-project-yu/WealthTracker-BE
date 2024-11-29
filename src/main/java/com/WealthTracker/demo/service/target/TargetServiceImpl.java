@@ -45,7 +45,7 @@ public class TargetServiceImpl implements TargetService {
                 .build();
         // 목표에 대한 내용들을 builder로 저장한 후
         Target savedTarget = targetRepository.save(target); // 목표를 저장
-      
+
         return TargetResponseDTO.builder()
                 .targetId(savedTarget.getTargetId())
                 .targetAmount(savedTarget.getTargetAmount())

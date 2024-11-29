@@ -90,7 +90,7 @@ public class AuthController { //** Signup 및 EmailAuth 담당 Controller **//
         }
     }
 
-    //* 비밀번호 재설정 요청
+    //** 비밀번호 재설정 요청
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody @Valid VerificationCodeRequestDTO request) {
         try {
