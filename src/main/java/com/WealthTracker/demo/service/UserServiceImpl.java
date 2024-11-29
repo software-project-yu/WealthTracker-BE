@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
     public UserProfileResponseDTO updateProfile(String token, UserProfileResponseDTO updateRequestDTO) {
         Long userId = jwtUtil.getUserId(token);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
 
         String updatedName = updateRequestDTO.getName();
         String updatedNickName = updateRequestDTO.getNickName();

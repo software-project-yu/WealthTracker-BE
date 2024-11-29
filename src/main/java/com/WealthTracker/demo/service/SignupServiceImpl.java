@@ -82,11 +82,11 @@ public class SignupServiceImpl implements SignupService {
     public String confirmPassword(String token, PasswordConfirmDTO passwordConfirmDTO) {
         Optional<User> user = userRepository.findByUserId(jwtUtil.getUserId(token));
         User myUser = user.orElseThrow(
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage())
         ); // 기존 유저의 비밀번호를 확인하기 위해 로그인한 유저의 정보를 가져와야함.
 
         if (!passwordEncoder.matches(passwordConfirmDTO.getConfirmPassword(), myUser.getPassword())) {
-            throw new CustomException(ErrorCode.PASSWORD_MISMATCH); // 기존 비밀번호와 일치하지 않는 경우에 오류 던지기
+            throw new CustomException(ErrorCode.PASSWORD_MISMATCH,ErrorCode.PASSWORD_MISMATCH.getMessage()); // 기존 비밀번호와 일치하지 않는 경우에 오류 던지기
         }
         // 일치하는 경우에 밑의 로직 실행하면 됨
 

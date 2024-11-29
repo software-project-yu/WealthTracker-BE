@@ -104,7 +104,7 @@ public class TargetServiceImpl implements TargetService {
     @Transactional(readOnly = true)
     public TargetGraphDTO getGraphData(int month, String token) {
         User user = userRepository.findByUserId(getUserIdFromToken(token))
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
 
         //현재 금액
         int nowAmount=targetRepository.getAllSavedAmountByMonth(month,user);
