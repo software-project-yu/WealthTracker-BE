@@ -21,7 +21,9 @@ public enum SuccessCode {
     SUCCESS_EXPEND_INCOME(200,"지출과 수입 내역을 성공적으로 불러왔습니다."),
     SUCCESS_RESET_CODE_SENT(200, "비밀번호 재설정 코드가 발송되었습니다."),
     SUCCESS_PASSWORD_RESET(200, "비밀번호가 성공적으로 재설정되었습니다."),
-    SUCCESS_PASSWORD_CONFIRM(200, "비밀번호 확인이 완료되었습니다.");
+    SUCCESS_PASSWORD_CONFIRM(200, "비밀번호 확인이 완료되었습니다."),
+    SUCCESS_CREATE_CATEGORYTARGET(200, "카테고리 지출 목표가 성공적으로 생성되었습니다."),
+    SUCCESS_UPDATE_CATEGORYTARGET(200, "카테고리 지출 목표가 성공적으로 수정되었습니다.");
     private final int status;
     private final String message;
 
