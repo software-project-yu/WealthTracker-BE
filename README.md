@@ -1,21 +1,22 @@
 # WealthTracker - 💵개인 재무 관리 플랫폼
 <img src="https://github.com/user-attachments/assets/ef4c9b71-0899-409a-88ae-918eb9acd8a4" style="width:100%"/>
 
-# 🔖Version
+# 🔖 Version
 | Version | Revision Date | Description                                                                                      | Distributor |
 |:-------:|:-------------:|:-------------------------------------------------------------------------------------------------|:-----------:|
 | 1.0.0   | 2024.11.24      | Request DTO 유효성 검사<br>목표 API<br>비밀번호 재설정 수정<br>지출 목표 CRUD API 구현<br>회원 가입, 이메일 로직 변경<br>회원가입 DTO test code 추가 | 김도연      |
 | 1.0.1 | 2024.11.28 | 비밀번호 확인 API 추가 | 김도연 |
+| 1.1.0 | 2024.11.29 | 결제 예정 API 추가<br>예외처리 강화<br>지출 목표 Swagger API 형식 작성|김도연|
 
 <br/>
 
-## 👥Team
+## 👥 Team
 
 |<img src="https://avatars.githubusercontent.com/u/144890194?s=400&u=89b20ce0f01d59364fe15b04bd5a7b2cdb5045a1&v=4" width="150" height="150"/>|<img src="https://avatars.githubusercontent.com/u/144890194?s=400&u=89b20ce0f01d59364fe15b04bd5a7b2cdb5045a1&v=4" width="150" height="150"/> | <img src="https://avatars.githubusercontent.com/u/181474874?v=4" width="150" height="150"/>  |
 |:-:|:-:|:-:|
 |김도연<br/>[@tkv00](https://github.com/tkv00)|박재성<br/>[@pjs1710](https://github.com/pjs1710)|정현아<br/>[@hyunaaaj](https://github.com/hyunaaaj)
 
-## Responsibilities
+## ✏️ Responsibilities
 - 김도연
     - AWS EC2, AWS RDS 서버 배포
     - GitHub Action,AWS Code Deploy를 이용한 CI/CD
@@ -58,52 +59,107 @@
 
 <br/>
 
-## Directory Achitecture
+## 📜 Directory Achitecture
 ```
-├── HELP.md
-├── build.gradle
-├── gradle
-│   └── wrapper
-│       ├── gradle-wrapper.jar
-│       └── gradle-wrapper.properties
-├── gradlew
-├── gradlew.bat
-├── settings.gradle
-└── src
-    ├── main
-    │   ├── java
-    │   │   └── com
-    │   │       └── WealthTracker
-    │   │           └── demo
-    │   │               ├── DTO
-    │   │               │   └── test
-    │   │               ├── DemoApplication.java
-    │   │               ├── config
-    │   │               │   └── test
-    │   │               ├── controller
-    │   │               │   └── test
-    │   │               ├── domain
-    │   │               │   └── test
-    │   │               ├── enums
-    │   │               │   └── test
-    │   │               ├── error
-    │   │               │   └── test
-    │   │               ├── repository
-    │   │               │   └── test
-    │   │               ├── service
-    │   │               │   └── test
-    │   │               └── util
-    │   │                   └── test
-    │   └── resources
-    │       ├── application.properties
-    │       ├── static
-    │       └── templates
-    └── test
-        └── java
-            └── com
-                └── WealthTracker
-                    └── demo
-                        └── DemoApplicationTests.java
+.
+└── demo
+    ├── DTO
+    │   ├── CustomUserInfoDTO.java
+    │   ├── JwtResponseDTO.java
+    │   ├── LoginRequestDTO.java
+    │   ├── ReturnCodeDTO.java
+    │   ├── SignupRequestDTO.java
+    │   ├── VerificationCodeConfirmDTO.java
+    │   ├── VerificationCodeRequestDTO.java
+    │   ├── dailysaving
+    │   │   └── DailySavingRequestDTO.java
+    │   ├── feedback
+    │   │   ├── ChatRequest.java
+    │   │   ├── ChatResponse.java
+    │   │   ├── FeedbackResponseDTO.java
+    │   │   └── Message.java
+    │   ├── income_expend
+    │   │   ├── ExpendCategoryAmountDTO.java
+    │   │   ├── ExpendDateResponseDTO.java
+    │   │   ├── ExpendDayResponseDTO.java
+    │   │   ├── ExpendIncomeResponseDTO.java
+    │   │   ├── ExpendRequestDTO.java
+    │   │   ├── ExpendResponseDTO.java
+    │   │   ├── IncomeRequestDTO.java
+    │   │   └── IncomeResponseDTO.java
+    │   └── target
+    │       ├── TargetRequestDTO.java
+    │       └── TargetResponseDTO.java
+    ├── DemoApplication.java
+    ├── config
+    │   ├── GeminiRestTemplateConfig.java
+    │   ├── SecurityConfig.java
+    │   └── SwaggerConfig.java
+    ├── constants
+    │   ├── ErrorCode.java
+    │   └── SuccessCode.java
+    ├── controller
+    │   ├── AuthController.java
+    │   ├── ExpendController.java
+    │   ├── ExpendIncomeController.java
+    │   ├── FeedbackController.java
+    │   ├── IncomeController.java
+    │   ├── LoginController.java
+    │   └── TargetController.java
+    ├── domain
+    │   ├── CategoryExpend.java
+    │   ├── CategoryIncome.java
+    │   ├── DailySaving.java
+    │   ├── Expend.java
+    │   ├── FeedBack.java
+    │   ├── Income.java
+    │   ├── Target.java
+    │   ├── User.java
+    │   └── VerificationCode.java
+    ├── enums
+    │   ├── Asset.java
+    │   ├── Category_Expend.java
+    │   └── Category_Income.java
+    ├── error
+    │   ├── CustomException.java
+    │   └── GlobalExceptionHandler.java
+    ├── repository
+    │   ├── DailySavingRepository.java
+    │   ├── ExpendCategoryRepository.java
+    │   ├── ExpendRepository.java
+    │   ├── FeedbackRepository.java
+    │   ├── IncomeCategoryRepository.java
+    │   ├── IncomeRepository.java
+    │   ├── TargetRepository.java
+    │   ├── UserRepository.java
+    │   └── VerificationCodeRepository.java
+    ├── service
+    │   ├── CustomUserDetailsService.java
+    │   ├── EmailService.java
+    │   ├── EmailServiceImpl.java
+    │   ├── FeedbackService.java
+    │   ├── FeedbackServiceImpl.java
+    │   ├── KakaoOAuth2UserService.java
+    │   ├── LoginService.java
+    │   ├── LoginServiceImpl.java
+    │   ├── SignupService.java
+    │   ├── SignupServiceImpl.java
+    │   ├── income_expend
+    │   │   ├── ExpendIncomeService.java
+    │   │   ├── ExpendIncomeServiceImpl.java
+    │   │   ├── ExpendService.java
+    │   │   ├── ExpendServiceImpl.java
+    │   │   ├── IncomeService.java
+    │   │   └── IncomeServiceImpl.java
+    │   └── target
+    │       ├── TargetService.java
+    │       └── TargetServiceImpl.java
+    └── util
+        ├── CategoryExpendInitializer.java
+        ├── JwtAuthFilter.java
+        ├── JwtUtil.java
+        └── VerificationCodeUtil.java
+
 
 
 ```
@@ -118,6 +174,20 @@
 - service
 - util : 기능 클래스
 
+## 📄 API Docs
+#### 회원가입 로그인
+![스크린샷 2024-11-30 02 07 18](https://github.com/user-attachments/assets/bc5fa66e-25bf-4e34-99d6-f3fd2254208a)
+
+#### 지출 및 수입
+![스크린샷 2024-11-30 02 05 13](https://github.com/user-attachments/assets/75313bee-af03-4b66-b6f7-5b42f3bb849a)
+![스크린샷 2024-11-30 02 07 06](https://github.com/user-attachments/assets/bc0f9530-e385-458a-8b4c-50bb5929b5dd)
+
+#### 피드백 및 지출예정
+![스크린샷 2024-11-30 02 05 24](https://github.com/user-attachments/assets/7f171b6e-7b04-4d31-b511-04bbf0928d70)
+
+#### 저축 목표
+![스크린샷 2024-11-30 02 06 55](https://github.com/user-attachments/assets/02fedd7f-30b8-4178-933d-33a20a6fb9e3)
+
 ## Archictecture
 
 ### 1️⃣ ERD
@@ -128,7 +198,7 @@
 ![sf](https://github.com/user-attachments/assets/7c97c013-5cd8-4423-b4e2-45182a12dc8c)
 
 
-## Tech 📕
+## 📕 Tech 
 1️⃣ Framework & Library
 
 - JDK: 21
