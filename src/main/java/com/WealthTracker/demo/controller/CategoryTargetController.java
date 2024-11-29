@@ -3,7 +3,9 @@ package com.WealthTracker.demo.controller;
 import com.WealthTracker.demo.DTO.ReturnCodeDTO;
 import com.WealthTracker.demo.DTO.category_target.CategoryTargetRequestDTO;
 import com.WealthTracker.demo.DTO.category_target.CategoryTargetResponseDTO;
+import com.WealthTracker.demo.constants.SuccessCode;
 import com.WealthTracker.demo.enums.Category_Expend;
+import com.WealthTracker.demo.error.CustomException;
 import com.WealthTracker.demo.service.category_target.CategoryTargetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,6 +14,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,9 +34,14 @@ public class CategoryTargetController {
             @ApiResponse(responseCode = "500", description = "서버 오류", content = {@Content(mediaType = "string")})
     })
     @PostMapping("/create")
-    public void createTarget(@RequestHeader("Authorization") String token,
-                             @RequestBody CategoryTargetRequestDTO requestDTO) {
-        categoryTargetService.createTarget(token, requestDTO);
+    public ResponseEntity<?> createTarget(@RequestHeader("Authorization") String token,
+                                       @RequestBody CategoryTargetRequestDTO requestDTO) {
+        try {
+            categoryTargetService.createTarget(token, requestDTO);
+            return ResponseEntity.ok(SuccessCode.SUCCESS_CREATE_CATEGORYTARGET.getMessage());
+        } catch (CustomException e) {
+            return new ResponseEntity<>(new ReturnCodeDTO(e.getErrorCode().getStatus(),e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
     }
 
     //* 카테고리 목표 수정하는 API
@@ -44,9 +53,14 @@ public class CategoryTargetController {
             @ApiResponse(responseCode = "500", description = "서버 오류", content = {@Content(mediaType = "string")})
     })
     @PutMapping("/update")
-    public void updateTarget(@RequestHeader("Authorization") String token,
+    public ResponseEntity<?> updateTarget(@RequestHeader("Authorization") String token,
                              @RequestBody CategoryTargetRequestDTO requestDTO) {
-        categoryTargetService.updateTarget(token, requestDTO);
+        try {
+            categoryTargetService.updateTarget(token, requestDTO);
+            return ResponseEntity.ok(SuccessCode.SUCCESS_UPDATE_CATEGORYTARGET.getMessage());
+        } catch (CustomException e) {
+            return new ResponseEntity<>(new ReturnCodeDTO(e.getErrorCode().getStatus(),e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
     }
 
     //* 해당 카테고리 목표를 조회하는 API
@@ -58,8 +72,13 @@ public class CategoryTargetController {
             @ApiResponse(responseCode = "500", description = "서버 오류", content = {@Content(mediaType = "string")})
     })
     @GetMapping("/{category}")
-    public CategoryTargetResponseDTO getTarget(@RequestHeader("Authorization") String token,
+    public ResponseEntity<?> getTarget(@RequestHeader("Authorization") String token,
                                                @PathVariable("category") Category_Expend category) {
-        return categoryTargetService.getTarget(token, category);
+        try {
+            CategoryTargetResponseDTO responseDTO = categoryTargetService.getTarget(token, category);
+            return ResponseEntity.ok(responseDTO);
+        } catch (CustomException e) {
+            return new ResponseEntity<>(new ReturnCodeDTO(e.getErrorCode().getStatus(),e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
     }
 }
