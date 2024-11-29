@@ -88,8 +88,7 @@ public class SignupServiceImpl implements SignupService {
         if (!passwordEncoder.matches(passwordConfirmDTO.getConfirmPassword(), myUser.getPassword())) {
             throw new CustomException(ErrorCode.PASSWORD_MISMATCH); // 기존 비밀번호와 일치하지 않는 경우에 오류 던지기
         }
-        // 일치하는 경우에 밑의 로직 실행하면 됨
-
+        // if 문 통과하면 성공!
         return SuccessCode.SUCCESS_PASSWORD_CONFIRM.getMessage();
     }
 
