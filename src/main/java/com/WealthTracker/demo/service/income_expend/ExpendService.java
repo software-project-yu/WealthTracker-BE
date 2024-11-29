@@ -15,8 +15,7 @@ public interface ExpendService {
     //지출 내역 상세보기
     ExpendResponseDTO  expendResponseDetail(String token,Long expendId);
 
-    //카테고리별 지출 내역 불러오기
-    List<ExpendCategoryAmountDTO> expendCategoryResponse(String token,String category);
+
     //지출 내역 수정
     Long updateExpend(String token,Long expendId,ExpendRequestDTO expendRequestDTO);
     //지출 내역 삭제

@@ -11,11 +11,13 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler { //** 예외 처리에 관한 Handler
 
     @ExceptionHandler(UsernameNotFoundException.class)
@@ -34,10 +36,11 @@ public class GlobalExceptionHandler { //** 예외 처리에 관한 Handler
     }
 
     // 필요한 다른 예외 처리 추가
-    @ExceptionHandler({CustomException.class})
-    protected ResponseEntity handleCustomException(CustomException ex) {
-        return new ResponseEntity(new ReturnCodeDTO(ex.getErrorCode().getStatus(), ex.getErrorCode().getMessage()),
-                HttpStatus.valueOf(ex.getErrorCode().getStatus()));
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<?> handleCustomException(CustomException ex){
+        return ResponseEntity
+                .status(HttpStatus.valueOf(ex.getErrorCode().getStatus()))
+                .body(new ReturnCodeDTO(ex.getErrorCode().getStatus(),ex.getMessage()));
     }
 
     @ExceptionHandler({Exception.class})

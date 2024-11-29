@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -31,13 +32,13 @@ import java.util.List;
 public class IncomeController {
     private final IncomeServiceImpl incomeService;
 
-    @Operation(summary = "수입 내역 조회 API입니다. [담당자]:김도연")
+    @Operation(summary = "수입 내역 작성 API입니다. [담당자]:김도연")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "기록 성공", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ReturnCodeDTO.class))}),
             @ApiResponse(responseCode = "500", description = "서버 오류", content = {@Content(mediaType = "string")})
     })
     @PostMapping("/income")
-    public ResponseEntity<?> write(@RequestBody IncomeRequestDTO incomeRequestDTO, @RequestHeader("Authorization") String token) throws Exception {
+    public ResponseEntity<?> write(@RequestBody IncomeRequestDTO incomeRequestDTO, @RequestHeader("Authorization") String token) throws CustomException {
 
         incomeService.writeIncome(incomeRequestDTO, token);
 
