@@ -115,7 +115,9 @@
 
 ![WealthTracker (1)](https://github.com/user-attachments/assets/72ad4a36-eba5-43bc-a8e3-1093a68419b2)
 
-### 2️⃣
+### 2️⃣ CI/CD
+![sf](https://github.com/user-attachments/assets/7c97c013-5cd8-4423-b4e2-45182a12dc8c)
+
 
 ## Tech 📕
 1️⃣ Framework & Library
