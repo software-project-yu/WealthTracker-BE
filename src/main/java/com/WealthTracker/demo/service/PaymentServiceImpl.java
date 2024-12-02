@@ -155,9 +155,10 @@ public class PaymentServiceImpl implements PaymentService {
         // JWT 토큰 검증 실시
         Optional<User> findUser = userRepository.findByUserId(jwtUtil.getUserId(token));
         User user = findUser.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
-        // 사용자의 최근 결제 내역 2개 조회
-        List<Payment> recentPaymentList = paymentRepository.findRecentPayment(user, (Pageable) PageRequest.of(0, 2));
 
+        // 사용자의 최근 결제 내역 2개 조회
+        List<Payment> recentPaymentList = paymentRepository.findRecentPayment(user, (Pageable) PageRequest.of(0, 2))
+                .orElseThrow(()->new  CustomException(ErrorCode.PAYMENT_IS_NULL,ErrorCode.PAYMENT_IS_NULL.getMessage()));
         return recentPaymentList.stream()
                 .map(payment -> new PaymentResponseDTO(payment))
                 .collect(Collectors.toList());
@@ -195,7 +196,8 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         // 결제 내역 2개씩 리스트
-        List<Payment> paymentList = paymentRepository.findRecentPayment(user, PageRequest.of(0, 2));
+        List<Payment> paymentList = paymentRepository.findRecentPayment(user, PageRequest.of(0, 2))
+                .orElseThrow(()->new CustomException(ErrorCode.PAYMENT_IS_NULL,ErrorCode.EXPEND_NOT_FOUND.getMessage()));
         List<PaymentResponseDTO> paymentResponseDTOList = paymentList.stream()
                 .map(payment -> PaymentResponseDTO.builder()
                         .paymentId(payment.getPaymentId())

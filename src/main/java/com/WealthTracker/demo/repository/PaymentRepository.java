@@ -35,7 +35,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
             "and month (p.lastPayment) = month (current_date) "+
             "and year (p.lastPayment) = year (current_date) "+
             " ORDER BY p.lastPayment DESC")
-    List<Payment> findRecentPayment(User user, Pageable pageable);
+    Optional<List<Payment>> findRecentPayment(User user, Pageable pageable);
 
     // 이번 달 결제 금액
     @Query("SELECT COALESCE(SUM(p.cost), 0) FROM Payment p "+
