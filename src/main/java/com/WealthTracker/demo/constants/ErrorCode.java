@@ -38,6 +38,7 @@ public enum ErrorCode {
 
 
     PAYMENT_CONFLICT(409, "결제 내역이 이미 존재합니다."),
+    PAYMENT_IS_NULL(409,"결제예정내역이 없습니다."),
 
 
     //500 INTERNAL SERVER ERROR

@@ -43,31 +43,18 @@ public class PaymentServiceImpl implements PaymentService {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
 
-        PaymentDetail convertToPaymentDetail;
-        try {
-            convertToPaymentDetail = PaymentDetail.fromString(paymentRequestDTO.getPaymentDetail());
-        } catch (Exception e) {
-            throw new CustomException(ErrorCode.INVALID_PAYMENT_DETAIL_PARAMETER,ErrorCode.INVALID_PAYMENT_PARAMETER.getMessage());
-        }
+
 
         if (paymentRequestDTO.getDueDate() == null || paymentRequestDTO.getLastPayment() == null) {
             throw new CustomException(ErrorCode.PAYMENT_DATE_EMPTY,ErrorCode.PAYMENT_DATE_EMPTY.getMessage());
         }
 
-        LocalDate dueDate;
-        LocalDate lastPayment;
-        try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd/HH:mm:ss");
-            dueDate = paymentRequestDTO.getDueDate().toLocalDate();
-            lastPayment = paymentRequestDTO.getLastPayment().toLocalDate();
-        } catch (DateTimeParseException e) {
-            throw new CustomException(ErrorCode.INVALID_PAYMENT_DATE,ErrorCode.INVALID_PAYMENT_DATE.getMessage());
-        }
+
 
         Payment payment = Payment.builder()
-                .dueDate(dueDate.atStartOfDay())
-                .paymentDetail(convertToPaymentDetail)
-                .lastPayment(lastPayment.atStartOfDay())
+                .dueDate(LocalDate.parse(paymentRequestDTO.getDueDate()).atStartOfDay())
+                .paymentDetail(paymentRequestDTO.getPaymentDetail())
+                .lastPayment(LocalDate.parse(paymentRequestDTO.getLastPayment()).atStartOfDay())
                 .cost(paymentRequestDTO.getCost())
                 .tradeName(paymentRequestDTO.getTradeName())
                 .user(user)
@@ -97,7 +84,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .map(payment -> PaymentResponseDTO.builder()
                         .paymentId(payment.getPaymentId())
                         .dueDate(LocalDateTime.parse(payment.getDueDate().toString().substring(0, 10)))
-                        .paymentDetail(PaymentDetail.toString(payment.getPaymentDetail()))
+                        .paymentDetail(payment.getPaymentDetail())
                         .lastPayment(LocalDateTime.parse(payment.getLastPayment().toString().substring(0, 10)))
                         .cost(payment.getCost())
                         .tradeName(payment.getTradeName())
@@ -126,7 +113,7 @@ public class PaymentServiceImpl implements PaymentService {
         // 결제 내역 수정
         Payment updatePayment = findPayment.builder()
                 .dueDate(LocalDateTime.parse(paymentRequestDTO.getDueDate() + "T00:00"))
-                .paymentDetail(PaymentDetail.fromString(paymentRequestDTO.getPaymentDetail()))
+                .paymentDetail(payment.getPaymentDetail())
                 .lastPayment(LocalDateTime.parse(paymentRequestDTO.getLastPayment() + "T00:00"))
                 .cost(paymentRequestDTO.getCost())
                 .tradeName(paymentRequestDTO.getTradeName())
@@ -155,9 +142,10 @@ public class PaymentServiceImpl implements PaymentService {
         // JWT 토큰 검증 실시
         Optional<User> findUser = userRepository.findByUserId(jwtUtil.getUserId(token));
         User user = findUser.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
-        // 사용자의 최근 결제 내역 2개 조회
-        List<Payment> recentPaymentList = paymentRepository.findRecentPayment(user, (Pageable) PageRequest.of(0, 2));
 
+        // 사용자의 최근 결제 내역 2개 조회
+        List<Payment> recentPaymentList = paymentRepository.findRecentPayment(user, (Pageable) PageRequest.of(0, 2))
+                .orElseThrow(()->new  CustomException(ErrorCode.PAYMENT_IS_NULL,ErrorCode.PAYMENT_IS_NULL.getMessage()));
         return recentPaymentList.stream()
                 .map(payment -> new PaymentResponseDTO(payment))
                 .collect(Collectors.toList());
@@ -195,7 +183,8 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         // 결제 내역 2개씩 리스트
-        List<Payment> paymentList = paymentRepository.findRecentPayment(user, PageRequest.of(0, 2));
+        List<Payment> paymentList = paymentRepository.findRecentPayment(user, PageRequest.of(0, 2))
+                .orElseThrow(()->new CustomException(ErrorCode.PAYMENT_IS_NULL,ErrorCode.EXPEND_NOT_FOUND.getMessage()));
         List<PaymentResponseDTO> paymentResponseDTOList = paymentList.stream()
                 .map(payment -> PaymentResponseDTO.builder()
                         .paymentId(payment.getPaymentId())
