@@ -27,7 +27,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping({"/api", "/payment"})
+@RequestMapping("/api")
 @Tag(name = "결제", description = "결제 내역 API")
 
 public class PaymentController {

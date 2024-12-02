@@ -28,8 +28,8 @@ public class Payment {
 
     private LocalDateTime lastPayment;
 
-    @Enumerated(EnumType.STRING)
-    private PaymentDetail paymentDetail;
+
+    private String paymentDetail;
 
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(nullable = false, name = "userId")

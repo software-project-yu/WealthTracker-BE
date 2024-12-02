@@ -23,4 +23,7 @@ public class ExpendIncomeResponseDTO {
     //내용
     private String content;
 
+    //금액
+    private Long cost;
+
 }
