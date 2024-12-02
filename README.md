@@ -195,8 +195,9 @@
 ![스크린샷 2024-11-30 02 05 13](https://github.com/user-attachments/assets/75313bee-af03-4b66-b6f7-5b42f3bb849a)
 ![스크린샷 2024-11-30 02 07 06](https://github.com/user-attachments/assets/bc0f9530-e385-458a-8b4c-50bb5929b5dd)
 
-#### 피드백 및 지출예정
-![스크린샷 2024-11-30 02 05 24](https://github.com/user-attachments/assets/7f171b6e-7b04-4d31-b511-04bbf0928d70)
+#### 피드백 및 결제예정
+![스크린샷 2024-12-02 13 21 27](https://github.com/user-attachments/assets/e2e37c7b-929a-483d-90a3-4719baedb085)
+
 
 #### 저축 목표
 ![스크린샷 2024-11-30 02 06 55](https://github.com/user-attachments/assets/02fedd7f-30b8-4178-933d-33a20a6fb9e3)
