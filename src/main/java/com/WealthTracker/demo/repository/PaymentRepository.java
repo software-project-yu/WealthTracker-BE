@@ -8,6 +8,7 @@ import com.WealthTracker.demo.enums.Category_Expend;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
@@ -53,4 +54,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
             "and year(p.dueDate) = year(current_date) -1))"
     )
     Long preMonthAmount(@Param("user") User user);
+
+
+    void deleteById(@Param("paymentId") Long paymentId);
 }

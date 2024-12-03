@@ -83,9 +83,9 @@ public class PaymentServiceImpl implements PaymentService {
         return paymentList.stream()
                 .map(payment -> PaymentResponseDTO.builder()
                         .paymentId(payment.getPaymentId())
-                        .dueDate(LocalDateTime.parse(payment.getDueDate().toString().substring(0, 10)))
+                        .dueDate(payment.getDueDate().toString().substring(0,10))
                         .paymentDetail(payment.getPaymentDetail())
-                        .lastPayment(LocalDateTime.parse(payment.getLastPayment().toString().substring(0, 10)))
+                        .lastPayment(payment.getLastPayment().toString().substring(0,10))
                         .cost(payment.getCost())
                         .tradeName(payment.getTradeName())
                         .build())
@@ -93,6 +93,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public Long updatePayment(String token, Long paymentId, PaymentRequestDTO paymentRequestDTO) {
         // 유저 정보 가져오기
         User myUser = userRepository.findByUserId(jwtUtil.getUserId(token))
@@ -125,16 +126,13 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public Long deletePayment(String token, Long paymentId) {
+    @Transactional
+    public void deletePayment(String token, Long paymentId) {
         Optional<User> user = userRepository.findByUserId(jwtUtil.getUserId(token));
         User currentUser = user.orElseThrow(() ->  new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
 
-        Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND,ErrorCode.PAYMENT_NOT_FOUND.getMessage()));
-
         // 결제 내역 삭제
-        paymentRepository.delete(payment);
-        return paymentId;
+         paymentRepository.deleteById(paymentId);
     }
 
     @Override
@@ -147,7 +145,7 @@ public class PaymentServiceImpl implements PaymentService {
         List<Payment> recentPaymentList = paymentRepository.findRecentPayment(user, (Pageable) PageRequest.of(0, 2))
                 .orElseThrow(()->new  CustomException(ErrorCode.PAYMENT_IS_NULL,ErrorCode.PAYMENT_IS_NULL.getMessage()));
         return recentPaymentList.stream()
-                .map(payment -> new PaymentResponseDTO(payment))
+                .map(PaymentResponseDTO::new)
                 .collect(Collectors.toList());
     }
 
@@ -189,7 +187,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .map(payment -> PaymentResponseDTO.builder()
                         .paymentId(payment.getPaymentId())
                         .tradeName(payment.getTradeName())
-                        .lastPayment(LocalDateTime.parse(payment.getLastPayment().toString()))
+                        .lastPayment(payment.getLastPayment().toString().substring(0,10))
                         .cost(payment.getCost())
                         .build())
                 .toList();
