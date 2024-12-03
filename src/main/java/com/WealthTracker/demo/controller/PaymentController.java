@@ -94,13 +94,6 @@ public class PaymentController {
         }catch (CustomException ex){
             return new ResponseEntity<>(new ReturnCodeDTO(ex.getErrorCode().getStatus(),ex.getMessage()),HttpStatus.BAD_REQUEST);
         }
-        //결제 내역이 존재하지 않을 때
-        catch (Exception ex){
-            // 일반 예외 처리
-            ReturnCodeDTO returnCodeDTO = new ReturnCodeDTO(ErrorCode.PAYMENT_NOT_FOUND.getStatus(),
-                    ErrorCode.PAYMENT_NOT_FOUND.getMessage());
-            return new ResponseEntity<>(returnCodeDTO, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
     }
 
     @Operation(summary = "결제 내역 수정을 위한 API 입니다.",  description = "결제 내역을 수정합니다.")
