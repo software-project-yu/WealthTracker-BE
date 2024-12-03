@@ -112,9 +112,9 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment = paymentRepository.findByPaymentId(paymentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND,ErrorCode.PAYMENT_NOT_FOUND.getMessage()));
         // 결제 내역 수정
-        Payment updatePayment = findPayment.builder()
+        Payment updatePayment = findPayment.toBuilder()
                 .dueDate(LocalDateTime.parse(paymentRequestDTO.getDueDate() + "T00:00"))
-                .paymentDetail(payment.getPaymentDetail())
+                .paymentDetail(paymentRequestDTO.getPaymentDetail())
                 .lastPayment(LocalDateTime.parse(paymentRequestDTO.getLastPayment() + "T00:00"))
                 .cost(paymentRequestDTO.getCost())
                 .tradeName(paymentRequestDTO.getTradeName())
