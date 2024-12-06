@@ -32,7 +32,11 @@ public class CategoryTargetServiceImpl implements CategoryTargetService {
 
         categoryTargetRepository.findByUserAndCategory(user, requestDTO.getCategory())
                 .ifPresent(target -> {
+
+                    throw new CustomException(ErrorCode.TARGET_ALREADY_EXISTS, ErrorCode.USER_NOT_FOUND.getMessage());
+
                     throw new CustomException(ErrorCode.TARGET_ALREADY_EXISTS,ErrorCode.TARGET_ALREADY_EXISTS.getMessage());
+
                 });
 
         CategoryTarget categoryTarget = CategoryTarget.builder()
@@ -51,7 +55,11 @@ public class CategoryTargetServiceImpl implements CategoryTargetService {
         User user = getUserById(userId);
 
         CategoryTarget categoryTarget = categoryTargetRepository.findByUserAndCategory(user, requestDTO.getCategory())
+
+                .orElseThrow(() -> new CustomException(ErrorCode.TARGET_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
+
                 .orElseThrow(() -> new CustomException(ErrorCode.TARGET_NOT_FOUND,ErrorCode.TARGET_NOT_FOUND.getMessage()));
+
 
         categoryTarget = CategoryTarget.builder()
                 .categorytargetId(categoryTarget.getCategorytargetId())
@@ -102,7 +110,11 @@ public class CategoryTargetServiceImpl implements CategoryTargetService {
 
     private User getUserById(Long userId) {
         return userRepository.findByUserId(userId)
+
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
+
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
+
 
     }
 }

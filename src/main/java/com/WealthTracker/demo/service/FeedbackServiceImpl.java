@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,7 +83,11 @@ public class FeedbackServiceImpl implements FeedbackService {
         //유저 찾기
         Optional<User> user = userRepository.findByUserId(jwtUtil.getUserId(token));
         User myUser = user.orElseThrow(
+
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage())
+
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage())
+
         );
         //최신 지출 날짜
         LocalDateTime latestExpendDate = expendRepository.findLatestExpend(myUser);

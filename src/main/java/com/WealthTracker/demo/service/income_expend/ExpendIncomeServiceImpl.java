@@ -39,7 +39,11 @@ public class ExpendIncomeServiceImpl implements ExpendIncomeService {
         //유저 정보 가져오기
         Optional<User> user = userRepository.findByUserId(jwtUtil.getUserId(token));
         User myUser = user.orElseThrow(
+
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage())
+
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage())
+
         );
 
         //이번 달 지출 총 내역

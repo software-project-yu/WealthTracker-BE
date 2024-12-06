@@ -16,7 +16,11 @@ public interface PaymentService {
     // 결제 내역 수정
     Long updatePayment(String token, Long paymentId, PaymentRequestDTO paymentRequestDTO);
     // 결제 내역 삭제
+
+    void deletePayment(String token, Long paymentId);
+
     void deletePayment(String token,Long paymentId);
+
     // 최근 결제 내역 2개 불러오기
     List<PaymentResponseDTO> getRecentPayments(String token);
     // 이번 결제 내역

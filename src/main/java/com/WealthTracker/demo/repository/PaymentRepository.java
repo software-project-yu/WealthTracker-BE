@@ -28,8 +28,9 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     List<Payment> findByDueDate(LocalDateTime dueDate);
 
     //날짜로 최신순 정렬하여 2개 가져오기
-    @Query("select e from Payment e order by e.lastPayment desc")
-    Optional<List<Payment>> findRecentPayment(Pageable pageable);
+    @Query("SELECT p FROM Payment p WHERE p.user = :user " +
+            "order by p.lastPayment desc")
+    Optional<List<Payment>>  findRecentPayment(Pageable pageable, User user);
 
     //이번 달 최신 결제 내역 2개
     @Query("SELECT p FROM Payment p WHERE p.user = :user "+
@@ -56,5 +57,9 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     Long preMonthAmount(@Param("user") User user);
 
 
+    void deleteById(@Param("paymentId")Long paymentId);
+
+
     void deleteById(@Param("paymentId") Long paymentId);
+
 }
