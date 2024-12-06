@@ -34,11 +34,16 @@ public class ExpendIncomeServiceImpl implements ExpendIncomeService {
     private final JwtUtil jwtUtil;
 
     @Override
+    @Transactional(readOnly = true)
     public List<ExpendIncomeResponseDTO> getExpendIncomeAllList(String token, int month) {
         //유저 정보 가져오기
         Optional<User> user = userRepository.findByUserId(jwtUtil.getUserId(token));
         User myUser = user.orElseThrow(
+
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage())
+
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage())
+
         );
 
         //이번 달 지출 총 내역
@@ -71,6 +76,7 @@ public class ExpendIncomeServiceImpl implements ExpendIncomeService {
                         return ExpendIncomeResponseDTO.builder()
                                 .asset(Asset.toString(expend.getAsset()))
                                 .id(expend.getExpendId())
+                                .cost(expend.getCost())
                                 .content(expend.getExpendName())
                                 .date(expend.getExpendDate().toString().substring(0, 10))
                                 .type("지출")
@@ -88,6 +94,7 @@ public class ExpendIncomeServiceImpl implements ExpendIncomeService {
                         return ExpendIncomeResponseDTO.builder()
                                 .asset(Asset.toString(income.getAsset()))
                                 .id(income.getIncomeId())
+                                .cost(income.getCost())
                                 .content(income.getIncomeName())
                                 .date(income.getIncomeDate().toString().substring(0, 10))
                                 .type("수입")

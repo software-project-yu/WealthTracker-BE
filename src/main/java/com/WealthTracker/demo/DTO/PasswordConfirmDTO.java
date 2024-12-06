@@ -1,6 +1,7 @@
 package com.WealthTracker.demo.DTO;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,8 +11,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class VerificationCodeConfirmDTO {
+public class PasswordConfirmDTO {
     @NotNull
-    private String code;
-    private String newPassword;
+    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,15}$\n")
+    private String confirmPassword; // 확인할 비밀번호
 }

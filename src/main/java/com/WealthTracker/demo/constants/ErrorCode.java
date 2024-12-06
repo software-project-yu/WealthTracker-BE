@@ -19,10 +19,12 @@ public enum ErrorCode {
     EMAIL_ALREADY_REGISTERED(400, "이미 가입된 이메일입니다."),
     EMAIL_VERIFY_FAIL(400, "이메일 인증에 실패했습니다."),
     PASSWORD_RESET_INVALID(400, "비밀번호 재설정 코드가 유효하지 않거나 만료된 코드입니다."),
+    INVALID_UPDATE_REQUEST(400, "수정할 정보가 없거나 기존 값과 동일합니다."),
 
     //404 NOT_FOUND 잘못된 리소스 접근
     USER_NOT_FOUND(404, "존재하지 않는 회원 ID 입니다."),
     VERIFICATION_CODE_NOT_FOUND(404, "인증 코드가 존재하지 않습니다."),
+    PAYMENT_NOT_FOUND(404, "존재하지 않는 결제 내역입니다."),
     TARGET_ALREADY_EXISTS(400, "이미 존재하는 목표입니다."),
     TARGET_NOT_FOUND(400, "해당 목표가 존재하지 않습니다."),
     PASSWORD_MISMATCH(400, "비밀번호가 일치하지 않습니다."),
@@ -37,6 +39,7 @@ public enum ErrorCode {
 
 
     PAYMENT_CONFLICT(409, "결제 내역이 이미 존재합니다."),
+    PAYMENT_IS_NULL(409,"결제예정내역이 없습니다."),
 
 
     //500 INTERNAL SERVER ERROR

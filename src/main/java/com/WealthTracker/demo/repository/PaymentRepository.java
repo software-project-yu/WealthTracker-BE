@@ -11,8 +11,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import java.lang.ScopedValue;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -39,7 +37,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
             "and month (p.lastPayment) = month (current_date) "+
             "and year (p.lastPayment) = year (current_date) "+
             " ORDER BY p.lastPayment DESC")
-    List<Payment> findRecentPayment(User user, Pageable pageable);
+    Optional<List<Payment>> findRecentPayment(User user, Pageable pageable);
 
     // 이번 달 결제 금액
     @Query("SELECT COALESCE(SUM(p.cost), 0) FROM Payment p "+
@@ -58,5 +56,10 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     )
     Long preMonthAmount(@Param("user") User user);
 
+
     void deleteById(@Param("paymentId")Long paymentId);
+
+
+    void deleteById(@Param("paymentId") Long paymentId);
+
 }

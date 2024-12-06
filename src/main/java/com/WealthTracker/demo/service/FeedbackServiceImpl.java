@@ -83,7 +83,11 @@ public class FeedbackServiceImpl implements FeedbackService {
         //유저 찾기
         Optional<User> user = userRepository.findByUserId(jwtUtil.getUserId(token));
         User myUser = user.orElseThrow(
+
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage())
+
+                () -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage())
+
         );
         //최신 지출 날짜
         LocalDateTime latestExpendDate = expendRepository.findLatestExpend(myUser);
