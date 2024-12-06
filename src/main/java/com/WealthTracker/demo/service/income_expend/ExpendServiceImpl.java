@@ -246,7 +246,7 @@ public class ExpendServiceImpl implements ExpendService {
 
         //유저의 최신 지출 내역 5개 불러오기
         List<Expend> recentExpendList = expendRepository.findRecentExpend(
-                PageRequest.of(0, 5)).orElseThrow(
+                PageRequest.of(0, 5),user).orElseThrow(
                 () -> new CustomException(ErrorCode.INTERNAL_SERVER_ERROR,ErrorCode.INTERNAL_SERVER_ERROR.getMessage())
         );
 
