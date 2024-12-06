@@ -156,7 +156,8 @@ public class PaymentServiceImpl implements PaymentService {
         Optional<User> findUser = userRepository.findByUserId(jwtUtil.getUserId(token));
         User user = findUser.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
         // 사용자의 최근 결제 내역 2개 조회
-        List<Payment> recentPaymentList = paymentRepository.findRecentPayment(PageRequest.of(0, 2), user).orElseThrow(
+        List<Payment> recentPaymentList = paymentRepository.findRecentPayment
+                (PageRequest.of(0, 2), user).orElseThrow(
                 () -> new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_SERVER_ERROR.getMessage())
         );
 

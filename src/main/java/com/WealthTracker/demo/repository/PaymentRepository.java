@@ -30,7 +30,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     List<Payment> findByDueDate(LocalDateTime dueDate);
 
     //날짜로 최신순 정렬하여 2개 가져오기
-    @Query("select p from Payment p where p.user = :user " +
+    @Query("SELECT p FROM Payment p WHERE p.user = :user " +
             "order by p.lastPayment desc")
     Optional<List<Payment>>  findRecentPayment(Pageable pageable, User user);
 
