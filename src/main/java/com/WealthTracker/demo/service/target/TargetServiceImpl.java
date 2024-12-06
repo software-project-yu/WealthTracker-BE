@@ -34,10 +34,7 @@ public class TargetServiceImpl implements TargetService {
     @Transactional
     public TargetResponseDTO createTarget(TargetRequestDTO requestDTO, String token) { //* 새로운 목표 생성하는 서비스 로직
         User user = userRepository.findByUserId(getUserIdFromToken(token))
-
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
-
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
 
         // 정상적으로 진행되는 서비스 로직 구현부
         Target target = Target.builder()
@@ -63,11 +60,7 @@ public class TargetServiceImpl implements TargetService {
         Long userId = getUserIdFromToken(token);
 
         Target target = targetRepository.findByTargetIdAndUserUserId(targetId, userId)
-
-                .orElseThrow(() -> new CustomException(ErrorCode.TARGET_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
-
                 .orElseThrow(() -> new CustomException(ErrorCode.TARGET_NOT_FOUND,ErrorCode.TARGET_NOT_FOUND.getMessage()));
-
 
         target.updateTarget(requestDTO.getTargetAmount(), requestDTO.getStartDate(), requestDTO.getEndDate());
 
@@ -80,11 +73,7 @@ public class TargetServiceImpl implements TargetService {
         Long userId = getUserIdFromToken(token);
 
         Target target = targetRepository.findByTargetIdAndUserUserId(targetId, userId)
-
-                .orElseThrow(() -> new CustomException(ErrorCode.TARGET_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
-
                 .orElseThrow(() -> new CustomException(ErrorCode.TARGET_NOT_FOUND,ErrorCode.TARGET_NOT_FOUND.getMessage()));
-
 
         targetRepository.delete(target);
     }
@@ -95,9 +84,6 @@ public class TargetServiceImpl implements TargetService {
         Long userId = getUserIdFromToken(token);
 
         Target target = targetRepository.findByTargetIdAndUserUserId(targetId, userId)
-
-                .orElseThrow(() -> new CustomException(ErrorCode.TARGET_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
-
                 .orElseThrow(() -> new CustomException(ErrorCode.TARGET_NOT_FOUND,ErrorCode.TARGET_NOT_FOUND.getMessage()));
 
         // 날짜별 저축에 날짜와 목표에 대한 내용 저장

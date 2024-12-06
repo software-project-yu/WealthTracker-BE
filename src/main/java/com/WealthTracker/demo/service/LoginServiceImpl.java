@@ -25,27 +25,12 @@ public class LoginServiceImpl implements LoginService {
 
         // enabled 값이 false인 경우 로그인 불가
         if (!user.isEnabled()) {
-            throw new CustomException(ErrorCode.EMAIL_VERIFY_NEED, ErrorCode.USER_NOT_FOUND.getMessage());
-
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
-
-        // enabled 값이 false인 경우 로그인 불가
-        if (!user.isEnabled()) {
             throw new CustomException(ErrorCode.EMAIL_VERIFY_NEED,ErrorCode.EMAIL_VERIFY_NEED.getMessage());
 
         }
 
-        // enabled 값이 false인 경우 로그인 불가
-        if (!user.isEnabled()) {
-            throw new RuntimeException("이메일 인증이 완료되지 않았습니다. 인증 후 다시 시도해주세요.");
-        }
-
         if (!passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword())) {
-
-            throw new CustomException(ErrorCode.PASSWORD_MISMATCH, ErrorCode.USER_NOT_FOUND.getMessage());
-
             throw new CustomException(ErrorCode.PASSWORD_MISMATCH,ErrorCode.PASSWORD_MISMATCH.getMessage());
-
         }
 
         return user;
@@ -63,10 +48,6 @@ public class LoginServiceImpl implements LoginService {
     @Override
     public User getUserById(Long userId) {
         return userRepository.findByUserId(userId)
-
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
-
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
-
     }
 }

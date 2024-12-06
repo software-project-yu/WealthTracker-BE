@@ -45,11 +45,7 @@ public class ExpendServiceImpl implements ExpendService {
 
         //변환결과 예외처리
         if (convertToCategory == null) {
-
-            throw new CustomException(ErrorCode.INVALID_CATEGORY, ErrorCode.USER_NOT_FOUND.getMessage());
-
             throw new CustomException(ErrorCode.INVALID_CATEGORY,ErrorCode.INVALID_CATEGORY.getMessage());
-
         }
 
         String asset = expendRequestDTO.getAsset();
@@ -79,8 +75,6 @@ public class ExpendServiceImpl implements ExpendService {
 
                         () -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage())
 
-                        () -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage())
-
                 ))
                 .build();
         expendRepository.save(expend);
@@ -97,8 +91,6 @@ public class ExpendServiceImpl implements ExpendService {
         Optional<User> user = userRepository.findByUserId(jwtUtil.getUserId(token));
 
         User findUser = user.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
-
-        User findUser = user.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
 
         List<Expend> expendList = expendRepository.findAllByExpendDate(findUser, month);
 
@@ -143,29 +135,17 @@ public class ExpendServiceImpl implements ExpendService {
         //유저 정보 가져오기
         Optional<User> user = userRepository.findByUserId(jwtUtil.getUserId(token));
         User myUser = user.orElseThrow(
-
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage())
-
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage())
-
         );
 
         //지출아이디로 지출 내역 찾기
         Expend findExpend = expendRepository.findByExpendId(expendId).orElseThrow(
-
-                () -> new CustomException(ErrorCode.EXPEND_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage())
-
                 () -> new CustomException(ErrorCode.EXPEND_NOT_FOUND,ErrorCode.EXPEND_NOT_FOUND.getMessage())
-
         );
 
         //유저의 지출 내역인지 확인
         if (!Objects.equals(findExpend.getUser().getUserId(), myUser.getUserId())) {
-
             throw new CustomException(ErrorCode.USER_NOT_CORRECT, ErrorCode.USER_NOT_FOUND.getMessage());
-
-            throw new CustomException(ErrorCode.USER_NOT_CORRECT,ErrorCode.USER_NOT_FOUND.getMessage());
-
         }
 
 
@@ -192,40 +172,23 @@ public class ExpendServiceImpl implements ExpendService {
     public Long updateExpend(String token, Long expendId, ExpendRequestDTO expendRequestDTO) {
         // 유저 정보 가져오기
         User myUser = userRepository.findByUserId(jwtUtil.getUserId(token))
-
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
-
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
-
-
         // 지출아이디로 지출 내역 찾기
         Expend findExpend = expendRepository.findByExpendId(expendId)
                 .orElse(null);
         if (findExpend == null) {
-
-            throw new CustomException(ErrorCode.EXPEND_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage());
-
             throw new CustomException(ErrorCode.EXPEND_NOT_FOUND,ErrorCode.EXPEND_NOT_FOUND.getMessage());
-
         }
 
         // 유저의 지출 내역인지 확인
         if (!Objects.equals(findExpend.getUser().getUserId(), myUser.getUserId())) {
-
             throw new CustomException(ErrorCode.USER_NOT_CORRECT, ErrorCode.USER_NOT_FOUND.getMessage());
-
-            throw new CustomException(ErrorCode.USER_NOT_CORRECT,ErrorCode.USER_NOT_FOUND.getMessage());
-
         }
 
         // 카테고리 ENUM으로 변환
         Category_Expend newCategoryExpend = Category_Expend.fromString(expendRequestDTO.getCategory());
         if (newCategoryExpend == null) {
-
-            throw new CustomException(ErrorCode.INVALID_CATEGORY, ErrorCode.USER_NOT_FOUND.getMessage());
-
             throw new CustomException(ErrorCode.INVALID_CATEGORY,ErrorCode.INVALID_CATEGORY.getMessage());
-
         }
 
         // 새로운 카테고리 객체 찾기 또는 생성
@@ -266,23 +229,13 @@ public class ExpendServiceImpl implements ExpendService {
         );
         //지출아이디로 지출 내역 찾기
         Expend findExpend = expendRepository.findByExpendId(expendId).orElseThrow(
-                () -> new CustomException(ErrorCode.EXPEND_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage())
-
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage())
-        );
-        //지출아이디로 지출 내역 찾기
-        Expend findExpend = expendRepository.findByExpendId(expendId).orElseThrow(
                 () -> new CustomException(ErrorCode.EXPEND_NOT_FOUND,ErrorCode.EXPEND_NOT_FOUND.getMessage())
 
         );
 
         //유저의 지출 내역인지 확인
         if (!Objects.equals(findExpend.getUser().getUserId(), myUser.getUserId())) {
-
             throw new CustomException(ErrorCode.USER_NOT_CORRECT, ErrorCode.USER_NOT_FOUND.getMessage());
-
-            throw new CustomException(ErrorCode.USER_NOT_CORRECT,ErrorCode.USER_NOT_FOUND.getMessage());
-
         }
 
         expendRepository.deleteById(findExpend.getExpendId());
@@ -296,13 +249,6 @@ public class ExpendServiceImpl implements ExpendService {
         Optional<User> findUser = userRepository.findByUserId(jwtUtil.getUserId(token));
 
         User user = findUser.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
-
-        //유저의 최신 지출 내역 5개 불러오기
-        List<Expend> recentExpendList = expendRepository.findRecentExpend(
-                PageRequest.of(0, 5)).orElseThrow(
-                () -> new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, ErrorCode.USER_NOT_FOUND.getMessage())
-
-        User user = findUser.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
 
         //유저의 최신 지출 내역 5개 불러오기
         List<Expend> recentExpendList = expendRepository.findRecentExpend(
@@ -332,11 +278,7 @@ public class ExpendServiceImpl implements ExpendService {
     public List<ExpendDateResponseDTO> getAmountByWeek(String token) {
         //jwt토큰 검증 실시
         Optional<User> findUser = userRepository.findByUserId(jwtUtil.getUserId(token));
-
         User user = findUser.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
-
-        User user = findUser.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
-
 
         //이번달 불러오기
         int nowMonth = LocalDate.now().getMonthValue();
@@ -379,11 +321,7 @@ public class ExpendServiceImpl implements ExpendService {
     public List<ExpendCategoryAmountDTO> getAmountByMonth(String token) {
         //jwt토큰 검증 실시
         Optional<User> findUser = userRepository.findByUserId(jwtUtil.getUserId(token));
-
         User user = findUser.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
-
-        User user = findUser.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
-
 
         //ENUM 리스트
         Category_Expend[] categoryList = Category_Expend.values();
@@ -445,12 +383,7 @@ public class ExpendServiceImpl implements ExpendService {
     public List<ExpendDayResponseDTO> getAmountByDate(String token) {
         //jwt토큰 검증 실시
         Optional<User> findUser = userRepository.findByUserId(jwtUtil.getUserId(token));
-
         User user = findUser.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
-
-        User user = findUser.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
-
-
 
         //2주 계산
         LocalDateTime startDate = LocalDateTime.now().minusWeeks(2);

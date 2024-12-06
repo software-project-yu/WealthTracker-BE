@@ -23,9 +23,6 @@ public enum PaymentDetail {
                 return detail;
             }
         }
-
-        throw new CustomException(ErrorCode.INVALID_PAYMENT_DETAIL, ErrorCode.USER_NOT_FOUND.getMessage());
-
         throw new CustomException(ErrorCode.INVALID_PAYMENT_DETAIL,ErrorCode.INVALID_PAYMENT_DETAIL.getMessage());
 
     }
