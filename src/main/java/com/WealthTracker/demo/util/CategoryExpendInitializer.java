@@ -3,7 +3,6 @@ package com.WealthTracker.demo.util;
 import com.WealthTracker.demo.domain.CategoryExpend;
 import com.WealthTracker.demo.enums.Category_Expend;
 import com.WealthTracker.demo.repository.ExpendCategoryRepository;
-import com.WealthTracker.demo.repository.ExpendRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public class CategoryExpendInitializer {
     private final ExpendCategoryRepository categoryRepository;
-    private final ExpendRepository expendRepository;
 
     @PostConstruct
     public void init(){
@@ -28,4 +26,3 @@ public class CategoryExpendInitializer {
         }
     }
 }
-//

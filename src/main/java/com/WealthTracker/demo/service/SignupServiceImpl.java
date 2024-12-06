@@ -35,11 +35,7 @@ public class SignupServiceImpl implements SignupService {
     public String createVerificationCodeAndSendEmail(String email) {
         // 이메일 중복 확인
         if (userRepository.findByEmail(email).isPresent()) {
-
-            throw new CustomException(ErrorCode.EMAIL_ALREADY_REGISTERED, ErrorCode.USER_NOT_FOUND.getMessage());
-
             throw new CustomException(ErrorCode.EMAIL_ALREADY_REGISTERED,ErrorCode.EMAIL_ALREADY_REGISTERED.getMessage());
-
         }
 
         // 기존 인증 코드 삭제
@@ -65,30 +61,16 @@ public class SignupServiceImpl implements SignupService {
     public void verifyEmail(String email, String code) {
         try {
             VerificationCode verificationCode = verificationCodeRepository.findByEmail(email)
-
                     .orElseThrow(() -> new CustomException(ErrorCode.VERIFICATION_CODE_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
             if (!verificationCode.getCode().equals(code)) {
-                throw new CustomException(ErrorCode.INVALID_VERIFICATION_CODE, ErrorCode.USER_NOT_FOUND.getMessage());
-
-                    .orElseThrow(() -> new CustomException(ErrorCode.VERIFICATION_CODE_NOT_FOUND,ErrorCode.VERIFICATION_CODE_NOT_FOUND.getMessage()));
-            if (!verificationCode.getCode().equals(code)) {
                 throw new CustomException(ErrorCode.INVALID_VERIFICATION_CODE,ErrorCode.INVALID_VERIFICATION_CODE.getMessage());
-
             }
-
             if (verificationCode.getExpiryDate().isBefore(LocalDateTime.now())) {
                 verificationCodeRepository.delete(verificationCode); // 만료된 인증 코드 삭제
-
                 throw new CustomException(ErrorCode.INVALID_VERIFICATION_CODE, ErrorCode.USER_NOT_FOUND.getMessage());
-            }
-        } catch (CustomException e) {
-            throw new CustomException(ErrorCode.EMAIL_VERIFY_FAIL, ErrorCode.USER_NOT_FOUND.getMessage());
-
-                throw new CustomException(ErrorCode.INVALID_VERIFICATION_CODE,ErrorCode.INVALID_VERIFICATION_CODE.getMessage());
             }
         } catch (CustomException e) {
             throw new CustomException(ErrorCode.EMAIL_VERIFY_FAIL,ErrorCode.EMAIL_VERIFY_FAIL.getMessage());
-
         }
     }
 
@@ -112,11 +94,7 @@ public class SignupServiceImpl implements SignupService {
     public String signupUser(SignupRequestDTO signupRequestDTO) {
         // 인증된 이메일인지 확인
         VerificationCode verificationCode = verificationCodeRepository.findByEmail(signupRequestDTO.getEmail())
-
-                .orElseThrow(() -> new CustomException(ErrorCode.EMAIL_VERIFY_NEED, ErrorCode.USER_NOT_FOUND.getMessage()));
-
                 .orElseThrow(() -> new CustomException(ErrorCode.EMAIL_VERIFY_NEED,ErrorCode.EMAIL_VERIFY_NEED.getMessage()));
-
 
         // 회원가입 로직
         User user = User.builder()
@@ -152,11 +130,7 @@ public class SignupServiceImpl implements SignupService {
     public void createPasswordResetCode(String email) {
         // User 찾기
         userRepository.findByEmail(email)
-
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
-
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
-
 
         // 기존 인증 코드 삭제 또는 갱신
         verificationCodeRepository.deleteByEmail(email);
@@ -180,17 +154,10 @@ public class SignupServiceImpl implements SignupService {
     @Transactional(readOnly = true)
     public String validatePasswordResetCode(String code) {
         VerificationCode verificationCode = verificationCodeRepository.findByCode(code)
-
                 .orElseThrow(() -> new CustomException(ErrorCode.PASSWORD_RESET_INVALID, ErrorCode.USER_NOT_FOUND.getMessage()));
 
         if (verificationCode.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new CustomException(ErrorCode.PASSWORD_RESET_INVALID, ErrorCode.USER_NOT_FOUND.getMessage());
-
-                .orElseThrow(() -> new CustomException(ErrorCode.PASSWORD_RESET_INVALID,ErrorCode.PASSWORD_RESET_INVALID.getMessage()));
-
-        if (verificationCode.getExpiryDate().isBefore(LocalDateTime.now())) {
             throw new CustomException(ErrorCode.PASSWORD_RESET_INVALID,ErrorCode.PASSWORD_RESET_INVALID.getMessage());
-
         }
 
         return "valid";
@@ -200,28 +167,16 @@ public class SignupServiceImpl implements SignupService {
     @Transactional
     public void resetPassword(String code, String newPassword) {
         VerificationCode verificationCode = verificationCodeRepository.findByCode(code)
-
                 .orElseThrow(() -> new CustomException(ErrorCode.PASSWORD_RESET_INVALID, ErrorCode.USER_NOT_FOUND.getMessage()));
 
         if (verificationCode.getExpiryDate().isBefore(LocalDateTime.now())) {
             verificationCodeRepository.delete(verificationCode);
-            throw new CustomException(ErrorCode.PASSWORD_RESET_INVALID, ErrorCode.USER_NOT_FOUND.getMessage());
-
-                .orElseThrow(() -> new CustomException(ErrorCode.PASSWORD_RESET_INVALID,ErrorCode.PASSWORD_RESET_INVALID.getMessage()));
-
-        if (verificationCode.getExpiryDate().isBefore(LocalDateTime.now())) {
-            verificationCodeRepository.delete(verificationCode);
             throw new CustomException(ErrorCode.PASSWORD_RESET_INVALID,ErrorCode.PASSWORD_RESET_INVALID.getMessage());
-
         }
 
         // email을 사용해 User 찾기
         User user = userRepository.findByEmail(verificationCode.getEmail())
-
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
-
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
-
 
         // 기존 비밀번호와 새 비밀번호 비교
         if (passwordEncoder.matches(newPassword, user.getPassword())) {

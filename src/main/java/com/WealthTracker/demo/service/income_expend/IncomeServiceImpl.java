@@ -42,11 +42,7 @@ public class IncomeServiceImpl implements IncomeService {
 
         //변환결과 예외처리
         if (convertToCategory == null) {
-
-            throw new CustomException(ErrorCode.INVALID_CATEGORY, ErrorCode.USER_NOT_FOUND.getMessage());
-
             throw new CustomException(ErrorCode.INVALID_CATEGORY,ErrorCode.INVALID_CATEGORY.getMessage());
-
         }
 
         String asset = incomeRequestDTO.getAsset();
@@ -72,11 +68,7 @@ public class IncomeServiceImpl implements IncomeService {
                 .asset(convertToAsset)
                 .cost(incomeRequestDTO.getCost())
                 .user(userRepository.findByUserId(jwtUtil.getUserId(token)).orElseThrow(
-
                         () -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage())
-
-                        () -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage())
-
                 )).build();
         incomeRepository.save(income);
         return income.getIncomeId();
@@ -87,10 +79,7 @@ public class IncomeServiceImpl implements IncomeService {
     public List<IncomeResponseDTO> incomeList(String token,int month) {
         //유저 정보 가져오기
         Optional<User> user = userRepository.findByUserId(jwtUtil.getUserId(token));
-
         User findUser=user.orElseThrow(()->new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
-
-        User findUser=user.orElseThrow(()->new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
 
         List<Income> incomeList = incomeRepository.findAllByIncomeDate(findUser,month);
 
@@ -116,29 +105,17 @@ public class IncomeServiceImpl implements IncomeService {
         //유저 정보 가져오기
         Optional<User> user = userRepository.findByUserId(jwtUtil.getUserId(token));
         User myUser=user.orElseThrow(
-
                 ()->new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage())
-
-                ()->new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage())
-
         );
 
         //수입아이디로 수입 내역 찾기
         Income findIncome=incomeRepository.findByIncomeId(incomeId).orElseThrow(
-
-                ()->new CustomException(ErrorCode.INCOME_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage())
-
                 ()->new CustomException(ErrorCode.INCOME_NOT_FOUND,ErrorCode.INCOME_NOT_FOUND.getMessage())
-
         );
 
         //유저의 수입내역 확인
         if(!Objects.equals(findIncome.getUser().getUserId(),myUser.getUserId())){
-
             throw new CustomException(ErrorCode.USER_NOT_CORRECT, ErrorCode.USER_NOT_FOUND.getMessage());
-
-            throw new CustomException(ErrorCode.USER_NOT_CORRECT,ErrorCode.USER_NOT_CORRECT.getMessage());
-
         }
 
         //카테고리 변환
@@ -161,40 +138,23 @@ public class IncomeServiceImpl implements IncomeService {
     public Long updateIncome(String token, Long incomeId, IncomeRequestDTO incomeRequestDTO) {
         // 유저 정보 가져오기
         User myUser = userRepository.findByUserId(jwtUtil.getUserId(token))
-
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
-
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
-
-
         // 지출아이디로 지출 내역 찾기
         Income findIncome = incomeRepository.findByIncomeId(incomeId)
                 .orElse(null);
         if(findIncome==null){
-
-            throw new CustomException(ErrorCode.EXPEND_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage());
-
             throw new CustomException(ErrorCode.EXPEND_NOT_FOUND,ErrorCode.EXPEND_NOT_FOUND.getMessage());
-
         }
 
         // 유저의 지출 내역인지 확인
         if (!Objects.equals(findIncome.getUser().getUserId(), myUser.getUserId())) {
-
             throw new CustomException(ErrorCode.USER_NOT_CORRECT, ErrorCode.USER_NOT_FOUND.getMessage());
-
-            throw new CustomException(ErrorCode.USER_NOT_CORRECT,ErrorCode.USER_NOT_FOUND.getMessage());
-
         }
 
         // 카테고리 ENUM으로 변환
         Category_Income newCategoryIncome = Category_Income.fromString(incomeRequestDTO.getCategory());
         if (newCategoryIncome == null) {
-
-            throw new CustomException(ErrorCode.INVALID_CATEGORY, ErrorCode.USER_NOT_FOUND.getMessage());
-
             throw new CustomException(ErrorCode.INVALID_CATEGORY,ErrorCode.INVALID_CATEGORY.getMessage());
-
         }
 
         Asset convertToAsset = Asset.fromString(incomeRequestDTO.getAsset());
@@ -233,12 +193,7 @@ public class IncomeServiceImpl implements IncomeService {
 
                 ()->new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage())
         );
-        //수입아이디로 수입 내역 찾기
-        Income findIncome=incomeRepository.findByIncomeId(incomeId).orElseThrow(
-                ()->new CustomException(ErrorCode.EXPEND_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage())
 
-                ()->new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage())
-        );
         //수입아이디로 수입 내역 찾기
         Income findIncome=incomeRepository.findByIncomeId(incomeId).orElseThrow(
                 ()->new CustomException(ErrorCode.EXPEND_NOT_FOUND,ErrorCode.EXPEND_NOT_FOUND.getMessage())
@@ -247,11 +202,7 @@ public class IncomeServiceImpl implements IncomeService {
 
         //유저의 지출 내역인지 확인
         if(!Objects.equals(findIncome.getUser().getUserId(), myUser.getUserId())){
-
             throw  new CustomException(ErrorCode.USER_NOT_CORRECT, ErrorCode.USER_NOT_FOUND.getMessage());
-
-            throw  new CustomException(ErrorCode.USER_NOT_CORRECT,ErrorCode.USER_NOT_FOUND.getMessage());
-
         }
 
         incomeRepository.deleteById(findIncome.getIncomeId());
@@ -262,20 +213,12 @@ public class IncomeServiceImpl implements IncomeService {
     public List<IncomeResponseDTO> getRecentIncome(String token) {
         //jwt토큰 검증 실시
         Optional<User> findUser = userRepository.findByUserId(jwtUtil.getUserId(token));
-
         User user = findUser.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
-
-        User user = findUser.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
-
 
         //유저의 최신 지출 내역 5개 불러오기
         List<Income> recentIncomeList = incomeRepository.findRecentIncome(
                 PageRequest.of(0, 5)).orElseThrow(
-
-                ()->new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, ErrorCode.USER_NOT_FOUND.getMessage())
-
                 ()->new CustomException(ErrorCode.INTERNAL_SERVER_ERROR,ErrorCode.INTERNAL_SERVER_ERROR.getMessage())
-
         );
 
         //지출 카테고리 정보 가져오기

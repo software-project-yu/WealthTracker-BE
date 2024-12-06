@@ -6,7 +6,6 @@ import com.WealthTracker.demo.DTO.PaymentResponseDTO;
 import com.WealthTracker.demo.constants.ErrorCode;
 import com.WealthTracker.demo.domain.Payment;
 import com.WealthTracker.demo.domain.User;
-import com.WealthTracker.demo.enums.PaymentDetail;
 import com.WealthTracker.demo.error.CustomException;
 import com.WealthTracker.demo.repository.PaymentRepository;
 import com.WealthTracker.demo.repository.UserRepository;
@@ -19,8 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
@@ -39,41 +36,10 @@ public class PaymentServiceImpl implements PaymentService {
     public Long writePayment(PaymentRequestDTO paymentRequestDTO, String token) {
         Long userId = jwtUtil.getUserId(token);
         User user = userRepository.findByUserId(userId)
-
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
-
-        PaymentDetail convertToPaymentDetail;
-        try {
-            convertToPaymentDetail = PaymentDetail.fromString(paymentRequestDTO.getPaymentDetail());
-        } catch (Exception e) {
-            throw new CustomException(ErrorCode.INVALID_PAYMENT_DETAIL_PARAMETER, ErrorCode.USER_NOT_FOUND.getMessage());
-        }
-
-        if (paymentRequestDTO.getDueDate() == null || paymentRequestDTO.getLastPayment() == null) {
-            throw new CustomException(ErrorCode.PAYMENT_DATE_EMPTY, ErrorCode.USER_NOT_FOUND.getMessage());
-        }
-
-        LocalDate dueDate;
-        LocalDate lastPayment;
-        try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd/HH:mm:ss");
-            dueDate = paymentRequestDTO.getDueDate().toLocalDate();
-            lastPayment = paymentRequestDTO.getLastPayment().toLocalDate();
-        } catch (DateTimeParseException e) {
-            throw new CustomException(ErrorCode.INVALID_PAYMENT_DATE, ErrorCode.USER_NOT_FOUND.getMessage());
-        }
-
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
-
-
-
         if (paymentRequestDTO.getDueDate() == null || paymentRequestDTO.getLastPayment() == null) {
             throw new CustomException(ErrorCode.PAYMENT_DATE_EMPTY,ErrorCode.PAYMENT_DATE_EMPTY.getMessage());
         }
-
-
-
-
         Payment payment = Payment.builder()
                 .dueDate(LocalDate.parse(paymentRequestDTO.getDueDate()).atStartOfDay())
                 .paymentDetail(paymentRequestDTO.getPaymentDetail())
@@ -82,7 +48,6 @@ public class PaymentServiceImpl implements PaymentService {
                 .tradeName(paymentRequestDTO.getTradeName())
                 .user(user)
                 .build();
-
         // 결제 저장
         Payment savePayment = paymentRepository.save(payment);
         // 사용자의 총 결제 금액
@@ -97,19 +62,11 @@ public class PaymentServiceImpl implements PaymentService {
         //유저 정보 가져오기
         Optional<User> user = userRepository.findByUserId(jwtUtil.getUserId(token));
         List<Payment> paymentList = paymentRepository.findAllByUser(user.orElseThrow(
-
                 () -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage())
         ));
         if (paymentList.isEmpty()) {
             // 결제 내역이 없을 경우 예외 발생
             throw new CustomException(ErrorCode.PAYMENT_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage());
-
-                () -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage())
-        ));
-        if (paymentList.isEmpty()) {
-            // 결제 내역이 없을 경우 예외 발생
-            throw new CustomException(ErrorCode.PAYMENT_NOT_FOUND,ErrorCode.PAYMENT_NOT_FOUND.getMessage());
-
         }
         return paymentList.stream()
                 .map(payment -> PaymentResponseDTO.builder()
@@ -128,27 +85,11 @@ public class PaymentServiceImpl implements PaymentService {
     public Long updatePayment(String token, Long paymentId, PaymentRequestDTO paymentRequestDTO) {
         // 유저 정보 가져오기
         User myUser = userRepository.findByUserId(jwtUtil.getUserId(token))
-
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
-
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
-
         // 결제아이디로 결제 내역 찾기
         Payment findPayment = paymentRepository.findByPaymentId(paymentId)
                 .orElse(null);
-
         if (findPayment == null) {
-
-            throw new CustomException(ErrorCode.PAYMENT_NOT_FOUND, ErrorCode.PAYMENT_NOT_FOUND.getMessage());
-        }
-        // 유저의 지출 내역인지 확인
-        if (!Objects.equals(findPayment.getUser().getUserId(), myUser.getUserId())) {
-            throw new CustomException(ErrorCode.USER_NOT_CORRECT, ErrorCode.USER_NOT_CORRECT.getMessage());
-        }
-        // 결제 내역 조회
-        Payment payment = paymentRepository.findByPaymentId(paymentId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND, ErrorCode.PAYMENT_NOT_FOUND.getMessage()));
-
             throw new CustomException(ErrorCode.PAYMENT_NOT_FOUND,ErrorCode.PAYMENT_NOT_FOUND.getMessage());
         }
         // 유저의 지출 내역인지 확인
@@ -158,16 +99,14 @@ public class PaymentServiceImpl implements PaymentService {
         // 결제 내역 조회
         Payment payment = paymentRepository.findByPaymentId(paymentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND,ErrorCode.PAYMENT_NOT_FOUND.getMessage()));
-
         // 결제 내역 수정
-        Payment updatePayment = findPayment.toBuilder()
+        Payment updatePayment = findPayment.builder()
                 .dueDate(LocalDateTime.parse(paymentRequestDTO.getDueDate() + "T00:00"))
-                .paymentDetail(paymentRequestDTO.getPaymentDetail())
+                .paymentDetail(payment.getPaymentDetail())
                 .lastPayment(LocalDateTime.parse(paymentRequestDTO.getLastPayment() + "T00:00"))
                 .cost(paymentRequestDTO.getCost())
                 .tradeName(paymentRequestDTO.getTradeName())
                 .build();
-
         // 변경된 결제 내역 저장
         paymentRepository.save(updatePayment);
         // 수정된 결제 내역 ID 반환
@@ -175,43 +114,20 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-
+    @Transactional
     public void deletePayment(String token, Long paymentId) {
         Optional<User> user = userRepository.findByUserId(jwtUtil.getUserId(token));
         User currentUser = user.orElseThrow(() ->  new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
 
-//        Payment payment = paymentRepository.findById(paymentId)
-//                .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
-
         // 결제 내역 삭제
         paymentRepository.deleteById(paymentId);
-        //return paymentId;
-
-    @Transactional
-    public void deletePayment(String token, Long paymentId) {
-        Optional<User> user = userRepository.findByUserId(jwtUtil.getUserId(token));
-        User currentUser = user.orElseThrow(() ->  new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
-
-        // 결제 내역 삭제
-         paymentRepository.deleteById(paymentId);
-
     }
 
     @Override
     public List<PaymentResponseDTO> getRecentPayments(String token) {
         // JWT 토큰 검증 실시
         Optional<User> findUser = userRepository.findByUserId(jwtUtil.getUserId(token));
-
-        User user = findUser.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
-        // 사용자의 최근 결제 내역 2개 조회
-        List<Payment> recentPaymentList = paymentRepository.findRecentPayment
-                (PageRequest.of(0, 2), user).orElseThrow(
-                () -> new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_SERVER_ERROR.getMessage())
-        );
-
         User user = findUser.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
-
-
         // 사용자의 최근 결제 내역 2개 조회
         List<Payment> recentPaymentList = paymentRepository.findRecentPayment(user, (Pageable) PageRequest.of(0, 2))
                 .orElseThrow(()->new  CustomException(ErrorCode.PAYMENT_IS_NULL,ErrorCode.PAYMENT_IS_NULL.getMessage()));
@@ -224,18 +140,13 @@ public class PaymentServiceImpl implements PaymentService {
     public List<PaymentAmountDTO> getAmountByMonth(String token) {
         //jwt토큰 검증 실시
         Optional<User> findUser = userRepository.findByUserId(jwtUtil.getUserId(token));
-
-        User user = findUser.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
-
         User user = findUser.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND,ErrorCode.USER_NOT_FOUND.getMessage()));
-
         // 월별 결제 내역 저장할 리스트
         List<PaymentAmountDTO> nowMonthList = new ArrayList<>();
         // 이번 달 결제액 불러오기
         Long thisMonthAmount = paymentRepository.thisMonthAmount(user);
         // 저번 달 결제액 불러오기
         Long preMonthAmount = paymentRepository.preMonthAmount(user);
-
         //퍼센트 계산
         String upOrDown;
         int percentChange;
@@ -254,7 +165,6 @@ public class PaymentServiceImpl implements PaymentService {
             percentChange = Math.abs((int) change);
             upOrDown = change >= 0 ? "UP" : "DOWN";
         }
-
         // 결제 내역 2개씩 리스트
         List<Payment> paymentList = paymentRepository.findRecentPayment(user, PageRequest.of(0, 2))
                 .orElseThrow(()->new CustomException(ErrorCode.PAYMENT_IS_NULL,ErrorCode.EXPEND_NOT_FOUND.getMessage()));
@@ -273,9 +183,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .upOrDown(upOrDown)
                 .paymentList(paymentResponseDTOList)
                 .build();
-
         nowMonthList.add(paymentAmountDTO);
-
         return nowMonthList;
     }
 }
