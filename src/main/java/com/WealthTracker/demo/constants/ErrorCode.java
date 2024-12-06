@@ -28,6 +28,7 @@ public enum ErrorCode {
     PASSWORD_MISMATCH(400, "비밀번호가 일치하지 않습니다."),
     EXPEND_NOT_FOUND(404, "존재하지 않는 지출 ID입니다."),
     INCOME_NOT_FOUND(404, "존재하지 않는 수입 ID입니다."),
+    PAYMENT_NOT_FOUND(404, "존재하지 않는 결제 내역입니다."),
 
     // 409 CONFLICT 중복된 리소스
     USER_NOT_CORRECT(409, "해당 유저의 지출 또는 수입 내역이 아닙니다."),

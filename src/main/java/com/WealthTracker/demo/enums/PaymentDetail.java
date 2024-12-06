@@ -23,7 +23,7 @@ public enum PaymentDetail {
                 return detail;
             }
         }
-        throw new CustomException(ErrorCode.INVALID_PAYMENT_DETAIL);
+        throw new CustomException(ErrorCode.INVALID_PAYMENT_DETAIL, ErrorCode.USER_NOT_FOUND.getMessage());
     }
     public static String toString(PaymentDetail detail) {
         return detail.getPaymentDetailType();

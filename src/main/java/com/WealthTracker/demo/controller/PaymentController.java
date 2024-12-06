@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping({"/api", "/payment"})
+@RequestMapping("/api")
 @Tag(name = "결제", description = "결제 내역 API")
 
 public class PaymentController {
@@ -93,13 +94,6 @@ public class PaymentController {
             return new ResponseEntity<>(returnCodeDTO, HttpStatus.OK);
         }catch (CustomException ex){
             return new ResponseEntity<>(new ReturnCodeDTO(ex.getErrorCode().getStatus(),ex.getMessage()),HttpStatus.BAD_REQUEST);
-        }
-        //결제 내역이 존재하지 않을 때
-        catch (Exception ex){
-            // 일반 예외 처리
-            ReturnCodeDTO returnCodeDTO = new ReturnCodeDTO(ErrorCode.PAYMENT_NOT_FOUND.getStatus(),
-                    ErrorCode.PAYMENT_NOT_FOUND.getMessage());
-            return new ResponseEntity<>(returnCodeDTO, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
