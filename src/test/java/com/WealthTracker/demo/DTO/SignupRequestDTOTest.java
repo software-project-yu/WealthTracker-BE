@@ -1,6 +1,6 @@
 package com.WealthTracker.demo.DTO;
 
-import com.WealthTracker.demo.domain.User;
+import com.WealthTracker.demo.domain.auth.dto.SignupRequestDTO;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class SignupRequestDTOTest {
     private Validator validator;
