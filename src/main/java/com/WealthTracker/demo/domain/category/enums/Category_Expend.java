@@ -1,6 +1,7 @@
 package com.WealthTracker.demo.domain.category.enums;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @AllArgsConstructor
@@ -13,7 +14,7 @@ public enum Category_Expend {
     //한글->영어
     public static Category_Expend fromString(String categoryType) {
         for (Category_Expend ct : Category_Expend.values()) {
-            if (ct.getCategoryType().equalsIgnoreCase(categoryType)) {
+            if (ct.getCategoryType().equalsIgnoreCase(categoryType) || ct.name().equalsIgnoreCase(categoryType)) {
                 return ct;
             }
         }
