@@ -11,10 +11,12 @@ import com.WealthTracker.demo.global.error.CustomException;
 import com.WealthTracker.demo.domain.category.repository.ExpendCategoryRepository;
 import com.WealthTracker.demo.domain.expend.repository.ExpendRepository;
 import com.WealthTracker.demo.domain.user.repository.UserRepository;
+import com.WealthTracker.demo.global.lock.ExpendCategoryNamedLockFacade;
 import com.WealthTracker.demo.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -31,20 +33,20 @@ public class ExpendServiceImpl implements ExpendService {
     private final ExpendRepository expendRepository;
     private final ExpendCategoryRepository expendCategoryRepository;
     private final UserRepository userRepository;
+    private final ExpendCategoryNamedLockFacade lockFacade;
     private final JwtUtil jwtUtil;
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Long writeExpend(ExpendRequestDTO expendRequestDTO, String token) {
         if (!jwtUtil.validationToken(token)) {
             return -1L;
         }
         //카테고리명 변경
         String category = expendRequestDTO.getCategory();
-        Category_Expend convertToCategory = Category_Expend.fromString(category);
 
         //변환결과 예외처리
-        if (convertToCategory == null) {
+        if (category == null || category.trim().isEmpty()) {
             throw new CustomException(ErrorCode.INVALID_CATEGORY,ErrorCode.INVALID_CATEGORY.getMessage());
         }
 
@@ -54,16 +56,19 @@ public class ExpendServiceImpl implements ExpendService {
             throw new CustomException(ErrorCode.INVALID_CATEGORY,ErrorCode.INVALID_CATEGORY.getMessage());
         }
 
-        //카테고리 저장-기존 카테고리 존재 여부 확인
-        CategoryExpend categoryExpend =
-                expendCategoryRepository.findByCategoryName(convertToCategory)
-                        .orElseGet(() -> {
-                            CategoryExpend newCategory = CategoryExpend
-                                    .builder()
-                                    .categoryName(convertToCategory)
-                                    .build();
-                            return expendCategoryRepository.save(newCategory);
-                        });
+        //카테고리 문자열이 기본 카테고리 확인
+        Category_Expend isBaseCategory=Category_Expend.fromString(category);
+        //기본 카테고리가 아닌 경우
+        CategoryExpend categoryExpend;
+        if(isBaseCategory==null){
+            //사용자 정의 카테고리
+            categoryExpend=lockFacade.getOrCreateCustomCategoryExpend(category);
+        }else {
+            //기존 카테고리
+            categoryExpend=expendCategoryRepository.findByCategoryName(isBaseCategory)
+                    .orElseThrow(()->new CustomException(ErrorCode.INVALID_CATEGORY,ErrorCode.INVALID_CATEGORY.getMessage()));
+        }
+
         //지출 객체 저장
         Expend expend = Expend.builder()
                 .expendDate(LocalDate.parse(expendRequestDTO.getExpendDate()).atStartOfDay())
@@ -72,9 +77,7 @@ public class ExpendServiceImpl implements ExpendService {
                 .asset(convertToAsset)
                 .cost(expendRequestDTO.getCost())
                 .user(userRepository.findByUserId(jwtUtil.getUserId(token)).orElseThrow(
-
                         () -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage())
-
                 ))
                 .build();
         expendRepository.save(expend);
@@ -111,24 +114,8 @@ public class ExpendServiceImpl implements ExpendService {
                 .collect(Collectors.toList());
     }
 
-    // DTO로 매핑하는 함수
-    private ExpendResponseDTO mapToExpendResponseDTO(Expend expend, Map<Long, CategoryExpend> categoryExpendMap) {
-        CategoryExpend categoryExpend = categoryExpendMap.get(expend.getCategoryExpend().getCategoryId());
-
-        // 카테고리명 한글로 변환
-        String convertedCategory = (categoryExpend != null) ? Category_Expend.toString(categoryExpend.getCategoryName()) : null;
-
-        return ExpendResponseDTO.builder()
-                .expendId(expend.getExpendId())
-                .expendDate(expend.getExpendDate().toString().substring(0, 10))
-                .expendName(expend.getExpendName())
-                .asset(Asset.toString(expend.getAsset()))
-                .cost(expend.getCost())
-                .category(convertedCategory)
-                .build();
-    }
-
     //지출 상세 내역 리턴
+
     @Override
     public ExpendResponseDTO expendResponseDetail(String token, Long expendId) {
         //토큰 검증
@@ -166,7 +153,6 @@ public class ExpendServiceImpl implements ExpendService {
     }
 
 
-
     @Override
     @Transactional
     public Long updateExpend(String token, Long expendId, ExpendRequestDTO expendRequestDTO) {
@@ -193,10 +179,7 @@ public class ExpendServiceImpl implements ExpendService {
 
         // 새로운 카테고리 객체 찾기 또는 생성
         CategoryExpend categoryExpendToUpdate = expendCategoryRepository.findByCategoryName(newCategoryExpend)
-                .orElseGet(() -> CategoryExpend
-                        .builder()
-                        .categoryName(newCategoryExpend)
-                        .build());
+                .orElseGet(()->CategoryExpend.createBaseCategory(newCategoryExpend));
         expendCategoryRepository.save(categoryExpendToUpdate);
         Asset convertToAsset = Asset.fromString(expendRequestDTO.getAsset());
         if(convertToAsset ==null){
@@ -243,6 +226,7 @@ public class ExpendServiceImpl implements ExpendService {
     }
 
     //최근 지출내역 5개 가져오기
+
     @Override
     public List<ExpendResponseDTO> getRecentExpend(String token) {
         //jwt토큰 검증 실시
@@ -273,7 +257,6 @@ public class ExpendServiceImpl implements ExpendService {
                 .map(expend -> mapToExpendResponseDTO(expend, categoryExpendMap))
                 .collect(Collectors.toList());
     }
-
     @Override
     public List<ExpendDateResponseDTO> getAmountByWeek(String token) {
         //jwt토큰 검증 실시
@@ -413,5 +396,22 @@ public class ExpendServiceImpl implements ExpendService {
 
         }
         return expendDayResponseDTOList;
+    }
+
+    // DTO로 매핑하는 함수
+    private ExpendResponseDTO mapToExpendResponseDTO(Expend expend, Map<Long, CategoryExpend> categoryExpendMap) {
+        CategoryExpend categoryExpend = categoryExpendMap.get(expend.getCategoryExpend().getCategoryId());
+
+        // 카테고리명 한글로 변환
+        String convertedCategory = (categoryExpend != null) ? Category_Expend.toString(categoryExpend.getCategoryName()) : null;
+
+        return ExpendResponseDTO.builder()
+                .expendId(expend.getExpendId())
+                .expendDate(expend.getExpendDate().toString().substring(0, 10))
+                .expendName(expend.getExpendName())
+                .asset(Asset.toString(expend.getAsset()))
+                .cost(expend.getCost())
+                .category(convertedCategory)
+                .build();
     }
 }

@@ -18,9 +18,7 @@ public class CategoryExpendInitializer {
         if(categoryRepository.count()!=6){
             for (Category_Expend category : Category_Expend.values()) {
                if(categoryRepository.findByCategoryName(category).isEmpty()){
-                   categoryRepository.save(CategoryExpend.builder()
-                           .categoryName(category)
-                           .build());
+                   categoryRepository.save(CategoryExpend.createBaseCategory(category));
                }
             }
         }
