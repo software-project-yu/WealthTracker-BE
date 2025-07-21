@@ -3,6 +3,7 @@ package com.WealthTracker.demo.domain.expend.repository;
 import com.WealthTracker.demo.domain.expend.entity.Expend;
 import com.WealthTracker.demo.domain.user.entity.User;
 import com.WealthTracker.demo.domain.category.enums.Category_Expend;
+import io.micrometer.core.annotation.Timed;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -60,6 +61,7 @@ public interface ExpendRepository extends JpaRepository<Expend, Long> {
     @Query("select e from Expend e "+
             "where e.user = :user and MONTH(e.expendDate) = :month "+
             "order by e.expendDate desc")
+    @Timed(value = "repository.findAllByExpendDate", description = "Time spent on repository#findAllByExpendDate")
     List<Expend>findAllByExpendDate(@Param("user")User user, @Param("month")int month);
     //카테고리에 따른 지출 합계
     @Query("SELECT COALESCE(SUM(e.cost), 0) FROM Expend e " +

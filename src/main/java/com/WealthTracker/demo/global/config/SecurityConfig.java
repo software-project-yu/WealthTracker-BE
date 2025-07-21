@@ -40,6 +40,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/api/**").permitAll() // 임시로 api요청 인증 필요 없게끔 설정
                         .requestMatchers("/api/**").permitAll() // 일단 임시로 api요청 인증 필요 없게끔
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
