@@ -13,7 +13,10 @@ import com.WealthTracker.demo.domain.expend.repository.ExpendRepository;
 import com.WealthTracker.demo.domain.user.repository.UserRepository;
 import com.WealthTracker.demo.global.lock.ExpendCategoryNamedLockFacade;
 import com.WealthTracker.demo.global.util.JwtUtil;
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -28,7 +31,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-
+@Slf4j
 public class ExpendServiceImpl implements ExpendService {
     private final ExpendRepository expendRepository;
     private final ExpendCategoryRepository expendCategoryRepository;
@@ -85,9 +88,12 @@ public class ExpendServiceImpl implements ExpendService {
         return expend.getExpendId();
     }
 
-
+    @Timed(value = "service.expendList", description = "Time spent on ExpendService#getExpendList")
     @Override
     public List<ExpendResponseDTO> expendList(String token, int month) {
+        long start = System.currentTimeMillis();
+        log.info("expendList() 시작 - month: {}, token 일부: {}", month, token.substring(0, 10));
+
         /*유저정보로 지출 모두 반환*/
 
         //유저 정보 가져오기
@@ -98,7 +104,20 @@ public class ExpendServiceImpl implements ExpendService {
         List<Expend> expendList = expendRepository.findAllByExpendDate(findUser, month);
 
         //지출 카테고리 정보 가져오기
-        Map<Long, CategoryExpend> categoryExpendMap = expendCategoryRepository.findAllById(
+        Map<Long, CategoryExpend> categoryExpendMap = getCategoryExpendMap(expendList);
+
+
+        List<ExpendResponseDTO> result = expendList.stream()
+                .map(expend -> mapToExpendResponseDTO(expend, categoryExpendMap))
+                .collect(Collectors.toList());
+
+        log.info("expendList() 완료 - 총 {}건 반환, 처리 시간: {}ms", result.size(), System.currentTimeMillis() - start);
+        return result;
+    }
+
+    @Timed(value = "service.getCategoryExpendMap", description = "Time spent on ExpendService#getCategoryExpendMap")
+    private Map<Long, CategoryExpend> getCategoryExpendMap(List<Expend> expendList) {
+        return expendCategoryRepository.findAllById(
                         expendList.stream()
                                 .map(Expend::getCategoryExpend)
                                 .map(CategoryExpend::getCategoryId)
@@ -107,11 +126,6 @@ public class ExpendServiceImpl implements ExpendService {
                 .collect(Collectors.toMap(
                         CategoryExpend::getCategoryId,
                         Function.identity()));
-
-
-        return expendList.stream()
-                .map(expend -> mapToExpendResponseDTO(expend, categoryExpendMap))
-                .collect(Collectors.toList());
     }
 
     //지출 상세 내역 리턴
@@ -242,15 +256,7 @@ public class ExpendServiceImpl implements ExpendService {
         );
 
         //지출 카테고리 정보 가져오기
-        Map<Long, CategoryExpend> categoryExpendMap = expendCategoryRepository.findAllById(
-                        recentExpendList.stream()
-                                .map(Expend::getCategoryExpend)
-                                .map(CategoryExpend::getCategoryId)
-                                .collect(Collectors.toList()))
-                .stream()
-                .collect(Collectors.toMap(
-                        CategoryExpend::getCategoryId,
-                        Function.identity()));
+        Map<Long, CategoryExpend> categoryExpendMap = getCategoryExpendMap(recentExpendList);
 
 
         return recentExpendList.stream()
