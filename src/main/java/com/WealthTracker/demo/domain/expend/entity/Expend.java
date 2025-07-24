@@ -15,7 +15,9 @@ import java.time.LocalDateTime;
 @Builder(toBuilder = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Table(name = "expend")
+@Table(name = "expend",indexes={
+        @Index(name="idx_expend_date_user_id",columnList="expendDate, userId",unique=true)
+})
 public class Expend {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true)

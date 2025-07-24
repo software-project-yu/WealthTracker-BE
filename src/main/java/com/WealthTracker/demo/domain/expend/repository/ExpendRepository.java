@@ -63,6 +63,7 @@ public interface ExpendRepository extends JpaRepository<Expend, Long> {
                     SUM(CASE WHEN monthType = 'this' THEN totalCost ELSE 0 END) AS thisMonthTotalCost,
                     SUM(CASE WHEN monthType = 'prev' THEN totalCost ELSE 0 END) AS prevMonthTotalCost
                 FROM (
+                      (
                     SELECT
                         WEEK(e.expendDate, 2)
                           - WEEK(DATE_SUB(e.expendDate, INTERVAL DAYOFMONTH(e.expendDate)-1 DAY), 2) + 1 AS weekNum,
@@ -74,9 +75,9 @@ public interface ExpendRepository extends JpaRepository<Expend, Long> {
                       AND MONTH(e.expendDate) = MONTH(CURRENT_DATE)
                     GROUP BY WEEK(e.expendDate, 2)
                           - WEEK(DATE_SUB(e.expendDate, INTERVAL DAYOFMONTH(e.expendDate)-1 DAY), 2) + 1
-            
+                    )
                     UNION ALL
-            
+                    (
                     SELECT
                         WEEK(e.expendDate, 2)
                           - WEEK(DATE_SUB(e.expendDate, INTERVAL DAYOFMONTH(e.expendDate)-1 DAY), 2) + 1 AS weekNum,
@@ -90,7 +91,8 @@ public interface ExpendRepository extends JpaRepository<Expend, Long> {
                       )
                     GROUP BY WEEK(e.expendDate, 2)
                           - WEEK(DATE_SUB(e.expendDate, INTERVAL DAYOFMONTH(e.expendDate)-1 DAY), 2) + 1
-                ) AS unioin_table
+                    )
+                ) AS union_table
                 GROUP BY weekNum
                 ORDER BY weekNum ASC
             """, nativeQuery = true)
