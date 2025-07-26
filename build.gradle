@@ -61,7 +61,8 @@ dependencies {
 	implementation 'ch.qos.logback:logback-classic:1.5.13'
 	implementation 'ch.qos.logback:logback-core:1.5.13'
 	implementation group: 'org.bgee.log4jdbc-log4j2', name: 'log4jdbc-log4j2-jdbc4.1', version: '1.16'
-
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+	implementation 'com.github.ben-manes.caffeine:caffeine'
 
 }
 

@@ -1,5 +1,6 @@
 package com.WealthTracker.demo.domain.expend.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -7,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -16,9 +19,8 @@ import lombok.NoArgsConstructor;
 public class ExpendRequestDTO {
     //날짜
     @NotNull
-    @Size(min = 10,max = 10,message = "날짜는 반드시 yyyy-MM-dd 형식으로 입력")
-    @Pattern(regexp = "\\d{4}-\\d{2}-\\d{2}")
-    private String expendDate;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime expendDate;
     //금액
     @NotNull
     @Size(min = 1,message = "수입 금액은 1자리 이상 입력.")

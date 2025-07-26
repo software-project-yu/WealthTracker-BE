@@ -6,6 +6,7 @@ import com.WealthTracker.demo.domain.expend.entity.Expend;
 import com.WealthTracker.demo.domain.user.entity.User;
 import com.WealthTracker.demo.domain.category.enums.Category_Expend;
 import io.micrometer.core.annotation.Timed;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -56,6 +57,7 @@ public interface ExpendRepository extends JpaRepository<Expend, Long> {
            "group by CAST((FLOOR(DAY(e.expendDate) - 1) / 7) + 1 AS INTEGER)"
     )
     List<Object[]> getTotalExpendLastMonth(@Param("user") User user);
+
 
     @Query(value = """
                 SELECT
