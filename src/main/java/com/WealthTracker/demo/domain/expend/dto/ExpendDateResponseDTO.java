@@ -1,14 +1,12 @@
 package com.WealthTracker.demo.domain.expend.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
 public class ExpendDateResponseDTO {
     //달 반환
     private int month;
@@ -17,8 +15,8 @@ public class ExpendDateResponseDTO {
     private int weekNum;
 
     //이번달 같은주 지출 총 합계
-    private int thisWeekTotalCost;
+    private int thisMonthTotalCost;
 
     //저번달 같은 주 지출 총 합계
-    private int lastWeekTotalCost;
+    private int prevMonthTotalCost;
 }

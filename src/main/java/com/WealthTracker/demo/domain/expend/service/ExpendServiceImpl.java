@@ -17,6 +17,8 @@ import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -40,7 +42,8 @@ public class ExpendServiceImpl implements ExpendService {
     private final JwtUtil jwtUtil;
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
+    @CacheEvict(value = "expendWeekCache", key = "#token")
     public Long writeExpend(ExpendRequestDTO expendRequestDTO, String token) {
         if (!jwtUtil.validationToken(token)) {
             return -1L;
@@ -74,7 +77,7 @@ public class ExpendServiceImpl implements ExpendService {
 
         //지출 객체 저장
         Expend expend = Expend.builder()
-                .expendDate(LocalDate.parse(expendRequestDTO.getExpendDate()).atStartOfDay())
+                .expendDate(expendRequestDTO.getExpendDate())
                 .expendName(expendRequestDTO.getExpendName())
                 .categoryExpend(categoryExpend)
                 .asset(convertToAsset)
@@ -169,6 +172,7 @@ public class ExpendServiceImpl implements ExpendService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "expendWeekCache", key = "#token")
     public Long updateExpend(String token, Long expendId, ExpendRequestDTO expendRequestDTO) {
         // 유저 정보 가져오기
         User myUser = userRepository.findByUserId(jwtUtil.getUserId(token))
@@ -217,6 +221,7 @@ public class ExpendServiceImpl implements ExpendService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "expendWeekCache", key = "#token")
     public Long deleteExpend(String token, Long expendId) {
         //유저 정보 가져오기
         Optional<User> user = userRepository.findByUserId(jwtUtil.getUserId(token));
@@ -263,23 +268,11 @@ public class ExpendServiceImpl implements ExpendService {
                 .map(expend -> mapToExpendResponseDTO(expend, categoryExpendMap))
                 .collect(Collectors.toList());
     }
+    @Cacheable(value = "expendWeekCache", key = "#token")
     @Override
-    public List<ExpendDateResponseDTO> getAmountByWeek(String token) {
+    public List<ExpendWeekCompareDTO> getAmountByWeek(String token) {
         //jwt토큰 검증 실시
-        Optional<User> findUser = userRepository.findByUserId(jwtUtil.getUserId(token));
-        User user = findUser.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
-
-        //이번달 불러오기
-        int nowMonth = LocalDate.now().getMonthValue();
-
-        //저번달
-        int prevMonth = nowMonth - 1;
-        if (prevMonth == 0) {
-            prevMonth = 12;
-        }
-
-        //주차별 총 지출금액 가져오기
-        List<Object[]> nowMonthData = expendRepository.getTotalExpendThisMonth(user);
+       /* List<Object[]> nowMonthData = expendRepository.getTotalExpendThisMonth(user);
         List<Object[]> prevMonthData = expendRepository.getTotalExpendLastMonth(user);
 
         List<ExpendDateResponseDTO> graphReport = new ArrayList<>();
@@ -298,12 +291,16 @@ public class ExpendServiceImpl implements ExpendService {
             ExpendDateResponseDTO dto = ExpendDateResponseDTO.builder()
                     .month(nowMonth)
                     .weekNum(week)
-                    .thisWeekTotalCost(currentMonthMap.getOrDefault(week, 0))
-                    .lastWeekTotalCost(prevMonthMap.getOrDefault(week, 0))
+                    .thisMonthTotalCost(currentMonthMap.getOrDefault(week, 0))
+                    .prevMonthTotalCost(prevMonthMap.getOrDefault(week, 0))
                     .build();
             graphReport.add(dto);
+        }*/
+        Long userId=jwtUtil.getUserId(token);
+        if(userId==null){
+            throw new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage());
         }
-        return graphReport;
+        return expendRepository.getExpendWeekCompare(userId);
     }
 
     @Override
@@ -311,7 +308,6 @@ public class ExpendServiceImpl implements ExpendService {
         //jwt토큰 검증 실시
         Optional<User> findUser = userRepository.findByUserId(jwtUtil.getUserId(token));
         User user = findUser.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND, ErrorCode.USER_NOT_FOUND.getMessage()));
-
         //ENUM 리스트
         Category_Expend[] categoryList = Category_Expend.values();
 

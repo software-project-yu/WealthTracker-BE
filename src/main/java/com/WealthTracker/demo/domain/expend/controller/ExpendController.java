@@ -71,7 +71,7 @@ public class ExpendController {
             @ApiResponse(responseCode = "500", description = "서버 오류", content = {@Content(mediaType = "string")})
     })
     @GetMapping("/expend/graph")
-    public ResponseEntity<List<ExpendDateResponseDTO>> amountByWeek(@RequestHeader("Authorization") String token){
+    public ResponseEntity<List<ExpendWeekCompareDTO>> amountByWeek(@RequestHeader("Authorization") String token){
         return new ResponseEntity<>(expendService.getAmountByWeek(token),HttpStatusCode.valueOf(SuccessCode.SUCCESS_RESPOND_EXPEND.getStatus()));
     }
 
