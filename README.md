@@ -1,254 +1,1304 @@
-# WealthTracker - 💵개인 재무 관리 플랫폼
-<img src="https://github.com/user-attachments/assets/ef4c9b71-0899-409a-88ae-918eb9acd8a4" style="width:100%"/>
+# WealthTracker Backend
 
-# 🔖 Version
-| Version | Revision Date | Description                                                                                      | Distributor |
-|:-------:|:-------------:|:-------------------------------------------------------------------------------------------------|:-----------:|
-| 1.0.0   | 2024.11.24      | Request DTO 유효성 검사<br>목표 API<br>비밀번호 재설정 수정<br>지출 목표 CRUD API 구현<br>회원 가입, 이메일 로직 변경<br>회원가입 DTO test code 추가 | 김도연      |
-| 1.0.1 | 2024.11.28 | 비밀번호 확인 API 추가 | 김도연 |
-| 1.1.0 | 2024.11.29 | 결제 예정 API 추가<br>예외처리 강화<br>지출 목표 Swagger API 형식 작성|김도연|
-| 1.1.1 | 2024.12.02 | 결제예정 API 수정 | 김도연 |
+> 단순 가계부 CRUD를 넘어서,  
+> `회원 인증 -> 거래 기록 -> 월간 비교/목표 관리 -> 예정 결제 관리 -> 주간 AI 피드백`까지 한 흐름으로 연결한 개인 재무 관리 백엔드입니다.
 
-<br/>
+## 📚 목차
 
-## 👥 Team
+- [1. 프로젝트 한눈에 보기](#overview)
+- [2. 왜 이 프로젝트가 단단한가](#why-strong)
+- [3. 시스템 전체 구조](#system-architecture)
+- [4. 기술 스택과 저장소 역할](#tech-stack)
+- [5. 백엔드 처리 구조](#backend-architecture)
+- [6. 상세 기능 설명](#feature-details)
+- [7. API 인벤토리](#api-inventory)
+- [8. 데이터 모델](#data-model)
+- [9. 운영 / 배포 / 관측](#operations)
+- [10. 테스트와 품질 관리](#testing)
+- [11. 채용담당자가 봐야 할 포인트](#portfolio-points)
 
-|<img src="https://avatars.githubusercontent.com/u/144890194?s=400&u=89b20ce0f01d59364fe15b04bd5a7b2cdb5045a1&v=4" width="150" height="150"/>|<img src="https://avatars.githubusercontent.com/u/144890194?s=400&u=89b20ce0f01d59364fe15b04bd5a7b2cdb5045a1&v=4" width="150" height="150"/> | <img src="https://avatars.githubusercontent.com/u/181474874?v=4" width="150" height="150"/>  |
-|:-:|:-:|:-:|
-|김도연<br/>[@tkv00](https://github.com/tkv00)|박재성<br/>[@pjs1710](https://github.com/pjs1710)|정현아<br/>[@hyunaaaj](https://github.com/hyunaaaj)
+<a id="overview"></a>
+## 1. 프로젝트 한눈에 보기
 
-## ✏️ Responsibilities
-- 김도연
-    - AWS EC2, AWS RDS 서버 배포
-    - GitHub Action,AWS Code Deploy를 이용한 CI/CD
-    - ERD 구성
-    - ErrorCode 에러 처리 구체화
-    - Google AI ( GEMINI API )를 이용한 사용자 맞춤 주별 피드백 API
-    - Scheduler를 이용하여 일요일 23시 59분 59초 매주 사용자 피드백 초기화 구현
-    - 카테코리별 지출 API 구현
-    - 카테고리별 수입 API 구현
-    - Release 관리
-      
-- 박재성
-    - Spring Security Config 설정
-    - ERD 구성
-    - JavaMailSender를 활용한 이메일 인증 기반 회원가입 API 구현
-    - Naver SMTP를 이용한 Custom 인증코드 전송 구현
-    - 이메일 로그인 API 구현
-    - Json Web Token ( JWT )을 활용한 로그인 사용자 보안 강화 및 관리
-    - 프로필 정보 관리 API 구현
-    - 월별 저축 목표 및 일별 목표 금액 저축 API 구현
-    - 카테고리별 지출 목표 API 구현
-    
-- 정현아
-  - ERD 구성
-  - 결제 내역 API 구현
+### 1-1. 이 서비스가 해결하려는 문제
 
-## 👋 Commit Message
+많은 개인 재무 서비스는 아래 문제에서 멈춥니다.
 
-| emoji | message | description |
-| --- | --- | --- |
-| :sparkles: | feat | 새로운 기능 추가, 기존 기능을 요구 사항에 맞추어 수정 |
-| :bug: | fix | 기능에 대한 버그 수정 |
-| :closed_book: | docs | 문서(주석) 수정 |
-| :art: | style | 코드 스타일, 포맷팅에 대한 수정 |
-| :recycle: | refact | 기능 변화가 아닌 코드 리팩터링 |
-| :white_check_mark: | test | 테스트 코드 추가/수정 |
-| :pushpin: | chore | 패키지 매니저 수정, 그 외 기타 수정 ex) .gitignore |
-| 🛠️                 | merge   | 병합      |
-| 🚑 | hotfix | master브랜치로 긴급 수정 |
-| 🔖 | realese | 새 버젼 배포 시행 |
+- 돈을 썼는지 기록은 되지만, 어디에 과하게 쓰는지 바로 읽히지 않는다.
+- 수입과 지출이 따로 놀아서 한 달 흐름이 끊겨 보인다.
+- 목표 저축, 예정 결제, 현재 소비 패턴이 한 화면의 문맥으로 이어지지 않는다.
+- 사용자는 숫자 목록보다 "이번 주 내가 어떤 소비를 했는지" 해석된 피드백을 원한다.
+- 거래 데이터가 쌓여도 운영 관점에서 인증, 검증, 캐시, 락, 배포, 관측까지 같이 설계되지 않으면 서비스는 금방 흔들린다.
 
-<br/>
+WealthTracker는 이 문제를 다음 구조로 해결합니다.
 
-## 📜 Directory Achitecture
+- 이메일 인증과 JWT 기반 로그인으로 사용자 식별을 명확히 한다.
+- 지출/수입/예정 결제/저축 목표를 개별 기능이 아니라 하나의 재무 운영 흐름으로 묶는다.
+- 월간/주간 집계, 카테고리 목표 비교, 최근 내역 조회를 API로 분리해 프론트가 재무 대시보드를 구성하기 쉽게 만든다.
+- Gemini API를 통해 이번 주 소비 패턴을 자연어 피드백으로 요약한다.
+- 캐시, 스케줄러, named lock, 예외 처리, Actuator/Prometheus 같은 운영 장치를 코드 안에 함께 둔다.
+
+### 1-2. 이 레포지토리에서 확인할 수 있는 백엔드 역량
+
+| 항목 | 코드 기준 포인트 |
+| --- | --- |
+| 인증/인가 | 이메일 인증코드 발송, 비밀번호 재설정, JWT 발급/검증, Security Filter |
+| 도메인 | 지출, 수입, 통합 거래내역, 저축 목표, 카테고리 목표, 예정 결제, 프로필, 피드백 |
+| 외부 연동 | Naver SMTP, Kakao OAuth2 UserInfo, Google Gemini |
+| 데이터 접근 | Spring Data JPA, MySQL, 커스텀 JPQL/Native Query |
+| 성능/운영 | Caffeine Cache, HikariCP, Actuator, Prometheus, log4jdbc |
+| 정합성 | MySQL `GET_LOCK` 기반 커스텀 카테고리 생성 보호 |
+| 배포 | `Dockerfile`, `appspec.yml`, `start.sh`, `stop.sh` 기반 EC2/CodeDeploy 배포 구조 |
+| 테스트 | DTO 유효성 검사 테스트, 동시 카테고리 생성 시나리오 테스트 |
+
+### 1-3. 팀 프로젝트에서의 개인 기여도
+
+이 프로젝트는 3인 협업으로 진행됐고, 포트폴리오 관점에서 제가 주도적으로 가져간 영역은 아래와 같습니다.
+
+| 구분 | 기여 내용 |
+| --- | --- |
+| 김도연 주도 구현 | 지출 API, 수입 API, 월간/주간 집계 응답, Gemini 기반 주간 피드백 API, 피드백 스케줄러, `ErrorCode` 세분화, 운영/배포 흐름 정리 |
+| 박재성 주도 구현 | 이메일 인증 회원가입, JWT 로그인 보안, 프로필 API, 저축 목표 API, 카테고리별 지출 목표 API |
+| 정현아 주도 구현 | 예정 결제 API |
+| 공동 작업 | ERD 설계, 전체 도메인 연결, API 문서화 |
+
+포트폴리오 기준으로 보면 이 문서에서 특히 주의 깊게 봐야 할 저의 핵심 기여 구간은 다음입니다.
+
+- `6-4. 지출 관리`
+- `6-5. 수입 관리`
+- `6-10. 주간 AI 피드백`
+- `9. 운영 / 배포 / 관측`
+
+### 1-4. 숫자로 보는 프로젝트
+
+현재 레포 기준으로 다음 규모를 확인할 수 있습니다.
+
+- Java 소스 파일 `107개`
+- Controller `10개`
+- Service 계열 클래스 `24개`
+- Repository `13개`
+- HTTP 매핑 엔드포인트 `41개`
+- 주요 도메인 패키지 `9개`
+
+### 1-5. 서비스 전체 비즈니스 흐름
+
+```mermaid
+flowchart LR
+    A["회원가입 / 이메일 인증"] --> B["JWT 로그인"]
+    B --> C["프로필 조회/수정"]
+    B --> D["지출 기록"]
+    B --> E["수입 기록"]
+    B --> F["예정 결제 기록"]
+    B --> G["저축 목표 생성"]
+    D --> H["카테고리별 집계 / 주차별 비교"]
+    E --> I["월간 통합 거래내역 생성"]
+    F --> I
+    G --> J["일별 저축 누적"]
+    D --> K["카테고리별 목표 대비 소비 비교"]
+    D --> L["Gemini 주간 피드백"]
+    H --> M["대시보드 / 그래프"]
+    I --> M
+    J --> M
+    K --> M
+    L --> M
 ```
+
+### 1-6. 핵심 메시지
+
+이 프로젝트의 강점은 "기록" 자체가 아니라,  
+기록된 거래를 `검증 가능한 데이터`, `비교 가능한 숫자`, `행동을 유도하는 피드백`으로 바꾸는 백엔드 조립력에 있습니다.
+
+### 1-7. 이 프로젝트를 강하게 만드는 설계 원칙
+
+| 설계 원칙 | 실제 코드에서 보이는 구현 |
+| --- | --- |
+| 식별 가능성 | 이메일 인증코드, JWT claim, `userId` 기반 사용자 식별 |
+| 정합성 우선 | 사용자 소유권 검증, 커스텀 카테고리 named lock |
+| 읽히는 데이터 | 주차 비교, 카테고리별 비교, 통합 거래 타임라인 |
+| 재호출 비용 절감 | Caffeine 캐시, 주간 피드백 재사용 전략 |
+| 운영 대비 | Actuator, Prometheus, log4jdbc, 배포 스크립트 |
+| 확장 가능성 | Kakao OAuth2 확장 포인트, 인프라 패키지 분리, 도메인별 서비스 분리 |
+
+```mermaid
+flowchart LR
+    A["입력"] --> B["식별"]
+    B --> C["검증"]
+    C --> D["저장"]
+    D --> E["집계"]
+    E --> F["피드백"]
+    F --> G["운영/관측"]
+```
+
+<a id="why-strong"></a>
+## 2. 왜 이 프로젝트가 단단한가
+
+### 2-1. 단순 CRUD가 아니라 흐름을 설계했다
+
+- 회원가입과 로그인만 있는 서비스가 아니라 이메일 인증, 비밀번호 재설정, 프로필 변경까지 사용자 수명주기를 다룬다.
+- 지출/수입만 있는 서비스가 아니라 월간 통합 거래내역, 카테고리별 목표, 저축 목표, 예정 결제까지 재무 문맥을 만든다.
+- 집계 숫자만 보여주는 것이 아니라 Gemini 기반 주간 피드백까지 연결한다.
+
+### 2-2. 운영을 생각한 요소가 코드에 들어 있다
+
+- `GlobalExceptionHandler`로 예외를 한 군데서 정리한다.
+- `JwtAuthFilter`와 `JwtUtil`로 토큰 해석 책임을 분리한다.
+- `Caffeine` 캐시로 주차 비교 그래프 계산을 줄인다.
+- `GET_LOCK` 기반 named lock으로 커스텀 카테고리 동시 생성 경쟁 조건을 막는다.
+- `@Scheduled` 작업으로 피드백 라이프사이클을 관리한다.
+- `Actuator`, `Prometheus`, `log4jdbc`, `Pinpoint-ready Dockerfile`로 운영 가시성을 확보하려는 흔적이 남아 있다.
+
+### 2-3. 채용 관점에서 강하게 볼 수 있는 포인트
+
+```mermaid
+flowchart TD
+    A["WealthTracker Backend"] --> B["인증 흐름"]
+    A --> C["도메인 모델링"]
+    A --> D["외부 시스템 연동"]
+    A --> E["정합성 제어"]
+    A --> F["집계/분석"]
+    A --> G["운영 대비"]
+
+    B --> B1["이메일 인증코드"]
+    B --> B2["JWT 발급/검증"]
+    B --> B3["비밀번호 재설정"]
+
+    C --> C1["지출 / 수입 / 목표 / 결제"]
+    C --> C2["통합 거래 타임라인"]
+    C --> C3["카테고리 목표 비교"]
+
+    D --> D1["Naver SMTP"]
+    D --> D2["Kakao OAuth2"]
+    D --> D3["Google Gemini"]
+
+    E --> E1["User 소유권 검증"]
+    E --> E2["Named Lock"]
+    E --> E3["만료 코드 정리"]
+
+    F --> F1["월별/주차별 집계"]
+    F --> F2["최근 내역 요약"]
+    F --> F3["자연어 피드백"]
+
+    G --> G1["Actuator / Prometheus"]
+    G --> G2["CodeDeploy 스크립트"]
+    G --> G3["Docker 이미지 정의"]
+```
+
+### 2-4. 실패 시나리오까지 제어한 구조
+
+좋은 README는 "무엇을 만들었는가"에서 끝나지 않고,  
+"어디서 깨질 수 있고, 그것을 어떻게 막았는가"까지 보여줘야 합니다.
+
+```mermaid
+flowchart TD
+    A["동시 요청"] --> A1["GET_LOCK 기반 카테고리 중복 생성 방지"]
+    B["반복 집계 호출"] --> B1["Caffeine 캐시 + 변경 시 Evict"]
+    C["오래된 AI 피드백"] --> C1["최신 생성일/수정일 비교 후 재생성"]
+    D["타 사용자 데이터 접근"] --> D1["JWT userId + 엔티티 소유권 검증"]
+    E["만료된 인증 코드"] --> E1["5분 만료 + 재발송 시 기존 코드 삭제"]
+    F["배포 잔존 프로세스"] --> F1["stop.sh -> start.sh 순차 배포"]
+```
+
+| 깨질 수 있는 지점 | 대응 방식 |
+| --- | --- |
+| 같은 커스텀 카테고리의 동시 생성 | MySQL `GET_LOCK`으로 임계구역 보호 |
+| 주차 비교 API의 반복 호출 | `@Cacheable("expendWeekCache")`와 변경 시 `@CacheEvict` |
+| 거래가 바뀌었는데 예전 피드백이 남는 문제 | 최신 생성일/수정일과 피드백 생성일 비교 후 재생성 |
+| 다른 사용자의 거래 상세 조회/수정/삭제 | JWT에서 추출한 `userId`와 엔티티 소유자 비교 |
+| 인증 코드 재사용/중복 누적 | 기존 코드 삭제 후 새 코드 저장, 만료 시간 5분 설정 |
+| 배포 시 이전 프로세스 잔존 | `appspec.yml` + `stop.sh` + `start.sh`로 정리 후 재기동 |
+
+<a id="system-architecture"></a>
+## 3. 시스템 전체 구조
+
+### 3-1. 시스템 컨텍스트
+
+```mermaid
+flowchart LR
+    Client["Client<br/>Web / App"]
+    Api["WealthTracker API Server<br/>Spring Boot"]
+    Mysql["MySQL<br/>운영 데이터"]
+    Mail["Naver SMTP<br/>인증 코드 발송"]
+    Kakao["Kakao OAuth2<br/>소셜 사용자 정보"]
+    Gemini["Google Gemini<br/>주간 피드백 생성"]
+    Cache["Caffeine Cache<br/>주차별 지출 비교"]
+    Metrics["Actuator / Prometheus"]
+    Deploy["AWS CodeDeploy / EC2"]
+
+    Client --> Api
+    Api --> Mysql
+    Api --> Mail
+    Api --> Kakao
+    Api --> Gemini
+    Api --> Cache
+    Api --> Metrics
+    Deploy --> Api
+```
+
+### 3-2. 요청이 내부에서 지나가는 기본 경로
+
+```mermaid
+flowchart LR
+    A["HTTP Request"] --> B["Controller"]
+    B --> C["Service"]
+    C --> D["Repository"]
+    D --> E["MySQL / External API"]
+    C --> F["JWT / Validation / Lock / Cache"]
+    E --> G["DTO 변환"]
+    G --> H["HTTP Response"]
+```
+
+### 3-3. 이 프로젝트에서 저장소와 외부 시스템이 맡는 역할
+
+| 구성요소 | 역할 |
+| --- | --- |
+| MySQL | 사용자, 인증 코드, 지출, 수입, 목표, 결제, 피드백 등 핵심 운영 데이터 저장 |
+| Caffeine Cache | 주차별 지출 비교 API 결과 캐싱 |
+| Naver SMTP | 회원가입/비밀번호 재설정 인증코드 발송 |
+| Kakao OAuth2 | 카카오 사용자 정보를 받아 JWT로 연결하는 확장 로그인 구조 |
+| Google Gemini | 사용자의 이번 주 소비를 자연어 피드백으로 요약 |
+| Actuator / Prometheus | 헬스체크와 메트릭 노출 |
+| Pinpoint-ready Dockerfile | APM 적용을 고려한 런타임 정의 |
+
+### 3-4. 패키지 기준 시스템 분해
+
+```mermaid
+flowchart TB
+    A["com.WealthTracker.demo"] --> B["domain.auth"]
+    A --> C["domain.user"]
+    A --> D["domain.expend"]
+    A --> E["domain.income"]
+    A --> F["domain.expend_income"]
+    A --> G["domain.target"]
+    A --> H["domain.category"]
+    A --> I["domain.payment"]
+    A --> J["domain.feedback"]
+    A --> K["global"]
+    A --> L["infrastructure"]
+```
+
+### 3-5. 요청 1건에 함께 작동하는 방어선
+
+```mermaid
+flowchart LR
+    A["Client Request"] --> B["CORS / Security FilterChain"]
+    B --> C["JWT Parsing"]
+    C --> D["Controller"]
+    D --> E["DTO Validation"]
+    E --> F["Service"]
+    F --> G["User Lookup / Ownership Check"]
+    G --> H["Lock / Cache / Scheduler-aware Logic"]
+    H --> I["Repository"]
+    I --> J["MySQL / External API"]
+    J --> K["DTO Response"]
+    K --> L["GlobalExceptionHandler / Status Code"]
+```
+
+이 다이어그램의 포인트는 단순합니다.  
+요청은 Controller 하나만 통과하는 것이 아니라, 인증, 검증, 사용자 확인, 정합성 제어, 예외 처리까지 여러 방어선을 함께 통과합니다.
+
+<a id="tech-stack"></a>
+## 4. 기술 스택과 저장소 역할
+
+### 4-1. 기술 스택
+
+| 분류 | 기술 |
+| --- | --- |
+| Language | Java 17 |
+| Framework | Spring Boot 3.3.4 |
+| Security | Spring Security, JWT, OAuth2 Client |
+| ORM | Spring Data JPA |
+| DB | MySQL |
+| Cache | Spring Cache + Caffeine |
+| Mail | Spring Mail |
+| API Docs | Springdoc OpenAPI, Swagger UI |
+| AI | Google Gemini REST 호출 |
+| Observability | Actuator, Prometheus, log4jdbc |
+| Build | Gradle |
+| Deploy | Docker, AWS CodeDeploy 스크립트 |
+| Test | JUnit5, Spring Boot Test |
+
+### 4-2. 왜 이 조합이 좋은가
+
+- 관계형 정합성이 중요한 거래 데이터는 MySQL에 둔다.
+- 반복 조회가 발생하는 주차별 지출 비교는 캐시로 줄인다.
+- 인증은 세션이 아니라 JWT 중심으로 가져가 프론트 분리에 유리하게 만든다.
+- AI는 내부 비즈니스 로직과 분리된 REST 호출로 붙여 변경 가능성을 열어둔다.
+- 운영 환경에서 헬스체크와 메트릭을 쉽게 붙일 수 있게 Actuator/Prometheus를 켠다.
+
+### 4-3. build.gradle 기준으로 읽히는 설계 포인트
+
+- `spring-boot-starter-security`
+- `spring-boot-starter-oauth2-client`
+- `spring-boot-starter-mail`
+- `spring-boot-starter-actuator`
+- `micrometer-registry-prometheus`
+- `spring-boot-starter-cache`
+- `caffeine`
+- `jjwt`
+- `springdoc-openapi`
+
+즉, 인증, 운영, 문서화, 캐시, 외부 연동까지 백엔드 기본기를 한 레포 안에 다 넣은 구조입니다.
+
+<a id="backend-architecture"></a>
+## 5. 백엔드 처리 구조
+
+### 5-1. 디렉터리 구조
+
+```text
 .
-└── demo
-    ├── DTO
-    │   ├── CustomUserInfoDTO.java
-    │   ├── JwtResponseDTO.java
-    │   ├── LoginRequestDTO.java
-    │   ├── ReturnCodeDTO.java
-    │   ├── SignupRequestDTO.java
-    │   ├── VerificationCodeConfirmDTO.java
-    │   ├── VerificationCodeRequestDTO.java
-    │   ├── dailysaving
-    │   │   └── DailySavingRequestDTO.java
-    │   ├── feedback
-    │   │   ├── ChatRequest.java
-    │   │   ├── ChatResponse.java
-    │   │   ├── FeedbackResponseDTO.java
-    │   │   └── Message.java
-    │   ├── income_expend
-    │   │   ├── ExpendCategoryAmountDTO.java
-    │   │   ├── ExpendDateResponseDTO.java
-    │   │   ├── ExpendDayResponseDTO.java
-    │   │   ├── ExpendIncomeResponseDTO.java
-    │   │   ├── ExpendRequestDTO.java
-    │   │   ├── ExpendResponseDTO.java
-    │   │   ├── IncomeRequestDTO.java
-    │   │   └── IncomeResponseDTO.java
-    │   └── target
-    │       ├── TargetRequestDTO.java
-    │       └── TargetResponseDTO.java
-    ├── DemoApplication.java
-    ├── config
-    │   ├── GeminiRestTemplateConfig.java
-    │   ├── SecurityConfig.java
-    │   └── SwaggerConfig.java
-    ├── constants
-    │   ├── ErrorCode.java
-    │   └── SuccessCode.java
-    ├── controller
-    │   ├── AuthController.java
-    │   ├── ExpendController.java
-    │   ├── ExpendIncomeController.java
-    │   ├── FeedbackController.java
-    │   ├── IncomeController.java
-    │   ├── LoginController.java
-    │   └── TargetController.java
-    ├── domain
-    │   ├── CategoryExpend.java
-    │   ├── CategoryIncome.java
-    │   ├── DailySaving.java
-    │   ├── Expend.java
-    │   ├── FeedBack.java
-    │   ├── Income.java
-    │   ├── Target.java
-    │   ├── User.java
-    │   └── VerificationCode.java
-    ├── enums
-    │   ├── Asset.java
-    │   ├── Category_Expend.java
-    │   └── Category_Income.java
-    ├── error
-    │   ├── CustomException.java
-    │   └── GlobalExceptionHandler.java
-    ├── repository
-    │   ├── DailySavingRepository.java
-    │   ├── ExpendCategoryRepository.java
-    │   ├── ExpendRepository.java
-    │   ├── FeedbackRepository.java
-    │   ├── IncomeCategoryRepository.java
-    │   ├── IncomeRepository.java
-    │   ├── TargetRepository.java
-    │   ├── UserRepository.java
-    │   └── VerificationCodeRepository.java
-    ├── service
-    │   ├── CustomUserDetailsService.java
-    │   ├── EmailService.java
-    │   ├── EmailServiceImpl.java
-    │   ├── FeedbackService.java
-    │   ├── FeedbackServiceImpl.java
-    │   ├── KakaoOAuth2UserService.java
-    │   ├── LoginService.java
-    │   ├── LoginServiceImpl.java
-    │   ├── SignupService.java
-    │   ├── SignupServiceImpl.java
-    │   ├── income_expend
-    │   │   ├── ExpendIncomeService.java
-    │   │   ├── ExpendIncomeServiceImpl.java
-    │   │   ├── ExpendService.java
-    │   │   ├── ExpendServiceImpl.java
-    │   │   ├── IncomeService.java
-    │   │   └── IncomeServiceImpl.java
-    │   └── target
-    │       ├── TargetService.java
-    │       └── TargetServiceImpl.java
-    └── util
-        ├── CategoryExpendInitializer.java
-        ├── JwtAuthFilter.java
-        ├── JwtUtil.java
-        └── VerificationCodeUtil.java
-
-
-
+├── src/main/java/com/WealthTracker/demo
+│   ├── domain
+│   │   ├── auth
+│   │   ├── user
+│   │   ├── expend
+│   │   ├── income
+│   │   ├── expend_income
+│   │   ├── target
+│   │   ├── category
+│   │   ├── payment
+│   │   └── feedback
+│   ├── global
+│   │   ├── config
+│   │   ├── constants
+│   │   ├── error
+│   │   ├── lock
+│   │   └── util
+│   └── infrastructure
+│       ├── entity
+│       ├── repository
+│       └── service
+├── src/main/resources
+├── src/test/java
+├── Dockerfile
+├── appspec.yml
+└── scripts
+    ├── start.sh
+    └── stop.sh
 ```
 
-- DTO : DTO 클래스
-- config : 설정 클래스
-- controller
-- domain : 엔티티 클래스
-- eums : enum 클래스
-- error : 에러 클래스
-- repository : JPA 레포지토리 클래스
-- service
-- util : 기능 클래스
+### 5-2. 계층 구조
 
-<br/>
+```mermaid
+flowchart LR
+    A["Controller"] --> B["Service"]
+    B --> C["Repository"]
+    B --> D["Utility / Lock / Cache"]
+    C --> E["MySQL"]
+    B --> F["SMTP / Gemini / OAuth2"]
+```
 
-## 🌳Branch Strategy
-- `Git Hub Flow`전략 사용 -> issue를 통한 브랜치관리로 변경.
-> {branch 유형} / 유형 상세
+### 5-3. 공통 관심사
 
-> {issue 번호}-브랜치 작업 내용
-      
+| 영역 | 코드 기준 역할 |
+| --- | --- |
+| `SecurityConfig` | Stateless 세션 정책, JWT 필터 체인 등록, OAuth2 UserService 연결, CORS 설정 |
+| `JwtAuthFilter` | Authorization 헤더에서 Bearer 토큰 파싱 후 SecurityContext 구성 |
+| `JwtUtil` | 토큰 생성, `userId`/`email`/`name` claim 저장, 검증 |
+| `GlobalExceptionHandler` | `CustomException`, JWT 예외, 검증 예외 공통 응답 변환 |
+| `CategoryExpendInitializer` | 기본 지출 카테고리 선주입 |
+| `ExpendCategoryNamedLockFacadeImpl` | 커스텀 카테고리 생성 시 DB named lock 적용 |
+| `FeedbackServiceImpl.cleanAndSaveFeedback` | 주 단위 피드백 정리 스케줄러 |
 
-<br/>
+### 5-4. 응답/예외 처리 방식
 
-## 📄 API Docs
-#### 회원가입 로그인
-![스크린샷 2024-11-30 02 07 18](https://github.com/user-attachments/assets/bc5fa66e-25bf-4e34-99d6-f3fd2254208a)
+- 성공 응답은 도메인 DTO 또는 `ReturnCodeDTO(status, message)` 형태를 사용합니다.
+- 실패는 `CustomException + ErrorCode` 조합으로 처리합니다.
+- DTO 검증 실패는 필드별 에러 맵으로 반환합니다.
 
-#### 지출 및 수입
-![스크린샷 2024-11-30 02 05 13](https://github.com/user-attachments/assets/75313bee-af03-4b66-b6f7-5b42f3bb849a)
-![스크린샷 2024-11-30 02 07 06](https://github.com/user-attachments/assets/bc0f9530-e385-458a-8b4c-50bb5929b5dd)
+### 5-5. 이 구조가 포트폴리오에서 강한 이유
 
-#### 피드백 및 결제예정
-![스크린샷 2024-12-02 13 21 27](https://github.com/user-attachments/assets/e2e37c7b-929a-483d-90a3-4719baedb085)
+- 인증, 도메인, 외부 연동, 배포가 한 프로젝트 안에서 연결되어 있다.
+- 단일 서비스지만 관심사 분리가 잘 보여서 설명력이 높다.
+- "왜 이 클래스가 존재하는지"가 분명해서 기술 면접에서 방어하기 쉽다.
 
+<a id="feature-details"></a>
+## 6. 상세 기능 설명
 
-#### 저축 목표
-![스크린샷 2024-11-30 02 06 55](https://github.com/user-attachments/assets/02fedd7f-30b8-4178-933d-33a20a6fb9e3)
+## 6-1. 인증 / 회원가입 / 비밀번호 재설정
 
-## Archictecture
+### 관련 API
 
-### 1️⃣ ERD
-![WealthTracker (5)](https://github.com/user-attachments/assets/57d49c3d-a530-46bd-bb62-70b4a1479a0a)
+| Method | Endpoint | 설명 |
+| --- | --- | --- |
+| POST | `/api/send-code` | 회원가입용 이메일 인증코드 발송 |
+| GET | `/api/verify` | 이메일 인증코드 확인 |
+| POST | `/api/resend-code` | 인증코드 재발송 |
+| POST | `/api/signup` | 회원가입 |
+| POST | `/api/reset-password` | 비밀번호 재설정 코드 발송 |
+| POST | `/api/confirm-reset-password` | 재설정 코드 검증 후 비밀번호 변경 |
+| POST | `/api/confirm-password` | 로그인 사용자의 현재 비밀번호 확인 |
 
+### 6-1-1. 이메일 인증 기반 회원가입 흐름
 
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Controller as AuthController
+    participant Service as SignupServiceImpl
+    participant Repo as VerificationCodeRepository
+    participant Mail as EmailServiceImpl
+    participant DB as MySQL
 
-### 2️⃣ CI/CD
-![sf](https://github.com/user-attachments/assets/7c97c013-5cd8-4423-b4e2-45182a12dc8c)
+    Client->>Controller: POST /api/send-code
+    Controller->>Service: createVerificationCodeAndSendEmail(email)
+    Service->>DB: user email 중복 조회
+    Service->>Repo: 기존 코드 삭제
+    Service->>Service: 6자리 인증코드 생성
+    Service->>Repo: verification_code 저장(5분 만료)
+    Service->>Mail: 이메일 발송
+    Controller-->>Client: 인증코드 발송 성공
 
+    Client->>Controller: GET /api/verify?email=...&code=...
+    Controller->>Service: verifyEmail(email, code)
+    Service->>Repo: email 기준 코드 조회
+    Service->>Service: 코드 일치 여부 / 만료 여부 확인
+    Controller-->>Client: 이메일 인증 성공
 
-## 📕 Tech 
-1️⃣ Framework & Library
+    Client->>Controller: POST /api/signup
+    Controller->>Service: signupUser(dto)
+    Service->>Repo: email 기준 인증코드 존재 여부 확인
+    Service->>Service: 비밀번호 BCrypt 인코딩
+    Service->>DB: User 저장
+    Service->>Repo: 인증 코드 삭제
+    Controller-->>Client: 회원가입 성공
+```
 
-- JDK: 21
-- SpringBoot: 3.3.4
-- Spring Boot Starter Security: 3.3.4
-- Spring Boot Starter Data JPA: 3.3.4
-- Spring Boot Starter Web: 3.3.4
-- Spring Boot Starter WebSocket: 3.3.4
-- Spring Boot Starter Batch: 3.3.4
-- Spring Boot Starter Validation
-- Spring Boot Starter Mail
-- Spring Boot Starter JDBC
-- Spring Boot DevTools
-- Spring Doc Open API: 2.1.0
-- Springfox Swagger UI: 3.0.0
-- Thymeleaf Extras Spring Security 6
-- QueryDsl: 5.0.0
-- JSON Web Token (JJWT): 0.11.5
-- Project Lombok: 1.18.30
-- JUnit: 5
-- Testcontainers: 1.19.7
-- Apache HttpClient5: 5.2.25.RELEASE
-- OpenFeign: 4.0.6
-  
-2️⃣ Build Tools
-- Gradle: 7.6.4
+### 6-1-2. 코드 기준 핵심 포인트
 
-3️⃣ Database
-- MySQL 8.0.39
+- 인증코드는 `VerificationCode` 엔티티로 DB에 저장합니다.
+- 만료 시간은 `LocalDateTime.now().plusMinutes(5)` 기준입니다.
+- 중복 이메일은 회원가입 전에 차단합니다.
+- 회원가입이 완료되면 인증코드는 삭제합니다.
+- 비밀번호는 `BCryptPasswordEncoder`로 저장합니다.
 
-4️⃣ Infra
-- AWS EC2
-- AWS RDS
-- AWS S3
-- AWS NAT GATEWAY
-- AWS VPC
-- AWS CODEDEPLOY
-- GitHub Actions
+### 6-1-3. 비밀번호 재설정 흐름
+
+```mermaid
+flowchart LR
+    A["POST /api/reset-password"] --> B["SignupServiceImpl.createPasswordResetCode"]
+    B --> C["User 존재 확인"]
+    C --> D["기존 인증코드 삭제"]
+    D --> E["새 6자리 코드 생성"]
+    E --> F["verification_codes 저장"]
+    F --> G["이메일 발송"]
+    G --> H["POST /api/confirm-reset-password"]
+    H --> I["코드 유효성 확인"]
+    I --> J["새 비밀번호와 기존 비밀번호 비교"]
+    J --> K["BCrypt 인코딩 후 User 저장"]
+    K --> L["사용한 코드 삭제"]
+```
+
+## 6-2. 로그인과 JWT
+
+### 관련 API
+
+| Method | Endpoint | 설명 |
+| --- | --- | --- |
+| POST | `/api/login` | 이메일/비밀번호 로그인 후 JWT 발급 |
+
+### 6-2-1. 로그인 흐름
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Controller as LoginController
+    participant Service as LoginServiceImpl
+    participant DB as UserRepository
+    participant Jwt as JwtUtil
+
+    Client->>Controller: POST /api/login
+    Controller->>Service: login(email, password)
+    Service->>DB: email 기준 사용자 조회
+    Service->>Service: enabled 상태 확인
+    Service->>Service: BCrypt password 비교
+    Service-->>Controller: User 반환
+    Controller->>Jwt: createAccessToken(userId, email, name)
+    Jwt-->>Controller: JWT
+    Controller-->>Client: token 반환
+```
+
+### 6-2-2. 인증된 요청 처리 방식
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Filter as JwtAuthFilter
+    participant Jwt as JwtUtil
+    participant UDS as CustomUserDetailsService
+    participant Repo as UserRepository
+    participant SC as SecurityContext
+    participant Controller
+
+    Client->>Filter: Authorization: Bearer ...
+    Filter->>Jwt: validationToken()
+    Jwt-->>Filter: 유효 여부
+    Filter->>Jwt: getUserId()
+    Filter->>UDS: loadUserByUsername(userId)
+    UDS->>Repo: findByUserId(userId)
+    Repo-->>UDS: User
+    UDS-->>Filter: UserDetails
+    Filter->>SC: Authentication 저장
+    SC-->>Controller: 현재 인증 컨텍스트 사용 가능
+```
+
+### 6-2-3. JWT에 담는 정보
+
+- `subject`: `userId`
+- `claim.userId`
+- `claim.email`
+- `claim.name`
+
+즉, 단순 문자열 토큰이 아니라 이후 도메인 서비스가 바로 사용자 소유권을 검증할 수 있는 최소 정보가 들어 있습니다.
+
+## 6-3. 프로필 조회 / 수정
+
+### 관련 API
+
+| Method | Endpoint | 설명 |
+| --- | --- | --- |
+| GET | `/api/profile` | 현재 사용자 프로필 조회 |
+| PUT | `/api/profile-update` | 이름 / 닉네임 수정 |
+
+### 6-3-1. 동작 흐름
+
+```mermaid
+flowchart LR
+    A["Authorization Header"] --> B["JwtUtil.getUserId"]
+    B --> C["UserRepository.findById"]
+    C --> D["UserProfileResponseDTO 생성"]
+    D --> E["프로필 조회 응답"]
+
+    C --> F["변경 요청 DTO 비교"]
+    F --> G["변경된 필드만 반영"]
+    G --> H["User 저장"]
+    H --> I["프로필 수정 응답"]
+```
+
+### 6-3-2. 핵심 포인트
+
+- 프로필 수정 시 기존 값과 달라진 필드만 반영합니다.
+- 변경이 없으면 기존 프로필을 그대로 반환합니다.
+- 사용자 식별은 항상 JWT 내부 `userId` 기준입니다.
+
+## 6-4. 지출 관리
+
+> 개인 기여도 | 김도연 주도 구현  
+> 지출 CRUD, 커스텀 카테고리 처리, 월간/주간 집계, 카테고리별 비교 응답 설계까지 포트폴리오에서 가장 강하게 가져갈 수 있는 구현 영역입니다.
+
+### 관련 API
+
+| Method | Endpoint | 설명 |
+| --- | --- | --- |
+| POST | `/api/expend` | 지출 기록 생성 |
+| GET | `/api/expend/list?month=` | 월별 지출 목록 |
+| GET | `/api/expend/recent` | 최근 5개 지출 |
+| GET | `/api/expend/graph` | 이번 달 vs 저번 달 주차 비교 |
+| GET | `/api/expend/{expendId}` | 지출 상세 조회 |
+| DELETE | `/api/expend/delete/{expendId}` | 지출 삭제 |
+| PUT | `/api/expend/update/{expendId}` | 지출 수정 |
+| GET | `/api/expend/expendList` | 카테고리별 월간 요약 |
+| GET | `/api/expend/expendList/day` | 최근 2주 일별 총지출 |
+
+### 6-4-1. 지출 생성 흐름
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Controller as ExpendController
+    participant Service as ExpendServiceImpl
+    participant Jwt as JwtUtil
+    participant Lock as ExpendCategoryNamedLockFacade
+    participant CategoryRepo as ExpendCategoryRepository
+    participant UserRepo as UserRepository
+    participant ExpendRepo as ExpendRepository
+    participant DB as MySQL
+
+    Client->>Controller: POST /api/expend
+    Controller->>Service: writeExpend(dto, token)
+    Service->>Jwt: validationToken / getUserId
+    Service->>Service: category / asset 문자열 검증
+    alt 기본 카테고리
+        Service->>CategoryRepo: findByCategoryName
+    else 사용자 정의 카테고리
+        Service->>Lock: getOrCreateCustomCategoryExpend
+        Lock->>DB: GET_LOCK(category, 10)
+        Lock->>CategoryRepo: findByCustomCategoryName or save
+        Lock->>DB: RELEASE_LOCK(category)
+    end
+    Service->>UserRepo: findByUserId
+    Service->>ExpendRepo: Expend 저장
+    Controller-->>Client: 기록 성공
+```
+
+### 6-4-2. 왜 이 구현이 강한가
+
+이 프로젝트에서 가장 포트폴리오적으로 눈에 띄는 부분 중 하나가 바로 커스텀 지출 카테고리 처리입니다.
+
+- 기본 카테고리 6개는 `CategoryExpendInitializer`가 애플리케이션 시작 시 주입합니다.
+- 사용자가 기본 카테고리에 없는 문자열을 입력하면 커스텀 카테고리로 간주합니다.
+- 이때 `GET_LOCK(category, 10)`을 이용해 같은 이름 카테고리가 동시 다발로 중복 생성되는 경쟁 조건을 막습니다.
+- 실제 테스트 코드도 같은 커스텀 카테고리로 동시에 지출을 기록하는 시나리오를 검증합니다.
+
+### 6-4-3. 월간 / 주간 집계 흐름
+
+```mermaid
+flowchart TD
+    A["/api/expend/list?month="] --> B["월별 지출 raw 조회"]
+    B --> C["CategoryExpend 매핑"]
+    C --> D["ExpendResponseDTO 리스트 반환"]
+
+    E["/api/expend/graph"] --> F["userId 추출"]
+    F --> G["native query로 이번달/저번달 주차별 총액 계산"]
+    G --> H["ExpendWeekCompareDTO 반환"]
+
+    I["/api/expend/expendList"] --> J["카테고리별 이번달/저번달 금액 계산"]
+    J --> K["증감률 / UP-DOWN 계산"]
+    K --> L["카테고리별 최근 내역 2개 결합"]
+
+    M["/api/expend/expendList/day"] --> N["최근 2주 일별 총지출 조회"]
+    N --> O["빈 날짜는 0원으로 채움"]
+    O --> P["일별 그래프 DTO 반환"]
+```
+
+### 6-4-4. 세부 동작 포인트
+
+- `getAmountByWeek`는 `@Cacheable("expendWeekCache")`를 사용합니다.
+- 지출 생성/수정/삭제는 `@CacheEvict`로 해당 캐시를 비웁니다.
+- `getAmountByMonth`는 각 카테고리별로 이번 달/저번 달 지출을 비교해 `UP`, `DOWN`, `SAME` 메시지를 만듭니다.
+- `getAmountByDate`는 최근 14일을 기준으로 빈 날짜까지 채워 그래프 친화적인 응답을 만듭니다.
+- 상세/수정/삭제는 모두 "이 지출이 로그인한 사용자의 것인지"를 검증합니다.
+
+## 6-5. 수입 관리
+
+> 개인 기여도 | 김도연 주도 구현  
+> 수입 기록 API와 월별/최근 조회, 지출과 함께 재무 흐름을 구성하는 기본 데이터 축을 담당한 영역입니다.
+
+### 관련 API
+
+| Method | Endpoint | 설명 |
+| --- | --- | --- |
+| POST | `/api/income` | 수입 기록 생성 |
+| GET | `/api/income/list?month=` | 월별 수입 목록 |
+| GET | `/api/income/recent` | 최근 5개 수입 |
+| GET | `/api/income/{incomeId}` | 수입 상세 조회 |
+| DELETE | `/api/income/delete/{incomeId}` | 수입 삭제 |
+| PUT | `/api/income/update/{incomeId}` | 수입 수정 |
+
+### 6-5-1. 수입 흐름
+
+```mermaid
+flowchart LR
+    A["POST /api/income"] --> B["JwtUtil로 userId 추출"]
+    B --> C["카테고리 문자열을 Category_Income으로 변환"]
+    C --> D["Asset 문자열 변환"]
+    D --> E["CategoryIncome 조회 또는 생성"]
+    E --> F["Income 엔티티 저장"]
+
+    G["GET /api/income/list"] --> H["월별 Income 조회"]
+    H --> I["CategoryIncome 매핑"]
+    I --> J["IncomeResponseDTO 반환"]
+```
+
+### 6-5-2. 핵심 포인트
+
+- 수입은 enum 기반 기본 카테고리 중심으로 관리합니다.
+- 저장 시 카테고리가 없으면 `CategoryIncome`을 생성해 재사용합니다.
+- 지출과 마찬가지로 사용자 소유권 검증 후 상세/수정/삭제를 수행합니다.
+
+## 6-6. 수입 + 지출 통합 거래 타임라인
+
+> 개인 기여도 | 김도연 기여 연결 구간  
+> 지출/수입 API를 단순 CRUD로 끝내지 않고, 실제 화면에서 한 번에 소비 흐름을 읽을 수 있게 통합 응답 문맥으로 설명할 수 있는 구간입니다.
+
+### 관련 API
+
+| Method | Endpoint | 설명 |
+| --- | --- | --- |
+| GET | `/api/expend-income?month=` | 월별 통합 거래내역 조회 |
+
+### 6-6-1. 동작 흐름
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Controller as ExpendIncomeController
+    participant Service as ExpendIncomeServiceImpl
+    participant ExpendRepo
+    participant IncomeRepo
+
+    Client->>Controller: GET /api/expend-income?month=...
+    Controller->>Service: getExpendIncomeAllList(token, month)
+    Service->>ExpendRepo: 월별 지출 조회
+    Service->>IncomeRepo: 월별 수입 조회
+    Service->>Service: 하나의 리스트로 합치기
+    Service->>Service: 날짜 역순 정렬
+    Service->>Service: 타입별 DTO 매핑(수입/지출)
+    Controller-->>Client: 통합 타임라인 반환
+```
+
+### 6-6-2. 이 API의 의미
+
+이 API는 단순히 두 테이블을 따로 반환하는 것이 아니라,
+
+- 같은 월의 수입과 지출을 하나의 타임라인으로 합친다.
+- 날짜 기준으로 정렬한다.
+- 프론트가 "통합 거래내역 화면"을 한 번에 그릴 수 있게 만든다.
+
+즉, 백엔드가 UI 문맥까지 고려한 응답을 만든 사례입니다.
+
+## 6-7. 저축 목표
+
+### 관련 API
+
+| Method | Endpoint | 설명 |
+| --- | --- | --- |
+| POST | `/api/target/create` | 저축 목표 생성 |
+| PUT | `/api/target/update/{targetId}` | 저축 목표 수정 |
+| DELETE | `/api/target/delete/{targetId}` | 저축 목표 삭제 |
+| POST | `/api/target/savings/{targetId}` | 특정 날짜에 목표 금액 저축 |
+| GET | `/api/target/graph?month=` | 월별 목표/저축 그래프 데이터 |
+
+### 6-7-1. 목표 생성 및 저축 누적 흐름
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Controller as TargetController
+    participant Service as TargetServiceImpl
+    participant TargetRepo
+    participant DailyRepo as DailySavingRepository
+    participant DB as MySQL
+
+    Client->>Controller: POST /api/target/create
+    Controller->>Service: createTarget(dto, token)
+    Service->>TargetRepo: Target 저장
+    Controller-->>Client: targetId / targetAmount / savedAmount 반환
+
+    Client->>Controller: POST /api/target/savings/{targetId}
+    Controller->>Service: addDailySaving(targetId, dto, token)
+    Service->>TargetRepo: 사용자 소유 Target 조회
+    Service->>Service: DailySaving 생성
+    Service->>Service: target.addSaving(dailySaving)
+    Service->>DailyRepo: DailySaving 저장
+    Service->>TargetRepo: savedAmount 반영된 Target 저장
+    Controller-->>Client: 저축 성공
+```
+
+### 6-7-2. 저축 목표 그래프 흐름
+
+```mermaid
+flowchart LR
+    A["GET /api/target/graph?month="] --> B["TargetRepository.getAllSavedAmountByMonth"]
+    A --> C["TargetRepository.getAllTargetAmountByMonth"]
+    B --> D["TargetGraphDTO.nowAmount"]
+    C --> E["TargetGraphDTO.targetAmount"]
+    D --> F["그래프 응답"]
+    E --> F
+```
+
+### 6-7-3. 핵심 포인트
+
+- `Target`는 `savedAmount`를 aggregate처럼 관리합니다.
+- `DailySaving`은 목표의 일별 누적 내역을 별도 테이블로 보존합니다.
+- 목표 금액과 실제 저축 금액을 월 단위로 바로 비교할 수 있게 API를 제공합니다.
+
+## 6-8. 카테고리별 지출 목표
+
+### 관련 API
+
+| Method | Endpoint | 설명 |
+| --- | --- | --- |
+| POST | `/api/category-target/create` | 카테고리 목표 생성 |
+| PUT | `/api/category-target/update` | 카테고리 목표 수정 |
+| GET | `/api/category-target/{category}` | 특정 카테고리 목표와 현재 지출 비교 |
+
+### 6-8-1. 비교 흐름
+
+```mermaid
+flowchart TD
+    A["GET /api/category-target/{category}"] --> B["JWT에서 userId 추출"]
+    B --> C["CategoryTarget 조회"]
+    B --> D["ExpendRepository.thisMonthAmountByCategory"]
+    C --> E{"목표 존재 여부"}
+    E -- 없음 --> F["targetAmount=0, 현재 지출 안내 메시지"]
+    E -- 있음 --> G["목표금액 vs 현재지출 비교"]
+    G --> H["UP/DOWN 메시지 생성"]
+    F --> I["CategoryTargetResponseDTO"]
+    H --> I
+```
+
+### 6-8-2. 이 기능이 좋은 이유
+
+- 단순 목표 CRUD가 아니라 "현재 얼마나 초과/절약 중인지"까지 한 번에 말해줍니다.
+- 실제 지출 합계는 `ExpendRepository.thisMonthAmountByCategory`로 바로 계산합니다.
+- 목표가 없는 경우도 0원 목표로 처리해 UX가 끊기지 않게 했습니다.
+
+## 6-9. 예정 결제 관리
+
+### 관련 API
+
+| Method | Endpoint | 설명 |
+| --- | --- | --- |
+| POST | `/api/payment` | 예정 결제 생성 |
+| GET | `/api/payment/list` | 전체 예정 결제 조회 |
+| DELETE | `/api/payment/delete/{paymentId}` | 예정 결제 삭제 |
+| PUT | `/api/payment/update/{paymentId}` | 예정 결제 수정 |
+| GET | `/api/payment/recent` | 최근 2개 예정 결제 |
+| GET | `/api/payment/paymentList` | 이번 달 결제 요약 |
+
+### 6-9-1. 결제 관리 흐름
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Controller as PaymentController
+    participant Service as PaymentServiceImpl
+    participant UserRepo
+    participant PaymentRepo
+
+    Client->>Controller: POST /api/payment
+    Controller->>Service: writePayment(dto, token)
+    Service->>UserRepo: user 조회
+    Service->>Service: dueDate / lastPayment 비어있는지 검증
+    Service->>PaymentRepo: Payment 저장
+    Controller-->>Client: 기록 성공
+
+    Client->>Controller: GET /api/payment/paymentList
+    Controller->>Service: getAmountByMonth(token)
+    Service->>PaymentRepo: 이번달 / 저번달 금액 조회
+    Service->>PaymentRepo: 최근 2개 결제 조회
+    Service->>Service: 증감률 계산
+    Controller-->>Client: 결제 요약 응답
+```
+
+### 6-9-2. 결제 도메인에서 볼 포인트
+
+- `dueDate`, `lastPayment`를 별도 보유해 "다음 납부"와 "최근 납부"를 같이 관리합니다.
+- 이번 달과 저번 달 결제액 비교 API를 따로 제공해 정기 지출 감시 기능으로 연결할 수 있습니다.
+- 최근 2개의 예정 결제를 바로 반환해 홈 화면 위젯을 만들기 좋습니다.
+
+## 6-10. 주간 AI 피드백
+
+> 개인 기여도 | 김도연 주도 구현  
+> Gemini 프롬프트 조합, 주간 지출 집계, 기존 피드백 재사용 전략, 스케줄러 기반 정리까지 담당한 차별화 포인트입니다.
+
+### 관련 API
+
+| Method | Endpoint | 설명 |
+| --- | --- | --- |
+| GET | `/api/feedback` | 이번 주 지출 기반 AI 피드백 생성 또는 재사용 |
+
+### 6-10-1. 피드백 생성 흐름
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Controller as FeedbackController
+    participant Service as FeedbackServiceImpl
+    participant ExpendRepo
+    participant FeedbackRepo
+    participant Gemini as Google Gemini
+    participant UserRepo
+
+    Client->>Controller: GET /api/feedback
+    Controller->>Service: sendFeedBack(token, key, url)
+    Service->>UserRepo: 현재 사용자 조회
+    Service->>ExpendRepo: 최신 지출 생성일 / 수정일 조회
+    Service->>FeedbackRepo: 이번 주 피드백 존재 여부 조회
+    alt 이번 주 피드백 있고 지출 변경 없음
+        Service-->>Controller: 기존 피드백 재사용
+    else 새 피드백 필요
+        Service->>ExpendRepo: 카테고리별 주간 지출 합 조회
+        Service->>Service: 프롬프트 생성
+        Service->>Gemini: REST 호출
+        Gemini-->>Service: 자연어 응답
+        Service->>FeedbackRepo: 새 피드백 저장
+        Service->>UserRepo: User.feedBack 연결
+        Service-->>Controller: 새 피드백 반환
+    end
+    Controller-->>Client: 자연어 피드백 응답
+```
+
+### 6-10-2. 캐시처럼 동작하는 DB 재사용 전략
+
+```mermaid
+flowchart TD
+    A["이번 주 피드백 요청"] --> B["이번 주 피드백 존재?"]
+    B -- 아니오 --> C["Gemini 호출"]
+    B -- 예 --> D["최신 지출 생성/수정 시각 확인"]
+    D --> E{"피드백 이후 거래 변경 있음?"}
+    E -- 예 --> C
+    E -- 아니오 --> F["기존 피드백 재사용"]
+    C --> G["feedback 테이블 저장"]
+    G --> H["응답 반환"]
+    F --> H
+```
+
+### 6-10-3. 이 구현이 좋은 이유
+
+- 비싼 외부 AI 호출을 매번 하지 않고, 같은 주간 데이터면 재사용합니다.
+- 단순 총액이 아니라 카테고리별 금액을 프롬프트에 포함해 더 맥락 있는 조언을 유도합니다.
+- 사용자의 지출이 수정되면 피드백도 다시 만들어 데이터 정합성을 지킵니다.
+
+### 6-10-4. 스케줄러
+
+`FeedbackServiceImpl.cleanAndSaveFeedback`
+
+- 매주 일요일 `00:00` 크론 실행
+- 현재 주 시작 이전에 생성된 피드백 삭제
+- 즉, 주간 피드백을 스냅샷처럼 유지하되 오래된 결과는 정리합니다.
+
+## 6-11. Kakao OAuth2 연동 확장 포인트
+
+### 관련 구성
+
+- `SecurityConfig.oauth2Login(...)`
+- `KakaoOAuth2UserService`
+- `application.properties`의 Kakao registration / provider 설정
+
+### 6-11-1. 동작 흐름
+
+```mermaid
+flowchart LR
+    A["Kakao OAuth2 Login"] --> B["Spring Security oauth2Login"]
+    B --> C["KakaoOAuth2UserService.loadUser"]
+    C --> D["properties / kakao_account 파싱"]
+    D --> E["CustomUserInfoDTO 생성"]
+    E --> F["JwtUtil.createAccessToken"]
+    F --> G["HttpSession에 login_info / jwt_token 저장"]
+```
+
+### 6-11-2. 의미
+
+이 프로젝트의 주 로그인은 이메일/JWT 중심이지만,  
+코드베이스 안에는 이미 `소셜 사용자 정보 -> 내부 JWT`로 연결하는 확장 구조도 포함돼 있습니다.
+
+<a id="api-inventory"></a>
+## 7. API 인벤토리
+
+### 7-1. 인증 / 사용자
+
+| 도메인 | Method | Endpoint |
+| --- | --- | --- |
+| Auth | POST | `/api/send-code` |
+| Auth | GET | `/api/verify` |
+| Auth | POST | `/api/resend-code` |
+| Auth | POST | `/api/signup` |
+| Auth | POST | `/api/reset-password` |
+| Auth | POST | `/api/confirm-reset-password` |
+| Auth | POST | `/api/confirm-password` |
+| Login | POST | `/api/login` |
+| User | GET | `/api/profile` |
+| User | PUT | `/api/profile-update` |
+
+### 7-2. 지출 / 수입 / 통합 거래내역
+
+| 도메인 | Method | Endpoint |
+| --- | --- | --- |
+| Expend | POST | `/api/expend` |
+| Expend | GET | `/api/expend/list` |
+| Expend | GET | `/api/expend/recent` |
+| Expend | GET | `/api/expend/graph` |
+| Expend | GET | `/api/expend/{expendId}` |
+| Expend | DELETE | `/api/expend/delete/{expendId}` |
+| Expend | PUT | `/api/expend/update/{expendId}` |
+| Expend | GET | `/api/expend/expendList` |
+| Expend | GET | `/api/expend/expendList/day` |
+| Income | POST | `/api/income` |
+| Income | GET | `/api/income/list` |
+| Income | GET | `/api/income/recent` |
+| Income | GET | `/api/income/{incomeId}` |
+| Income | DELETE | `/api/income/delete/{incomeId}` |
+| Income | PUT | `/api/income/update/{incomeId}` |
+| ExpendIncome | GET | `/api/expend-income` |
+
+### 7-3. 목표 / 결제 / 피드백
+
+| 도메인 | Method | Endpoint |
+| --- | --- | --- |
+| Target | POST | `/api/target/create` |
+| Target | PUT | `/api/target/update/{targetId}` |
+| Target | DELETE | `/api/target/delete/{targetId}` |
+| Target | POST | `/api/target/savings/{targetId}` |
+| Target | GET | `/api/target/graph` |
+| CategoryTarget | POST | `/api/category-target/create` |
+| CategoryTarget | PUT | `/api/category-target/update` |
+| CategoryTarget | GET | `/api/category-target/{category}` |
+| Payment | POST | `/api/payment` |
+| Payment | GET | `/api/payment/list` |
+| Payment | DELETE | `/api/payment/delete/{paymentId}` |
+| Payment | PUT | `/api/payment/update/{paymentId}` |
+| Payment | GET | `/api/payment/recent` |
+| Payment | GET | `/api/payment/paymentList` |
+| Feedback | GET | `/api/feedback` |
+
+<a id="data-model"></a>
+## 8. 데이터 모델
+
+### 8-1. 핵심 ERD
+
+```mermaid
+erDiagram
+    USER ||--o{ EXPEND : records
+    USER ||--o{ INCOME : records
+    USER ||--o{ TARGET : owns
+    USER ||--o{ CATEGORY_TARGET : owns
+    USER ||--o{ PAYMENT : owns
+    USER ||--o| FEEDBACK : latest_feedback
+
+    CATEGORY_EXPEND ||--o{ EXPEND : classifies
+    CATEGORY_INCOME ||--o{ INCOME : classifies
+    TARGET ||--o{ DAILY_SAVING : accumulates
+
+    USER {
+        bigint userId PK
+        string email
+        string password
+        string name
+        string nickName
+        boolean enabled
+    }
+
+    VERIFICATION_CODE {
+        bigint id PK
+        string email
+        string code
+        datetime expiryDate
+    }
+
+    CATEGORY_EXPEND {
+        bigint categoryId PK
+        string categoryName
+        string customCategoryName
+    }
+
+    EXPEND {
+        bigint expendId PK
+        bigint userId FK
+        bigint categoryId FK
+        bigint cost
+        datetime expendDate
+        string expendName
+        string asset
+        datetime createdAt
+        datetime updateDate
+    }
+
+    CATEGORY_INCOME {
+        bigint categoryId PK
+        string categoryName
+    }
+
+    INCOME {
+        bigint incomeId PK
+        bigint userId FK
+        bigint categoryId FK
+        bigint cost
+        datetime incomeDate
+        string incomeName
+        string asset
+        datetime createdAt
+        datetime updateDate
+    }
+
+    TARGET {
+        bigint targetId PK
+        bigint userId FK
+        int targetAmount
+        int savedAmount
+        date startDate
+        date endDate
+    }
+
+    DAILY_SAVING {
+        bigint savingId PK
+        bigint targetId FK
+        date date
+        int amount
+    }
+
+    CATEGORY_TARGET {
+        bigint categorytargetId PK
+        bigint userId FK
+        string category
+        bigint targetAmount
+    }
+
+    PAYMENT {
+        bigint paymentId PK
+        bigint userId FK
+        datetime dueDate
+        datetime lastPayment
+        bigint cost
+        string tradeName
+        string paymentDetail
+        datetime createdAt
+    }
+
+    FEEDBACK {
+        bigint feedbackId PK
+        text content
+        datetime createdAt
+    }
+```
+
+### 8-2. 엔티티별 의미
+
+| 엔티티 | 의미 |
+| --- | --- |
+| `User` | 서비스 사용자. 인증 여부, 이름, 닉네임, 피드백 연결 보유 |
+| `VerificationCode` | 회원가입/비밀번호 재설정용 6자리 인증코드 저장 |
+| `Expend` | 지출 기록 |
+| `CategoryExpend` | 기본 + 사용자 정의 지출 카테고리 마스터 |
+| `Income` | 수입 기록 |
+| `CategoryIncome` | 수입 카테고리 마스터 |
+| `Target` | 저축 목표 |
+| `DailySaving` | 목표에 대한 일별 저축 내역 |
+| `CategoryTarget` | 카테고리별 월간 지출 목표 |
+| `Payment` | 예정 결제 / 정기 납부성 지출 관리 |
+| `FeedBack` | 이번 주 소비 요약 AI 피드백 |
+
+### 8-3. 설계 포인트
+
+- `User`가 여러 재무 도메인의 기준축이 됩니다.
+- `Expend`는 `CategoryExpend`와 분리해 커스텀 카테고리 생성이 가능하게 했습니다.
+- `Target`과 `DailySaving`을 분리해 목표와 실행 이력을 동시에 보존합니다.
+- `FeedBack`은 사용자에게 매핑되지만, 생성 주기를 별도 스케줄로 정리합니다.
+
+<a id="operations"></a>
+## 9. 운영 / 배포 / 관측
+
+> 개인 기여도 | 김도연 주도 구현  
+> 운영 관점에서 보이는 배포 스크립트, 실행 흐름, 메트릭/헬스체크 노출, 릴리즈 정리 포인트를 이 구간에서 강조할 수 있습니다.
+
+### 9-1. 배포 구조
+
+```mermaid
+flowchart LR
+    A["CI/CD 또는 배포 패키지"] --> B["CodeDeploy"]
+    B --> C["appspec.yml"]
+    C --> D["scripts/stop.sh"]
+    C --> E["scripts/start.sh"]
+    E --> F["build/libs/*.jar 복사"]
+    F --> G["spring-webapp.jar 실행"]
+    G --> H["EC2 애플리케이션 프로세스"]
+```
+
+### 9-2. 레포에 들어 있는 운영 파일
+
+| 파일 | 역할 |
+| --- | --- |
+| `Dockerfile` | 컨테이너 이미지 정의, Pinpoint javaagent 적용 가능 형태 |
+| `appspec.yml` | CodeDeploy 훅 정의 |
+| `scripts/stop.sh` | 기존 프로세스 종료 |
+| `scripts/start.sh` | 새 jar 복사 후 백그라운드 실행 |
+| `src/main/resources/logback.xml` | 로깅 설정 |
+
+### 9-3. 관측 포인트
+
+```mermaid
+flowchart TD
+    A["Application"] --> B["Spring Actuator"]
+    B --> C["/actuator/health"]
+    B --> D["/actuator/metrics"]
+    B --> E["/actuator/prometheus"]
+    A --> F["log4jdbc SQL Logging"]
+    A --> G["Micrometer Metrics"]
+    A --> H["Caffeine Cache Metrics 가능 구조"]
+```
+
+### 9-4. application.properties 기준 운영 설정
+
+- `management.endpoints.web.exposure.include=health,metrics,prometheus`
+- `management.endpoint.prometheus.enabled=true`
+- `spring.datasource.hikari.maximum-pool-size=32`
+- `spring.datasource.hikari.minimum-idle=32`
+- `spring.cache.type=caffeine`
+- `spring.cache.caffeine.spec=maximumSize=500,expireAfterWrite=10m`
+
+즉, 이 프로젝트는 "동작만 하는 앱"이 아니라 운영 시점의 최소 관측성과 성능 설정까지 손댄 프로젝트입니다.
+
+<a id="testing"></a>
+## 10. 테스트와 품질 관리
+
+### 10-1. 현재 레포에 포함된 테스트
+
+| 테스트 파일 | 의미 |
+| --- | --- |
+| `SignupRequestDTOTest` | 회원가입 DTO 유효성 검증 |
+| `ExpendServiceImplTest` | 동일 커스텀 카테고리 동시 생성 시 중복 생성 방지 시나리오 검증 |
+| `PaymentServiceImplTest` | 결제 서비스 테스트 스캐폴드 |
+
+### 10-2. 동시성 포인트가 왜 중요한가
+
+`ExpendServiceImplTest`는 특히 포트폴리오 설명에 좋습니다.
+
+- 여러 요청이 동시에 같은 커스텀 카테고리로 지출을 기록하는 상황을 가정합니다.
+- 테스트 종료 후 `customCategoryName = "TEST"` 카테고리가 정확히 1개만 생성됐는지 검증합니다.
+- 이 테스트는 `GET_LOCK` 기반 named lock 도입 이유를 설득력 있게 보여줍니다.
+
+### 10-3. 품질 관리 포인트
+
+```mermaid
+flowchart LR
+    A["입력 검증"] --> B["DTO Validation"]
+    B --> C["CustomException / ErrorCode"]
+    C --> D["GlobalExceptionHandler"]
+    D --> E["일관된 오류 응답"]
+
+    F["성능/정합성"] --> G["Caffeine Cache"]
+    F --> H["Named Lock"]
+    F --> I["스케줄러"]
+```
+
+### 10-4. 테스트 이상의 품질 장치
+
+- DTO validation annotation
+- 비밀번호 BCrypt 인코딩
+- 토큰 claim 검증
+- 사용자 소유권 검증
+- 캐시 무효화
+- 주간 데이터 정리 스케줄러
+- 글로벌 예외 처리
+
+<a id="portfolio-points"></a>
+## 11. 채용담당자가 봐야 할 포인트
+
+### 11-1. 이 프로젝트를 강하게 만드는 문장
+
+- 이 프로젝트는 단순한 가계부가 아니라, 개인 재무 데이터를 운영 가능한 서비스로 만드는 백엔드 프로젝트다.
+- 인증, 거래 기록, 통합 조회, 목표 관리, 예정 결제, AI 피드백, 캐시, 락, 배포, 관측이 한 코드베이스 안에서 이어진다.
+- 특히 `커스텀 카테고리 동시성 제어`, `주간 피드백 재사용 전략`, `수입+지출 통합 타임라인`, `카테고리 목표 대비 소비 비교`는 포트폴리오 설명력이 높다.
+
+### 11-2. 일반적인 토이 프로젝트와 다른 이유
+
+| 흔한 토이 프로젝트 | WealthTracker Backend |
+| --- | --- |
+| 로그인 + 게시판 수준 CRUD | 인증, 거래 기록, 목표 관리, 예정 결제, AI 피드백까지 연결된 재무 흐름 |
+| 단순 테이블 조회 | 월별/주차별 집계, 카테고리별 비교, 통합 타임라인 응답 |
+| 정합성 제어 부재 | named lock, 소유권 검증, 캐시 무효화 |
+| 외부 연동이 없음 | SMTP, Kakao OAuth2, Gemini 연동 |
+| 운영 고려 부족 | 배포 스크립트, Actuator, Prometheus, 로깅 설정 포함 |
+| 기능 설명 위주 README | 구조, 실패 시나리오, 운영성, 기여도까지 설명하는 README |
+
+### 11-3. 면접에서 어필하기 좋은 기술 포인트
+
+1. JWT 인증과 이메일 인증을 둘 다 설계한 경험
+2. MySQL named lock으로 중복 생성 경쟁 조건을 해결한 경험
+3. 단순 리스트 반환이 아니라 UI 친화적인 집계 DTO를 설계한 경험
+4. 외부 AI API를 서비스 로직과 결합하면서도 재호출 비용을 줄인 경험
+5. 배포 스크립트와 관측 포인트까지 고려한 백엔드 운영 경험
+
+### 11-4. 기여도를 말할 때 추천하는 화법
+
+- "팀 프로젝트였지만, 저는 지출/수입 도메인과 주간 소비 피드백 기능을 중심으로 서비스의 데이터 흐름을 잡았습니다."
+- "특히 커스텀 카테고리 동시성 제어, 월간/주간 집계 응답, Gemini 기반 주간 피드백은 제가 포트폴리오에서 가장 자신 있게 설명할 수 있는 구간입니다."
+- "운영 쪽에서도 배포 스크립트와 메트릭 노출 구조를 함께 챙겨서, 단순 기능 구현이 아니라 실제 서비스 운영 관점까지 담으려고 했습니다."
+
+### 11-5. 한 줄 총평
+
+WealthTracker는 "사용자 돈의 흐름"을 데이터로 남기고,  
+그 데이터를 다시 `비교`, `경고`, `목표`, `피드백`으로 바꾸는 백엔드입니다.
+
+즉, 이 프로젝트는 CRUD를 구현한 것이 아니라  
+개인 재무 서비스가 실제로 돌아가기 위해 필요한 백엔드의 근육을 갖춘 프로젝트라고 설명할 수 있습니다.
