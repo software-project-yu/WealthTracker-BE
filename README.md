@@ -62,23 +62,7 @@ WealthTracker는 이 문제를 다음 구조로 해결합니다.
 | 정현아 주도 구현 | 예정 결제 API |
 | 공동 작업 | ERD 설계, 전체 도메인 연결, API 문서화 |
 
-포트폴리오 기준으로 보면 이 문서에서 특히 주의 깊게 봐야 할 저의 핵심 기여 구간은 다음입니다.
 
-- `6-4. 지출 관리`
-- `6-5. 수입 관리`
-- `6-10. 주간 AI 피드백`
-- `9. 운영 / 배포 / 관측`
-
-### 1-4. 숫자로 보는 프로젝트
-
-현재 레포 기준으로 다음 규모를 확인할 수 있습니다.
-
-- Java 소스 파일 `107개`
-- Controller `10개`
-- Service 계열 클래스 `24개`
-- Repository `13개`
-- HTTP 매핑 엔드포인트 `41개`
-- 주요 도메인 패키지 `9개`
 
 ### 1-5. 서비스 전체 비즈니스 흐름
 
@@ -130,15 +114,14 @@ flowchart LR
 ```
 
 <a id="why-strong"></a>
-## 2. 왜 이 프로젝트가 단단한가
 
-### 2-1. 단순 CRUD가 아니라 흐름을 설계했다
+### 2-1. 흐름
 
 - 회원가입과 로그인만 있는 서비스가 아니라 이메일 인증, 비밀번호 재설정, 프로필 변경까지 사용자 수명주기를 다룬다.
 - 지출/수입만 있는 서비스가 아니라 월간 통합 거래내역, 카테고리별 목표, 저축 목표, 예정 결제까지 재무 문맥을 만든다.
 - 집계 숫자만 보여주는 것이 아니라 Gemini 기반 주간 피드백까지 연결한다.
 
-### 2-2. 운영을 생각한 요소가 코드에 들어 있다
+### 2-2. 운영을 생각한 요소
 
 - `GlobalExceptionHandler`로 예외를 한 군데서 정리한다.
 - `JwtAuthFilter`와 `JwtUtil`로 토큰 해석 책임을 분리한다.
@@ -147,46 +130,10 @@ flowchart LR
 - `@Scheduled` 작업으로 피드백 라이프사이클을 관리한다.
 - `Actuator`, `Prometheus`, `log4jdbc`, `Pinpoint-ready Dockerfile`로 운영 가시성을 확보하려는 흔적이 남아 있다.
 
-### 2-3. 채용 관점에서 강하게 볼 수 있는 포인트
 
-```mermaid
-flowchart TD
-    A["WealthTracker Backend"] --> B["인증 흐름"]
-    A --> C["도메인 모델링"]
-    A --> D["외부 시스템 연동"]
-    A --> E["정합성 제어"]
-    A --> F["집계/분석"]
-    A --> G["운영 대비"]
 
-    B --> B1["이메일 인증코드"]
-    B --> B2["JWT 발급/검증"]
-    B --> B3["비밀번호 재설정"]
+### 2-4. 실패 시나리오 제어 구조
 
-    C --> C1["지출 / 수입 / 목표 / 결제"]
-    C --> C2["통합 거래 타임라인"]
-    C --> C3["카테고리 목표 비교"]
-
-    D --> D1["Naver SMTP"]
-    D --> D2["Kakao OAuth2"]
-    D --> D3["Google Gemini"]
-
-    E --> E1["User 소유권 검증"]
-    E --> E2["Named Lock"]
-    E --> E3["만료 코드 정리"]
-
-    F --> F1["월별/주차별 집계"]
-    F --> F2["최근 내역 요약"]
-    F --> F3["자연어 피드백"]
-
-    G --> G1["Actuator / Prometheus"]
-    G --> G2["CodeDeploy 스크립트"]
-    G --> G3["Docker 이미지 정의"]
-```
-
-### 2-4. 실패 시나리오까지 제어한 구조
-
-좋은 README는 "무엇을 만들었는가"에서 끝나지 않고,  
-"어디서 깨질 수 있고, 그것을 어떻게 막았는가"까지 보여줘야 합니다.
 
 ```mermaid
 flowchart TD
@@ -234,7 +181,7 @@ flowchart LR
     Deploy --> Api
 ```
 
-### 3-2. 요청이 내부에서 지나가는 기본 경로
+### 3-2. 요청이 내부에서 지나가는  경로
 
 ```mermaid
 flowchart LR
@@ -247,7 +194,7 @@ flowchart LR
     G --> H["HTTP Response"]
 ```
 
-### 3-3. 이 프로젝트에서 저장소와 외부 시스템이 맡는 역할
+### 3-3. 저장소와 외부 시스템 역할
 
 | 구성요소 | 역할 |
 | --- | --- |
@@ -337,7 +284,6 @@ flowchart LR
 - `jjwt`
 - `springdoc-openapi`
 
-즉, 인증, 운영, 문서화, 캐시, 외부 연동까지 백엔드 기본기를 한 레포 안에 다 넣은 구조입니다.
 
 <a id="backend-architecture"></a>
 ## 5. 백엔드 처리 구조
@@ -405,11 +351,7 @@ flowchart LR
 - 실패는 `CustomException + ErrorCode` 조합으로 처리합니다.
 - DTO 검증 실패는 필드별 에러 맵으로 반환합니다.
 
-### 5-5. 이 구조가 포트폴리오에서 강한 이유
 
-- 인증, 도메인, 외부 연동, 배포가 한 프로젝트 안에서 연결되어 있다.
-- 단일 서비스지만 관심사 분리가 잘 보여서 설명력이 높다.
-- "왜 이 클래스가 존재하는지"가 분명해서 기술 면접에서 방어하기 쉽다.
 
 <a id="feature-details"></a>
 ## 6. 상세 기능 설명
@@ -582,8 +524,6 @@ flowchart LR
 
 ## 6-4. 지출 관리
 
-> 개인 기여도 | 김도연 주도 구현  
-> 지출 CRUD, 커스텀 카테고리 처리, 월간/주간 집계, 카테고리별 비교 응답 설계까지 포트폴리오에서 가장 강하게 가져갈 수 있는 구현 영역입니다.
 
 ### 관련 API
 
@@ -630,14 +570,7 @@ sequenceDiagram
     Controller-->>Client: 기록 성공
 ```
 
-### 6-4-2. 왜 이 구현이 강한가
 
-이 프로젝트에서 가장 포트폴리오적으로 눈에 띄는 부분 중 하나가 바로 커스텀 지출 카테고리 처리입니다.
-
-- 기본 카테고리 6개는 `CategoryExpendInitializer`가 애플리케이션 시작 시 주입합니다.
-- 사용자가 기본 카테고리에 없는 문자열을 입력하면 커스텀 카테고리로 간주합니다.
-- 이때 `GET_LOCK(category, 10)`을 이용해 같은 이름 카테고리가 동시 다발로 중복 생성되는 경쟁 조건을 막습니다.
-- 실제 테스트 코드도 같은 커스텀 카테고리로 동시에 지출을 기록하는 시나리오를 검증합니다.
 
 ### 6-4-3. 월간 / 주간 집계 흐름
 
@@ -670,8 +603,6 @@ flowchart TD
 
 ## 6-5. 수입 관리
 
-> 개인 기여도 | 김도연 주도 구현  
-> 수입 기록 API와 월별/최근 조회, 지출과 함께 재무 흐름을 구성하는 기본 데이터 축을 담당한 영역입니다.
 
 ### 관련 API
 
@@ -707,8 +638,6 @@ flowchart LR
 
 ## 6-6. 수입 + 지출 통합 거래 타임라인
 
-> 개인 기여도 | 김도연 기여 연결 구간  
-> 지출/수입 API를 단순 CRUD로 끝내지 않고, 실제 화면에서 한 번에 소비 흐름을 읽을 수 있게 통합 응답 문맥으로 설명할 수 있는 구간입니다.
 
 ### 관련 API
 
@@ -742,9 +671,7 @@ sequenceDiagram
 
 - 같은 월의 수입과 지출을 하나의 타임라인으로 합친다.
 - 날짜 기준으로 정렬한다.
-- 프론트가 "통합 거래내역 화면"을 한 번에 그릴 수 있게 만든다.
 
-즉, 백엔드가 UI 문맥까지 고려한 응답을 만든 사례입니다.
 
 ## 6-7. 저축 목표
 
@@ -879,8 +806,6 @@ sequenceDiagram
 
 ## 6-10. 주간 AI 피드백
 
-> 개인 기여도 | 김도연 주도 구현  
-> Gemini 프롬프트 조합, 주간 지출 집계, 기존 피드백 재사용 전략, 스케줄러 기반 정리까지 담당한 차별화 포인트입니다.
 
 ### 관련 API
 
@@ -934,7 +859,7 @@ flowchart TD
     F --> H
 ```
 
-### 6-10-3. 이 구현이 좋은 이유
+### 6-10-3. 이유
 
 - 비싼 외부 AI 호출을 매번 하지 않고, 같은 주간 데이터면 재사용합니다.
 - 단순 총액이 아니라 카테고리별 금액을 프롬프트에 포함해 더 맥락 있는 조언을 유도합니다.
@@ -950,11 +875,6 @@ flowchart TD
 
 ## 6-11. Kakao OAuth2 연동 확장 포인트
 
-### 관련 구성
-
-- `SecurityConfig.oauth2Login(...)`
-- `KakaoOAuth2UserService`
-- `application.properties`의 Kakao registration / provider 설정
 
 ### 6-11-1. 동작 흐름
 
@@ -968,13 +888,10 @@ flowchart LR
     F --> G["HttpSession에 login_info / jwt_token 저장"]
 ```
 
-### 6-11-2. 의미
 
-이 프로젝트의 주 로그인은 이메일/JWT 중심이지만,  
-코드베이스 안에는 이미 `소셜 사용자 정보 -> 내부 JWT`로 연결하는 확장 구조도 포함돼 있습니다.
 
 <a id="api-inventory"></a>
-## 7. API 인벤토리
+## 7. API Docs
 
 ### 7-1. 인증 / 사용자
 
@@ -1168,9 +1085,6 @@ erDiagram
 <a id="operations"></a>
 ## 9. 운영 / 배포 / 관측
 
-> 개인 기여도 | 김도연 주도 구현  
-> 운영 관점에서 보이는 배포 스크립트, 실행 흐름, 메트릭/헬스체크 노출, 릴리즈 정리 포인트를 이 구간에서 강조할 수 있습니다.
-
 ### 9-1. 배포 구조
 
 ```mermaid
@@ -1184,60 +1098,9 @@ flowchart LR
     G --> H["EC2 애플리케이션 프로세스"]
 ```
 
-### 9-2. 레포에 들어 있는 운영 파일
-
-| 파일 | 역할 |
-| --- | --- |
-| `Dockerfile` | 컨테이너 이미지 정의, Pinpoint javaagent 적용 가능 형태 |
-| `appspec.yml` | CodeDeploy 훅 정의 |
-| `scripts/stop.sh` | 기존 프로세스 종료 |
-| `scripts/start.sh` | 새 jar 복사 후 백그라운드 실행 |
-| `src/main/resources/logback.xml` | 로깅 설정 |
-
-### 9-3. 관측 포인트
-
-```mermaid
-flowchart TD
-    A["Application"] --> B["Spring Actuator"]
-    B --> C["/actuator/health"]
-    B --> D["/actuator/metrics"]
-    B --> E["/actuator/prometheus"]
-    A --> F["log4jdbc SQL Logging"]
-    A --> G["Micrometer Metrics"]
-    A --> H["Caffeine Cache Metrics 가능 구조"]
-```
-
-### 9-4. application.properties 기준 운영 설정
-
-- `management.endpoints.web.exposure.include=health,metrics,prometheus`
-- `management.endpoint.prometheus.enabled=true`
-- `spring.datasource.hikari.maximum-pool-size=32`
-- `spring.datasource.hikari.minimum-idle=32`
-- `spring.cache.type=caffeine`
-- `spring.cache.caffeine.spec=maximumSize=500,expireAfterWrite=10m`
-
-즉, 이 프로젝트는 "동작만 하는 앱"이 아니라 운영 시점의 최소 관측성과 성능 설정까지 손댄 프로젝트입니다.
 
 <a id="testing"></a>
 ## 10. 테스트와 품질 관리
-
-### 10-1. 현재 레포에 포함된 테스트
-
-| 테스트 파일 | 의미 |
-| --- | --- |
-| `SignupRequestDTOTest` | 회원가입 DTO 유효성 검증 |
-| `ExpendServiceImplTest` | 동일 커스텀 카테고리 동시 생성 시 중복 생성 방지 시나리오 검증 |
-| `PaymentServiceImplTest` | 결제 서비스 테스트 스캐폴드 |
-
-### 10-2. 동시성 포인트가 왜 중요한가
-
-`ExpendServiceImplTest`는 특히 포트폴리오 설명에 좋습니다.
-
-- 여러 요청이 동시에 같은 커스텀 카테고리로 지출을 기록하는 상황을 가정합니다.
-- 테스트 종료 후 `customCategoryName = "TEST"` 카테고리가 정확히 1개만 생성됐는지 검증합니다.
-- 이 테스트는 `GET_LOCK` 기반 named lock 도입 이유를 설득력 있게 보여줍니다.
-
-### 10-3. 품질 관리 포인트
 
 ```mermaid
 flowchart LR
